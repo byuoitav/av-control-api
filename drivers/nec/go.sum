@@ -6,6 +6,8 @@ github.com/byuoitav/nec-driver v0.0.0-20191023154230-dc0b97c694a9 h1:+PoxT33k5F7
 github.com/byuoitav/nec-driver v0.0.0-20191023154230-dc0b97c694a9/go.mod h1:g7EUxjGYKyJLcJ1G3ZXPomTYaP8uedounwkguJBQFUg=
 github.com/byuoitav/nec-driver v0.0.0-20191023155011-6f48930eb77c h1:Jp/dWZ44bTGht8DxQ1fKXxl9CSXRVGMNrJ2tarm2sXw=
 github.com/byuoitav/nec-driver v0.0.0-20191023155011-6f48930eb77c/go.mod h1:g7EUxjGYKyJLcJ1G3ZXPomTYaP8uedounwkguJBQFUg=
+github.com/byuoitav/nec-driver v1.0.0 h1:6Hi9koZJo/hh2HM2CaaajOwkdVAS9FwRkP0IcK+SfV8=
+github.com/byuoitav/nec-driver v1.0.0/go.mod h1:g7EUxjGYKyJLcJ1G3ZXPomTYaP8uedounwkguJBQFUg=
 github.com/byuoitav/pooled v0.0.0-20191022213741-dad43433a657 h1:uqjyW0GZpMf10R3bIztgQKX478d5sq5FGKqd+mh+iTo=
 github.com/byuoitav/pooled v0.0.0-20191022213741-dad43433a657/go.mod h1:MzHJMzI9sQZ/uUzshHzlYJE9ofTOUauZlCT/LQg2DYE=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
