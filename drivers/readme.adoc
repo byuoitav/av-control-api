@@ -71,7 +71,7 @@ TIP: In this case, go mod is used to reliably import the correct version of exte
 +
 [source,go]
 ----
-package main <1>
+package main // // <1>
 
 // imports
 
@@ -105,4 +105,4 @@ func main() { <1>
 <2> The port to run our servers will be passed in as part of the dockerfile.
 <3> We use the https://github.com/spf13/pflag[pflag] library for POSIX style flags.
 <4> The variable, package, and struct name will change depending on the driver you are importing.
-<5> Use the correct `Create...Server` function for the interface your driver implements.
+<5> Use the correct `Create...Server()` function for the interface your driver implements.
