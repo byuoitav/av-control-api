@@ -1,0 +1,37 @@
+= Drivers
+:icons: font
+
+Drivers are the services that the av-api calls to talk to physical AV devices.
+We write/use https://github.com/byuoitav/nec-driver[libraries] that implement one of the interfaces in this package - which interface they implement depends on the type of device the driver is written for.
+
+Subdirectories of this package are all of our BYU-specific driver servers, which are compiled into docker containers based on the link:nec/dockerfile[`dockerfile`] (and the link:nec/dockerfile-arm[`dockerfile-arm`] for arm containers).
+
+== Writing a Driver
+. Create a new repo, titled with the control protocol or vendor `-driver`.
++
+IMPORTANT: All new repos should use go mod now. Make sure to clone your repo outside of your `$GOPATH`.
+. Initialize https://blog.golang.org/using-go-modules[go mod] by running `go mod init <github.com/org/repo>`
++
+NOTE: A driver library should typically have only one package.
+. Create a struct in your new package that will implement to appropriate interface. Its fields should be an data required to use the driver.
++
+[source,go]
+---
+type Projector struct {
+	Username string
+	Password string
+}
+---
+. Implement all of the required functions in the matching interface found in this package. For example, to make a projector driver, I would probably want to implement the interface found in link:display.go[`display.go`].
++
+[source,go]
+---
+func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) { // <1>
+}
+---
+<1> Confused with context? These articles are a great place to start: https://blog.golang.org/context[1], https://dave.cheney.net/2017/08/20/context-isnt-for-cancellation[2], https://dave.cheney.net/2017/01/26/context-is-for-cancelation[3]
++
+IMPORTANT: Make sure that your driver library has good test code to ensure future changes don't break things icon:smile[]
+. Once a working version of your library is ready, release a v1.0.0 version of it. For future releases, use https://semver.org/[semantic versionion] to denote changes.
+
+== Making a Driver Server
