@@ -1,5 +1,7 @@
 = Drivers
 :icons: font
+:tabsize: 4
+
 ifdef::env-github[]
 :tip-caption: :bulb:
 :note-caption: :information_source:
@@ -15,24 +17,28 @@ Subdirectories of this package are all of our BYU-specific driver servers, which
 
 == Writing a Driver
 . Create a new repo, titled with the control protocol or vendor `-driver`.
-+
-NOTE: A driver library should typically have only one package
-+
+.. Use the github provided Go `.gitignore`.
+.. Repos from BYU OIT AV should use the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 License]
 
 . Initialize https://blog.golang.org/using-go-modules[go mod] by running `go mod init <github.com/org/repo>`
 +
-IMPORTANT: All new repos should use go mod now. Make sure to clone your repo outside of your `$GOPATH`
+IMPORTANT: All new repos should use go mod. Make sure to clone your repo outside of your `$GOPATH`.
 
 . Create a struct in your new package that will implement to appropriate interface. Its fields should be an data required to use the driver.
 +
 [source,go]
 ----
+package adcp <1>
+
 type Projector struct {
-	Username string
-	Password string
+	Username string // <2>
+	Password string // <2>
 }
 ----
-. Implement all of the required functions in the matching interface found in this package. For example, to make a projector driver, I would probably want to implement the interface found in link:display.go[`display.go`].
+<1> A driver library should typically have only one package
+<2> Not required, just an example
+
+. Implement all of the required functions in the matching interface found in this package. For example, to make a projector driver, you would probably want to implement the interface found in link:display.go[`display.go`].
 +
 [source,go]
 ----
@@ -41,7 +47,62 @@ func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) {
 ----
 <1> Confused with context? These articles are a great place to start: https://blog.golang.org/context[1], https://dave.cheney.net/2017/08/20/context-isnt-for-cancellation[2], https://dave.cheney.net/2017/01/26/context-is-for-cancelation[3]
 +
-IMPORTANT: Make sure that your driver library has good test code to ensure future changes don't break things 😊
+CAUTION: Make sure that your driver library has good test code to ensure future changes don't break things. 😊
+
 . Once a working version of your library is ready, release a v1.0.0 version of it. For future releases, use https://semver.org/[semantic versioning] to denote changes.
+[source,bash]
+----
+$ git tag -a "v1.0.0"
+$ git push --tags
+----
 
 == Making a Driver Server
+Once you have finished a library, or want to use one that implements one of the driver interfaces, you create create a driver server.
+
+. Create a subdirectory in this one with the name of your driver server. Usually, this should match the driver name, without the `-driver` suffix.
+
+. In your new directory, initalize go mod by running `go mod init github.com/byuoitav/drivers/<folder name>`
++
+TIP: In this case, go mod is used to reliably import the correct version of external libraries, and not for exporting your package.
+
+. TODO adding dockerfile, anything else https://github.com/bwinterton needs to build these
+
+. Create a `server.go` file. This is where all of your driver server's code should go.
++
+[source,go]
+----
+package main // <1>
+
+// imports
+
+func main() { // <1>
+    var port int
+    // variable declarations
+
+    pflag.IntVarP(&port, "port", "p", 80, "port to run the server on") <2>
+    // other flags
+
+    pflag.Parse() <3>
+
+    // create a net.Listener to run the server on
+    addr := fmt.Sprintf(":%d", port)
+    lis, err := net.Listen("tcp", addr)
+    if err != nil {
+        // handle err
+    }
+
+    // import driver library
+    display := &adcp.Projector{} <4>
+
+    // create server
+    server := drivers.CreateDisplayServer(display) <5>
+    if err = server.Serve(lis); err != nil {
+        // handle err
+    }
+}
+----
+<1> Must be in package `main` with a `main()` function. This is where your driver server will start.
+<2> The port to run our servers will be passed in as part of the dockerfile.
+<3> We use the https://github.com/spf13/pflag[pflag] library for POSIX style flags.
+<4> The variable, package, and struct name will change depending on the driver you are importing.
+<5> Use the correct `Create...Server` function for the interface your driver implements.
