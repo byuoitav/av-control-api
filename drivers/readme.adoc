@@ -20,7 +20,7 @@ Subdirectories of this package are all of our BYU-specific driver servers, which
 .. Use the github provided Go `.gitignore`.
 .. Repos from BYU OIT AV should use the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 License]
 
-. Initialize https://blog.golang.org/using-go-modules[go mod] by running `go mod init <github.com/org/repo>`
+. Clone your repo and initialize https://blog.golang.org/using-go-modules[go mod] by running `go mod init <github.com/org/repo>`
 +
 IMPORTANT: All new repos should use go mod. Make sure to clone your repo outside of your `$GOPATH`.
 
@@ -28,11 +28,11 @@ IMPORTANT: All new repos should use go mod. Make sure to clone your repo outside
 +
 [source,go]
 ----
-package adcp <1>
+package adcp // <1>
 
 type Projector struct {
-	Username string <2>
-	Password string <2>
+	Username string // <2>
+	Password string // <2>
 }
 ----
 <1> A driver library should typically have only one package
@@ -42,7 +42,7 @@ type Projector struct {
 +
 [source,go]
 ----
-func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) { <1>
+func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) { // <1>
 }
 ----
 <1> Confused with context? These articles are a great place to start: https://blog.golang.org/context[1], https://dave.cheney.net/2017/08/20/context-isnt-for-cancellation[2], https://dave.cheney.net/2017/01/26/context-is-for-cancelation[3]
@@ -75,14 +75,14 @@ package main // <1>
 
 // imports
 
-func main() { <1>
+func main() { // <1>
     var port int
     // variable declarations
 
-    pflag.IntVarP(&port, "port", "p", 80, "port to run the server on") <2>
+    pflag.IntVarP(&port, "port", "p", 80, "port to run the server on") // <2>
     // other flags
 
-    pflag.Parse() <3>
+    pflag.Parse() // <3>
 
     // create a net.Listener to run the server on
     addr := fmt.Sprintf(":%d", port)
@@ -92,10 +92,10 @@ func main() { <1>
     }
 
     // import driver library
-    display := &adcp.Projector{} <4>
+    display := &adcp.Projector{} // <4>
 
     // create server
-    server := drivers.CreateDisplayServer(display) <5>
+    server := drivers.CreateDisplayServer(display) // <5>
     if err = server.Serve(lis); err != nil {
         // handle err
     }
