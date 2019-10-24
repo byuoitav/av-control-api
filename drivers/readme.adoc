@@ -31,8 +31,8 @@ IMPORTANT: All new repos should use go mod. Make sure to clone your repo outside
 package adcp <1>
 
 type Projector struct {
-	Username string // <2>
-	Password string // <2>
+	Username string <2>
+	Password string <2>
 }
 ----
 <1> A driver library should typically have only one package
@@ -42,7 +42,7 @@ type Projector struct {
 +
 [source,go]
 ----
-func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) { // <1>
+func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) { <1>
 }
 ----
 <1> Confused with context? These articles are a great place to start: https://blog.golang.org/context[1], https://dave.cheney.net/2017/08/20/context-isnt-for-cancellation[2], https://dave.cheney.net/2017/01/26/context-is-for-cancelation[3]
@@ -71,11 +71,11 @@ TIP: In this case, go mod is used to reliably import the correct version of exte
 +
 [source,go]
 ----
-package main // <1>
+package main <1>
 
 // imports
 
-func main() { // <1>
+func main() { <1>
     var port int
     // variable declarations
 
