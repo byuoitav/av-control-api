@@ -23,6 +23,7 @@ type VideoSwitcher interface {
 func CreateVideoSwitcherServer(vs VideoSwitcher) Server {
 	e := newEchoServer()
 
+	addDeviceRoutes(e, vs)
 	addVideoSwitcherRoutes(e, vs)
 
 	return wrapEchoServer(e)
