@@ -20,13 +20,13 @@ Subdirectories of this package are all of our BYU-specific driver servers, which
 .. Use the github provided Go `.gitignore`.
 .. Repos from BYU OIT AV should use the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 License]
 
-. Clone your repo `git clone git@github.com:<org/repo>.git`
+. Clone your repo by running ``git clone git@github.com:<org/repo>.git``
 +
 IMPORTANT: All new repos should use go mod. Make sure to clone your repo outside of your `$GOPATH`.
 
 . Initialize https://blog.golang.org/using-go-modules[go mod] by running `go mod init <github.com/org/repo>` in your newly cloned repo.
 
-. Create a struct in your new package that will implement to appropriate interface. Its fields should be an data required to use the driver.
+. In a new file, create a struct in your new package that will implement the appropriate interface. Its fields should have data required to use the driver.
 +
 [source,go]
 ----
