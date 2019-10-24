@@ -71,7 +71,7 @@ TIP: In this case, go mod is used to reliably import the correct version of exte
 +
 [source,go]
 ----
-package main // // <1>
+package main # <1>
 
 // imports
 
