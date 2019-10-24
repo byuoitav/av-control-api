@@ -14,12 +14,18 @@ type wrappedEchoServer struct {
 	*echo.Echo
 }
 
-func (e *wrappedEchoServer) Serve(lis net.Listener) error {
-	return e.Server.Serve(lis)
+func newEchoServer() *echo.Echo {
+	e := echo.New()
+
+	return e
 }
 
 func wrapEchoServer(e *echo.Echo) Server {
 	return &wrappedEchoServer{
 		Echo: e,
 	}
+}
+
+func (e *wrappedEchoServer) Serve(lis net.Listener) error {
+	return e.Server.Serve(lis)
 }

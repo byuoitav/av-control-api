@@ -22,7 +22,7 @@ type Display interface {
 }
 
 func CreateDisplayServer(disp Display) Server {
-	e := echo.New()
+	e := newEchoServer()
 
 	addDeviceRoutes(e, disp)
 	addDisplayRoutes(e, disp)
@@ -35,7 +35,7 @@ func addDisplayRoutes(e *echo.Echo, disp Display) {
 	e.GET("/:address/power", func(c echo.Context) error {
 		addr := c.Param("address")
 		if len(addr) == 0 {
-			return c.String(http.StatusBadRequest, "must include an address of the display")
+			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
 		power, err := disp.GetPower(c.Request().Context(), addr)
@@ -51,7 +51,7 @@ func addDisplayRoutes(e *echo.Echo, disp Display) {
 		power := c.Param("power")
 		switch {
 		case len(addr) == 0:
-			return c.String(http.StatusBadRequest, "must include an address of the display")
+			return c.String(http.StatusBadRequest, "must include the address of the display")
 		case len(power) == 0:
 			return c.String(http.StatusBadRequest, "must include a power state to set")
 		}
@@ -67,7 +67,7 @@ func addDisplayRoutes(e *echo.Echo, disp Display) {
 	e.GET("/:address/blanked", func(c echo.Context) error {
 		addr := c.Param("address")
 		if len(addr) == 0 {
-			return c.String(http.StatusBadRequest, "must include an address of the display")
+			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
 		blanked, err := disp.GetBlanked(c.Request().Context(), addr)
@@ -83,7 +83,7 @@ func addDisplayRoutes(e *echo.Echo, disp Display) {
 		blanked, err := strconv.ParseBool(c.Param("blanked"))
 		switch {
 		case len(addr) == 0:
-			return c.String(http.StatusBadRequest, "must include an address of the display")
+			return c.String(http.StatusBadRequest, "must include the address of the display")
 		case err != nil:
 			return c.String(http.StatusBadRequest, err.Error())
 		}
@@ -99,7 +99,7 @@ func addDisplayRoutes(e *echo.Echo, disp Display) {
 	e.GET("/:address/input", func(c echo.Context) error {
 		addr := c.Param("address")
 		if len(addr) == 0 {
-			return c.String(http.StatusBadRequest, "must include an address of the display")
+			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
 		input, err := disp.GetInput(c.Request().Context(), addr)
@@ -115,7 +115,7 @@ func addDisplayRoutes(e *echo.Echo, disp Display) {
 		input := c.Param("input")
 		switch {
 		case len(addr) == 0:
-			return c.String(http.StatusBadRequest, "must include an address of the display")
+			return c.String(http.StatusBadRequest, "must include the address of the display")
 		case len(input) == 0:
 			return c.String(http.StatusBadRequest, "must include a input to set")
 		}
@@ -131,7 +131,7 @@ func addDisplayRoutes(e *echo.Echo, disp Display) {
 	e.GET("/:address/activesignal", func(c echo.Context) error {
 		addr := c.Param("address")
 		if len(addr) == 0 {
-			return c.String(http.StatusBadRequest, "must include an address of the display")
+			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
 		asignal, err := disp.GetActiveSignal(c.Request().Context(), addr)
