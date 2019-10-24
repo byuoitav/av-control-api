@@ -8,15 +8,18 @@ import (
 	"github.com/labstack/echo"
 )
 
-type VideoSwitcher interface {
-	Device
-
+type videoSwitcher interface {
 	// TODO notes about being 1 indexed
 
 	GetInputByOutput(ctx context.Context, addr, output string) (string, error)
 	SetInputByOutput(ctx context.Context, addr, output, input string) error
 
 	// TODO active input ?
+}
+
+type VideoSwitcher interface {
+	Device
+	videoSwitcher
 }
 
 // TODO should we just make an explicit input/output struct that these return in their http calls?
@@ -29,7 +32,7 @@ func CreateVideoSwitcherServer(vs VideoSwitcher) Server {
 	return wrapEchoServer(e)
 }
 
-func addVideoSwitcherRoutes(e *echo.Echo, vs VideoSwitcher) {
+func addVideoSwitcherRoutes(e *echo.Echo, vs videoSwitcher) {
 	e.GET("/:address/output/:output/input", func(c echo.Context) error {
 		addr := c.Param("address")
 		output := c.Param("output")

@@ -8,14 +8,17 @@ import (
 	"github.com/labstack/echo"
 )
 
-type DSP interface {
-	Device
-
+type dsp interface {
 	GetVolumeByBlock(ctx context.Context, addr, block string) (int, error)
 	GetMutedByBlock(ctx context.Context, addr, block string) (bool, error)
 
 	SetVolumeByBlock(ctx context.Context, addr, block string, volume int) error
 	SetMutedByBlock(ctx context.Context, addr, block string, muted bool) error
+}
+
+type DSP interface {
+	Device
+	dsp
 }
 
 func CreateDSPServer(dsp DSP) Server {
@@ -27,7 +30,7 @@ func CreateDSPServer(dsp DSP) Server {
 	return wrapEchoServer(e)
 }
 
-func addDSPRoutes(e *echo.Echo, dsp DSP) {
+func addDSPRoutes(e *echo.Echo, d dsp) {
 	// volume
 	e.GET("/:address/block/:block/volume", func(c echo.Context) error {
 		addr := c.Param("address")
@@ -39,7 +42,7 @@ func addDSPRoutes(e *echo.Echo, dsp DSP) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		volume, err := dsp.GetVolumeByBlock(c.Request().Context(), addr, block)
+		volume, err := d.GetVolumeByBlock(c.Request().Context(), addr, block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -60,7 +63,7 @@ func addDSPRoutes(e *echo.Echo, dsp DSP) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err = dsp.SetVolumeByBlock(c.Request().Context(), addr, block, volume); err != nil {
+		if err = d.SetVolumeByBlock(c.Request().Context(), addr, block, volume); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
@@ -78,7 +81,7 @@ func addDSPRoutes(e *echo.Echo, dsp DSP) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		muted, err := dsp.GetMutedByBlock(c.Request().Context(), addr, block)
+		muted, err := d.GetMutedByBlock(c.Request().Context(), addr, block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -99,7 +102,7 @@ func addDSPRoutes(e *echo.Echo, dsp DSP) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err = dsp.SetMutedByBlock(c.Request().Context(), addr, block, muted); err != nil {
+		if err = d.SetMutedByBlock(c.Request().Context(), addr, block, muted); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
