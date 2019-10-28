@@ -28,11 +28,15 @@ IMPORTANT: All new repos should use go mod. Make sure to clone your repo outside
 
 . In a new file, create a struct in your new package that will implement the appropriate interface. Its fields should have data required to use the driver.
 +
+NOTE: Each instantiation of your struct should semantically represent a specific device (IE a single projector) and as such should contain _all_ of the information required to control that device
+
++
 [source,go]
 ----
 package adcp // <1>
 
 type Projector struct {
+	Address  string // <2>
 	Username string // <2>
 	Password string // <2>
 }
@@ -44,7 +48,7 @@ type Projector struct {
 +
 [source,go]
 ----
-func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) { // <1>
+func (p *Projector) GetPower(ctx context.Context) (string, error) { // <1>
 }
 ----
 <1> Confused with context? These articles are a great place to start: https://blog.golang.org/context[1], https://dave.cheney.net/2017/08/20/context-isnt-for-cancellation[2], https://dave.cheney.net/2017/01/26/context-is-for-cancelation[3]
@@ -52,6 +56,10 @@ func (p *Projector) GetPower(ctx context.Context, addr string) (string, error) {
 CAUTION: Make sure that your driver library has good test code to ensure future changes don't break things. 😊
 
 . Once a working version of your library is ready, release a v1.0.0 version of it. For future releases, use https://semver.org/[semantic versioning] to denote changes.
+
++
+NOTE: Err on the side of caution here. It's ok to stay at V0.X for a while as things stabilize. Once you go V1, things will have to follow semantic far more strictly. 
+
 [source,bash]
 ----
 $ git tag -a "v1.0.0"
@@ -67,10 +75,14 @@ Once you have finished a library, or want to use one that implements one of the 
 +
 TIP: In this case, go mod is used to reliably import the correct version of external libraries, and not for exporting your package.
 
-. TODO adding dockerfile, anything else https://github.com/bwinterton needs to build these
+. Add the dockerfiles for both linux and arm to the directory
+
+. TODO anything else https://github.com/bwinterton needs to build these (makefiles, etc.)
 
 . Create a `server.go` file. This is where all of your driver server's code should go.
 +
+CAUTION: This will be changing shortly to represent new decisions. (TODO)
+
 [source,go]
 ----
 package main // <1>
