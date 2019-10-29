@@ -2,9 +2,13 @@ package drivers
 
 import "context"
 
-type DisplayWithAudio interface {
-	Display
+type simpleAudioDevice interface {
+	GetVolume(ctx context.Context) (int, error)
+	GetMuted(ctx context.Context) (bool, error)
+}
 
-	GetVolume(ctx context.Context, addr string) (int, error)
-	GetMuted(ctx context.Context, addr string) (bool, error)
+type SimpleAudioDisplay interface {
+	Device
+	display
+	simpleAudioDevice
 }

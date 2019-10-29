@@ -9,11 +9,11 @@ import (
 )
 
 type dsp interface {
-	GetVolumeByBlock(ctx context.Context, addr, block string) (int, error)
-	GetMutedByBlock(ctx context.Context, addr, block string) (bool, error)
+	GetVolumeByBlock(ctx context.Context, block string) (int, error)
+	GetMutedByBlock(ctx context.Context, block string) (bool, error)
 
-	SetVolumeByBlock(ctx context.Context, addr, block string, volume int) error
-	SetMutedByBlock(ctx context.Context, addr, block string, muted bool) error
+	SetVolumeByBlock(ctx context.Context, block string, volume int) error
+	SetMutedByBlock(ctx context.Context, block string, muted bool) error
 }
 
 type DSP interface {

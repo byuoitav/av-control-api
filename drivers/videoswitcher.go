@@ -11,8 +11,8 @@ import (
 type videoSwitcher interface {
 	// TODO notes about being 1 indexed
 
-	GetInputByOutput(ctx context.Context, addr, output string) (string, error)
-	SetInputByOutput(ctx context.Context, addr, output, input string) error
+	GetInputByOutput(ctx context.Context, output string) (string, error)
+	SetInputByOutput(ctx context.Context, output, input string) error
 
 	// TODO active input ?
 }
