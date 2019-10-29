@@ -20,26 +20,16 @@ type display interface {
 	SetInput(ctx context.Context, input string) error
 }
 
-type CreateDisplayFunc func(string) Display
-
 type Display interface {
 	Device
 	display
 }
 
+type CreateDisplayFunc func(string) Display
+
 func CreateDisplayServer(create CreateDisplayFunc) Server {
 	e := newEchoServer()
 	m := &sync.Map{}
-
-	dev := func(addr string) Device {
-		if disp, ok := m.Load(addr); ok {
-			return disp.(Device)
-		}
-
-		disp := create(addr)
-		m.Store(addr, disp)
-		return disp
-	}
 
 	disp := func(addr string) Display {
 		if disp, ok := m.Load(addr); ok {
@@ -49,6 +39,10 @@ func CreateDisplayServer(create CreateDisplayFunc) Server {
 		disp := create(addr)
 		m.Store(addr, disp)
 		return disp
+	}
+
+	dev := func(addr string) Device {
+		return disp(addr)
 	}
 
 	addDeviceRoutes(e, dev)

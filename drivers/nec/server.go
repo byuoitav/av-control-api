@@ -14,6 +14,7 @@ func main() {
 	// parse flags
 	var port int
 
+	// TODO add flags for timeout, etc
 	pflag.IntVarP(&port, "port", "p", 80, "port to run the server on")
 	pflag.Parse()
 
@@ -25,11 +26,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// import display lib
-	display := &nec.Projector{}
+	create := func(addr string) drivers.Display {
+		return nec.NewProjector(addr) // TODO add options
+	}
 
 	// create server
-	server := drivers.CreateDisplayServer(display)
+	server := drivers.CreateDisplayServer(create)
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)
 		os.Exit(1)

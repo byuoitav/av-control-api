@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/labstack/echo"
 )
@@ -22,17 +23,34 @@ type VideoSwitcher interface {
 	videoSwitcher
 }
 
-// TODO should we just make an explicit input/output struct that these return in their http calls?
-func CreateVideoSwitcherServer(vs VideoSwitcher) Server {
-	e := newEchoServer()
+type CreateVideoSwitcherFunc func(string) VideoSwitcher
 
-	addDeviceRoutes(e, vs)
+// TODO should we just make an explicit input/output struct that these return in their http calls?
+func CreateVideoSwitcherServer(create CreateVideoSwitcherFunc) Server {
+	e := newEchoServer()
+	m := &sync.Map{}
+
+	vs := func(addr string) VideoSwitcher {
+		if vs, ok := m.Load(addr); ok {
+			return vs.(VideoSwitcher)
+		}
+
+		vs := create(addr)
+		m.Store(addr, vs)
+		return vs
+	}
+
+	dev := func(addr string) Device {
+		return vs(addr)
+	}
+
+	addDeviceRoutes(e, dev)
 	addVideoSwitcherRoutes(e, vs)
 
 	return wrapEchoServer(e)
 }
 
-func addVideoSwitcherRoutes(e *echo.Echo, vs videoSwitcher) {
+func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 	e.GET("/:address/output/:output/input", func(c echo.Context) error {
 		addr := c.Param("address")
 		output := c.Param("output")
@@ -43,7 +61,8 @@ func addVideoSwitcherRoutes(e *echo.Echo, vs videoSwitcher) {
 			return c.String(http.StatusBadRequest, "must include an output port for the video switcher")
 		}
 
-		input, err := vs.GetInputByOutput(c.Request().Context(), addr, output)
+		vs := create(addr)
+		input, err := vs.GetInputByOutput(c.Request().Context(), output)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -64,7 +83,8 @@ func addVideoSwitcherRoutes(e *echo.Echo, vs videoSwitcher) {
 			return c.String(http.StatusBadRequest, "must include an input portr")
 		}
 
-		if err := vs.SetInputByOutput(c.Request().Context(), addr, output, input); err != nil {
+		vs := create(addr)
+		if err := vs.SetInputByOutput(c.Request().Context(), output, input); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 

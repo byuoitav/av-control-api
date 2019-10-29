@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/labstack/echo"
 )
@@ -21,16 +22,33 @@ type DSP interface {
 	dsp
 }
 
-func CreateDSPServer(dsp DSP) Server {
-	e := newEchoServer()
+type CreateDSPFunc func(string) DSP
 
-	addDeviceRoutes(e, dsp)
+func CreateDSPServer(create CreateDSPFunc) Server {
+	e := newEchoServer()
+	m := &sync.Map{}
+
+	dsp := func(addr string) DSP {
+		if dsp, ok := m.Load(addr); ok {
+			return dsp.(DSP)
+		}
+
+		dsp := create(addr)
+		m.Store(addr, dsp)
+		return dsp
+	}
+
+	dev := func(addr string) Device {
+		return dsp(addr)
+	}
+
+	addDeviceRoutes(e, dev)
 	addDSPRoutes(e, dsp)
 
 	return wrapEchoServer(e)
 }
 
-func addDSPRoutes(e *echo.Echo, d dsp) {
+func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 	// volume
 	e.GET("/:address/block/:block/volume", func(c echo.Context) error {
 		addr := c.Param("address")
@@ -42,7 +60,8 @@ func addDSPRoutes(e *echo.Echo, d dsp) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		volume, err := d.GetVolumeByBlock(c.Request().Context(), addr, block)
+		d := create(addr)
+		volume, err := d.GetVolumeByBlock(c.Request().Context(), block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -63,7 +82,8 @@ func addDSPRoutes(e *echo.Echo, d dsp) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err = d.SetVolumeByBlock(c.Request().Context(), addr, block, volume); err != nil {
+		d := create(addr)
+		if err = d.SetVolumeByBlock(c.Request().Context(), block, volume); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
@@ -81,7 +101,8 @@ func addDSPRoutes(e *echo.Echo, d dsp) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		muted, err := d.GetMutedByBlock(c.Request().Context(), addr, block)
+		d := create(addr)
+		muted, err := d.GetMutedByBlock(c.Request().Context(), block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -102,7 +123,8 @@ func addDSPRoutes(e *echo.Echo, d dsp) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err = d.SetMutedByBlock(c.Request().Context(), addr, block, muted); err != nil {
+		d := create(addr)
+		if err = d.SetMutedByBlock(c.Request().Context(), block, muted); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 

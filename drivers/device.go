@@ -7,11 +7,11 @@ import (
 	"github.com/labstack/echo"
 )
 
-type CreateDeviceFunc func(string) Device
-
 type Device interface {
 	GetInfo(ctx context.Context) (interface{}, error)
 }
+
+type CreateDeviceFunc func(string) Device
 
 func addDeviceRoutes(e *echo.Echo, create CreateDeviceFunc) {
 	e.GET("/:address/info", func(c echo.Context) error {
