@@ -2,8 +2,8 @@ github.com/byuoitav/av-control-api v0.1.0 h1:Ljfm6BY4duFwU30APbACtEmjHIp7l/Y35Hr
 github.com/byuoitav/av-control-api v0.1.0/go.mod h1:EKbFkLF+6X64f6gUmveKxfKobgCVNv7i4qQMJKlz3jY=
 github.com/byuoitav/connpool v0.1.5 h1:r1AY7n1/9jDkZd5nEW8VpB+Oq8fvMmkKzmAiTbi9H90=
 github.com/byuoitav/connpool v0.1.5/go.mod h1:9jVn2IL91Wp6eHEymqxZ5v7zPy07FtIWp/JIfDCMGQY=
-github.com/byuoitav/nec-driver v0.1.1 h1:mcCkO/lhyJCG109ks+3l3vi13OtOLq40NBkEB/3b80Q=
-github.com/byuoitav/nec-driver v0.1.1/go.mod h1:LWLFp3tlh3EOowLAG8ysoM+7OKyoM4q1QUvdqK4XIOA=
+github.com/byuoitav/nec-driver v0.1.2 h1:b32cJNyQ0Cm9fdF8xkHOEQL2h998Lx3k5loP62T1FJ0=
+github.com/byuoitav/nec-driver v0.1.2/go.mod h1:LWLFp3tlh3EOowLAG8ysoM+7OKyoM4q1QUvdqK4XIOA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/labstack/echo v3.3.10+incompatible h1:pGRcYk231ExFAyoAjAfD85kQzRJCRI8bbnE7CX5OEgg=
 github.com/labstack/echo v3.3.10+incompatible/go.mod h1:0INS7j/VjnFxD4E2wkz67b8cVwCLbBmJyDaka6Cmk1s=

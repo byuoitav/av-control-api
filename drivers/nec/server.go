@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"github.com/byuoitav/av-control-api/drivers"
 	"github.com/byuoitav/nec-driver"
@@ -15,7 +16,7 @@ func main() {
 	var port int
 
 	// TODO add flags for timeout, etc
-	pflag.IntVarP(&port, "port", "p", 80, "port to run the server on")
+	pflag.IntVarP(&port, "port", "p", 8080, "port to run the server on")
 	pflag.Parse()
 
 	// bind to given port
@@ -27,7 +28,7 @@ func main() {
 	}
 
 	create := func(addr string) drivers.Display {
-		return nec.NewProjector(addr) // TODO add options
+		return nec.NewProjector(addr, nec.WithDelay(300*time.Second)) // TODO add options
 	}
 
 	// create server
