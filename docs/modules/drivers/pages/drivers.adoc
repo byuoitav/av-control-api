@@ -56,7 +56,7 @@ $ git tag -a "v1.0.0"
 $ git push --tags
 ----
 
-= Creating a Driver Server
+== Creating a Driver Server
 
 Once you have finished a library, or want to use one that implements one of the driver interfaces, you create create a driver server.
 
