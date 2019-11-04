@@ -1,0 +1,6 @@
+name: av-control-api
+version: master
+title: AV Control API
+nav:
+  - modules/ROOT/nav.adoc
+  - modules/drivers/nav.adoc
