@@ -13,7 +13,7 @@ type VideoSwitcherDSP interface {
 
 type CreateVideoSwitcherDSPFunc func(context.Context, string) (VideoSwitcherDSP, error)
 
-func CreateVideoSwitcherDSPServer(create CreateVideoSwitcherDSPFunc, ctx context.Context) Server {
+func CreateVideoSwitcherDSPServer(create CreateVideoSwitcherDSPFunc) Server {
 	e := newEchoServer()
 	m := &sync.Map{}
 
@@ -42,9 +42,9 @@ func CreateVideoSwitcherDSPServer(create CreateVideoSwitcherDSPFunc, ctx context
 		return vsdsp(ctx, addr)
 	}
 
-	addDeviceRoutes(e, dev, ctx)
-	addVideoSwitcherRoutes(e, vs, ctx)
-	addDSPRoutes(e, dsp, ctx)
+	addDeviceRoutes(e, dev)
+	addVideoSwitcherRoutes(e, vs)
+	addDSPRoutes(e, dsp)
 
 	return wrapEchoServer(e)
 }
