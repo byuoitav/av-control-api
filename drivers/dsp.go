@@ -24,7 +24,7 @@ type DSP interface {
 
 type CreateDSPFunc func(context.Context, string) (DSP, error)
 
-func CreateDSPServer(create CreateDSPFunc, ctx context.Context) (Server, error) {
+func CreateDSPServer(create CreateDSPFunc) (Server, error) {
 	e := newEchoServer()
 	m := &sync.Map{}
 
