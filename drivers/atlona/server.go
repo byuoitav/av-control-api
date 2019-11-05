@@ -43,6 +43,7 @@ func main() {
 		if err != nil {
 			return nil, fmt.Errorf("failed to discover device: %w", err)
 		}
+
 		return &atlona.AtlonaVideoSwitcher{
 			Address:    addr,
 			Username:   username,
