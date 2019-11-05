@@ -45,13 +45,13 @@ func CreateDSPServer(create CreateDSPFunc, ctx context.Context) (Server, error) 
 		return dsp(ctx, addr)
 	}
 
-	addDeviceRoutes(e, dev, ctx)
-	addDSPRoutes(e, dsp, ctx)
+	addDeviceRoutes(e, dev)
+	addDSPRoutes(e, dsp)
 
 	return wrapEchoServer(e), nil
 }
 
-func addDSPRoutes(e *echo.Echo, create CreateDSPFunc, ctx context.Context) {
+func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 	// volume
 	e.GET("/:address/block/:block/volume", func(c echo.Context) error {
 		addr := c.Param("address")
@@ -63,7 +63,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc, ctx context.Context) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		d, err := create(ctx, addr)
+		d, err := create(c.Request().Context(), addr)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -88,7 +88,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc, ctx context.Context) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		d, err := create(ctx, addr)
+		d, err := create(c.Request().Context(), addr)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -110,7 +110,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc, ctx context.Context) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		d, err := create(ctx, addr)
+		d, err := create(c.Request().Context(), addr)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -135,7 +135,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc, ctx context.Context) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		d, err := create(ctx, addr)
+		d, err := create(c.Request().Context(), addr)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}

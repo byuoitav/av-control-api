@@ -38,7 +38,7 @@ func main() {
 	}
 
 	// import driver library
-	createVS := func(addr string) drivers.VideoSwitcherDSP {
+	createVS := func(ctx context.Context, addr string) drivers.VideoSwitcherDSP {
 		deviceType, err := atlona.GetDeviceType(context.TODO(), addr)
 		if err != nil {
 			fmt.Printf("failed to discover device: %s\n", err)
