@@ -23,34 +23,38 @@ type VideoSwitcher interface {
 	videoSwitcher
 }
 
-type CreateVideoSwitcherFunc func(string) VideoSwitcher
+type CreateVideoSwitcherFunc func(context.Context, string) (VideoSwitcher, error)
 
 // TODO should we just make an explicit input/output struct that these return in their http calls?
-func CreateVideoSwitcherServer(create CreateVideoSwitcherFunc) Server {
+func CreateVideoSwitcherServer(create CreateVideoSwitcherFunc, ctx context.Context) Server {
 	e := newEchoServer()
 	m := &sync.Map{}
 
-	vs := func(addr string) VideoSwitcher {
+	vs := func(ctx context.Context, addr string) (VideoSwitcher, error) {
 		if vs, ok := m.Load(addr); ok {
-			return vs.(VideoSwitcher)
+			return vs.(VideoSwitcher), nil
 		}
 
-		vs := create(addr)
+		vs, err := create(ctx, addr)
+		if err != nil {
+			return nil, err
+		}
+
 		m.Store(addr, vs)
-		return vs
+		return vs, nil
 	}
 
-	dev := func(addr string) Device {
-		return vs(addr)
+	dev := func(ctx context.Context, addr string) (Device, error) {
+		return vs(ctx, addr)
 	}
 
-	addDeviceRoutes(e, dev)
-	addVideoSwitcherRoutes(e, vs)
+	addDeviceRoutes(e, dev, ctx)
+	addVideoSwitcherRoutes(e, vs, ctx)
 
 	return wrapEchoServer(e)
 }
 
-func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
+func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc, ctx context.Context) {
 	e.GET("/:address/output/:output/input", func(c echo.Context) error {
 		addr := c.Param("address")
 		output := c.Param("output")
@@ -61,7 +65,10 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 			return c.String(http.StatusBadRequest, "must include an output port for the video switcher")
 		}
 
-		vs := create(addr)
+		vs, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		input, err := vs.GetInputByOutput(c.Request().Context(), output)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
@@ -83,7 +90,10 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 			return c.String(http.StatusBadRequest, "must include an input portr")
 		}
 
-		vs := create(addr)
+		vs, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		if err := vs.SetInputByOutput(c.Request().Context(), output, input); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
