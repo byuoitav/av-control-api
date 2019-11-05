@@ -25,33 +25,36 @@ type Display interface {
 	display
 }
 
-type CreateDisplayFunc func(string) Display
+type CreateDisplayFunc func(context.Context, string) (Display, error)
 
-func CreateDisplayServer(create CreateDisplayFunc) Server {
+func CreateDisplayServer(create CreateDisplayFunc, ctx context.Context) (Server, error) {
 	e := newEchoServer()
 	m := &sync.Map{}
 
-	disp := func(addr string) Display {
+	disp := func(ctx context.Context, addr string) (Display, error) {
 		if disp, ok := m.Load(addr); ok {
-			return disp.(Display)
+			return disp.(Display), nil
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return nil, err
+		}
 		m.Store(addr, disp)
-		return disp
+		return disp, nil
 	}
 
-	dev := func(addr string) Device {
-		return disp(addr)
+	dev := func(ctx context.Context, addr string) (Device, error) {
+		return disp(ctx, addr)
 	}
 
-	addDeviceRoutes(e, dev)
-	addDisplayRoutes(e, disp)
+	addDeviceRoutes(e, dev, ctx)
+	addDisplayRoutes(e, disp, ctx)
 
-	return wrapEchoServer(e)
+	return wrapEchoServer(e), nil
 }
 
-func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
+func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc, ctx context.Context) {
 	// power
 	e.GET("/:address/power", func(c echo.Context) error {
 		addr := c.Param("address")
@@ -59,7 +62,10 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		power, err := disp.GetPower(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
@@ -78,7 +84,10 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include a power state to set")
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		if err := disp.SetPower(c.Request().Context(), power); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -93,7 +102,10 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		blanked, err := disp.GetBlanked(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
@@ -112,7 +124,10 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		if err := disp.SetBlanked(c.Request().Context(), blanked); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -127,7 +142,10 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		input, err := disp.GetInput(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
@@ -146,7 +164,10 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include a input to set")
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		if err := disp.SetInput(c.Request().Context(), input); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -161,7 +182,10 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp := create(addr)
+		disp, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		asignal, err := disp.GetActiveSignal(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())

@@ -22,33 +22,36 @@ type DSP interface {
 	dsp
 }
 
-type CreateDSPFunc func(string) DSP
+type CreateDSPFunc func(context.Context, string) (DSP, error)
 
-func CreateDSPServer(create CreateDSPFunc) Server {
+func CreateDSPServer(create CreateDSPFunc, ctx context.Context) (Server, error) {
 	e := newEchoServer()
 	m := &sync.Map{}
 
-	dsp := func(addr string) DSP {
+	dsp := func(ctx context.Context, addr string) (DSP, error) {
 		if dsp, ok := m.Load(addr); ok {
-			return dsp.(DSP)
+			return dsp.(DSP), nil
 		}
 
-		dsp := create(addr)
+		dsp, err := create(ctx, addr)
+		if err != nil {
+			return nil, err
+		}
 		m.Store(addr, dsp)
-		return dsp
+		return dsp, nil
 	}
 
-	dev := func(addr string) Device {
-		return dsp(addr)
+	dev := func(ctx context.Context, addr string) (Device, error) {
+		return dsp(ctx, addr)
 	}
 
-	addDeviceRoutes(e, dev)
-	addDSPRoutes(e, dsp)
+	addDeviceRoutes(e, dev, ctx)
+	addDSPRoutes(e, dsp, ctx)
 
-	return wrapEchoServer(e)
+	return wrapEchoServer(e), nil
 }
 
-func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
+func addDSPRoutes(e *echo.Echo, create CreateDSPFunc, ctx context.Context) {
 	// volume
 	e.GET("/:address/block/:block/volume", func(c echo.Context) error {
 		addr := c.Param("address")
@@ -60,7 +63,10 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		d := create(addr)
+		d, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		volume, err := d.GetVolumeByBlock(c.Request().Context(), block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
@@ -82,7 +88,10 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		d := create(addr)
+		d, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		if err = d.SetVolumeByBlock(c.Request().Context(), block, volume); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -101,7 +110,10 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		d := create(addr)
+		d, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		muted, err := d.GetMutedByBlock(c.Request().Context(), block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
@@ -123,7 +135,10 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		d := create(addr)
+		d, err := create(ctx, addr)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 		if err = d.SetMutedByBlock(c.Request().Context(), block, muted); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
