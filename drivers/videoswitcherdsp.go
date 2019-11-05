@@ -1,6 +1,9 @@
 package drivers
 
-import "sync"
+import (
+	"context"
+	"sync"
+)
 
 type VideoSwitcherDSP interface {
 	Device
@@ -8,37 +11,40 @@ type VideoSwitcherDSP interface {
 	dsp
 }
 
-type CreateVideoSwitcherDSPFunc func(string) VideoSwitcherDSP
+type CreateVideoSwitcherDSPFunc func(context.Context, string) (VideoSwitcherDSP, error)
 
-func CreateVideoSwitcherDSPServer(create CreateVideoSwitcherDSPFunc) Server {
+func CreateVideoSwitcherDSPServer(create CreateVideoSwitcherDSPFunc, ctx context.Context) Server {
 	e := newEchoServer()
 	m := &sync.Map{}
 
-	vsdsp := func(addr string) VideoSwitcherDSP {
+	vsdsp := func(ctx context.Context, addr string) (VideoSwitcherDSP, error) {
 		if vsdsp, ok := m.Load(addr); ok {
-			return vsdsp.(VideoSwitcherDSP)
+			return vsdsp.(VideoSwitcherDSP), nil
 		}
 
-		vsdsp := create(addr)
+		vsdsp, err := create(ctx, addr)
+		if err != nil {
+			return nil, err
+		}
 		m.Store(addr, vsdsp)
-		return vsdsp
+		return vsdsp, nil
 	}
 
-	dev := func(addr string) Device {
-		return vsdsp(addr)
+	dev := func(ctx context.Context, addr string) (Device, error) {
+		return vsdsp(ctx, addr)
 	}
 
-	vs := func(addr string) VideoSwitcher {
-		return vsdsp(addr)
+	vs := func(ctx context.Context, addr string) (VideoSwitcher, error) {
+		return vsdsp(ctx, addr)
 	}
 
-	dsp := func(addr string) DSP {
-		return vsdsp(addr)
+	dsp := func(ctx context.Context, addr string) (DSP, error) {
+		return vsdsp(ctx, addr)
 	}
 
-	addDeviceRoutes(e, dev)
-	addVideoSwitcherRoutes(e, vs)
-	addDSPRoutes(e, dsp)
+	addDeviceRoutes(e, dev, ctx)
+	addVideoSwitcherRoutes(e, vs, ctx)
+	addDSPRoutes(e, dsp, ctx)
 
 	return wrapEchoServer(e)
 }
