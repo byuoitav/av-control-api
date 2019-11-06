@@ -13,7 +13,7 @@ type display interface {
 	GetPower(ctx context.Context) (string, error)
 	GetBlanked(ctx context.Context) (bool, error)
 	GetInput(ctx context.Context) (string, error)
-	GetActiveSignal(ctx context.Context) (bool, error)
+	GetActiveSignal(ctx context.Context, port string) (bool, error)
 
 	SetPower(ctx context.Context, power string) error
 	SetBlanked(ctx context.Context, blanked bool) error
