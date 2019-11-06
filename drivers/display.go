@@ -176,8 +176,9 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 	})
 
 	// active signal
-	e.GET("/:address/activesignal", func(c echo.Context) error {
+	e.GET("/:address/activesignal/:port", func(c echo.Context) error {
 		addr := c.Param("address")
+		port := c.Param("port")
 		if len(addr) == 0 {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
@@ -186,7 +187,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		asignal, err := disp.GetActiveSignal(c.Request().Context())
+		asignal, err := disp.GetActiveSignal(c.Request().Context(), port)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
