@@ -3,7 +3,7 @@ module github.com/byuoitav/drivers/sonyrest
 go 1.13
 
 require (
-	github.com/byuoitav/av-control-api v0.2.3
+	github.com/byuoitav/av-control-api v0.2.5
 	github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b // indirect
 	github.com/byuoitav/sonyrest-driver v0.1.2
 	github.com/spf13/pflag v1.0.5

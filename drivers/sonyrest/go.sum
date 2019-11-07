@@ -1,6 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/byuoitav/av-control-api v0.2.3 h1:zGv++eLjnpHCIdkUAtEdQ4B9I+PMIXyYyvQk8jfSFyE=
-github.com/byuoitav/av-control-api v0.2.3/go.mod h1:lUOdhXvVSVb0fyZyeOCZ//JuiZmg5ssSRwzMXOwKnxM=
+github.com/byuoitav/av-control-api v0.2.5 h1:kHOkIHhUG+iXUnLYnLIwlBL1CqxDLOzC0uJrFcnqM14=
+github.com/byuoitav/av-control-api v0.2.5/go.mod h1:lUOdhXvVSVb0fyZyeOCZ//JuiZmg5ssSRwzMXOwKnxM=
 github.com/byuoitav/common v0.0.0-20191009134525-e6882d6c07f5/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b h1:sT6jgY7MkaWMKLTyLAl3WbVcsZEu8cvOktKqIRDgzkY=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=

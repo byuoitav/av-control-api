@@ -24,14 +24,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	create := func(ctx context.Context, addr string) (drivers.Display, error) {
+	create := func(ctx context.Context, addr string) (drivers.DisplayDSP, error) {
 		return &sonyrest.TV{
 			Address: addr,
 			PSK:     "T3CL1T3",
 		}, nil
 	}
 
-	server, err := drivers.CreateDisplayServer(create)
+	server := drivers.CreateDisplayDSPServer(create)
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)
 		os.Exit(1)
