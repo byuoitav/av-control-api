@@ -13,7 +13,7 @@ import (
 
 func main() {
 	var port int
-	pflag.IntVarP(&port, "port", "p", 80, "port to run the server on")
+	pflag.IntVarP(&port, "port", "p", 8080, "port to run the server on")
 
 	pflag.Parse()
 

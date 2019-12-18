@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"github.com/byuoitav/av-control-api/drivers"
-	"github.com/byuoitav/sonyrest-driver"
+	"github.com/byuoitav/london-driver"
 	"github.com/spf13/pflag"
 )
 
 func main() {
 	var port int
+
 	pflag.IntVarP(&port, "port", "p", 8080, "port to run the server on")
 
 	pflag.Parse()
@@ -24,14 +26,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	create := func(ctx context.Context, addr string) (drivers.DisplayDSP, error) {
-		return &sonyrest.TV{
-			Address: addr,
-			PSK:     "T3CL1T3",
-		}, nil
+	create := func(ctx context.Context, addr string) (drivers.DSP, error) {
+		return london.NewDSP(addr, london.WithDelay(300*time.Second)), nil
 	}
 
-	server := drivers.CreateDisplayDSPServer(create)
+	server, err := drivers.CreateDSPServer(create)
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)
 		os.Exit(1)
