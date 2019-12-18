@@ -1,13 +1,17 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/byuoitav/av-control-api v0.2.3 h1:zGv++eLjnpHCIdkUAtEdQ4B9I+PMIXyYyvQk8jfSFyE=
-github.com/byuoitav/av-control-api v0.2.3/go.mod h1:lUOdhXvVSVb0fyZyeOCZ//JuiZmg5ssSRwzMXOwKnxM=
+github.com/byuoitav/atlona-driver v1.2.0/go.mod h1:XSpZGCyxTJPkdg8sEwPt8AaKCs4nY8G0RlYu6jVXrSg=
+github.com/byuoitav/av-control-api v0.1.0/go.mod h1:EKbFkLF+6X64f6gUmveKxfKobgCVNv7i4qQMJKlz3jY=
+github.com/byuoitav/av-control-api v0.2.7 h1:6eDXdRa58ePhR+BthRJTW8bJd687m8EvQlK8DghLTFM=
+github.com/byuoitav/av-control-api v0.2.7/go.mod h1:XpVkZuhg2AfXISf9lxLwOXB/Y/VdT41dijXaF+VtT7o=
 github.com/byuoitav/common v0.0.0-20191009134525-e6882d6c07f5/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b h1:sT6jgY7MkaWMKLTyLAl3WbVcsZEu8cvOktKqIRDgzkY=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/nec-driver v1.0.0/go.mod h1:g7EUxjGYKyJLcJ1G3ZXPomTYaP8uedounwkguJBQFUg=
 github.com/byuoitav/pooled v0.0.0-20191022213741-dad43433a657/go.mod h1:MzHJMzI9sQZ/uUzshHzlYJE9ofTOUauZlCT/LQg2DYE=
-github.com/byuoitav/sonyrest-driver v0.1.2 h1:NKWc8/TnNmEGZSAIKzSwYNCt06+DXVCad8+OY4NXrPU=
+github.com/byuoitav/qsc-driver v0.1.4/go.mod h1:9jWqVoK3+9rNKSQPAQITDHMYQnCnEXhV6mOmzbcvhmA=
 github.com/byuoitav/sonyrest-driver v0.1.2/go.mod h1:+d4nbt2XDbPgyQO0hicDauIzJScfq4QHcgNTizSc8nw=
+github.com/byuoitav/sonyrest-driver v0.1.6 h1:BtRieofGX1fGtnFxbZ6O1gNank3kZxufrAb2kqKxryM=
+github.com/byuoitav/sonyrest-driver v0.1.6/go.mod h1:+d4nbt2XDbPgyQO0hicDauIzJScfq4QHcgNTizSc8nw=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
@@ -74,6 +78,7 @@ golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20191008105621-543471e840be/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20191105142833-ac3223d80179/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd h1:3x5uuvBgE6oaXJjCOvpCC1IpgJogqQ+PqGGU3ZxAgII=
 golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
@@ -84,6 +89,7 @@ golang.org/x/tools v0.0.0-20190311212946-11955173bddd/go.mod h1:LCzVGOaR6xXOjkQ3
 golang.org/x/tools v0.0.0-20190621195816-6e04913cbbac/go.mod h1:/rFqwRUd4F7ZHNgwSSTFct+R/Kf4OFW1sUzUTQQTgfc=
 golang.org/x/tools v0.0.0-20191029041327-9cc4af7d6b2c/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
+golang.org/x/tools v0.0.0-20191104232314-dc038396d1f0/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.0.0-20191105231337-689d0f08e67a/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
