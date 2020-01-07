@@ -1,6 +1,7 @@
 = Guide
 
 This setup guide should help you get your first room up and running, using the av-control-api to control it and optionally one of our UI's. The basic sections are as follows:
+
 . Getting the OS ready
 . Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 . Setting up the database and configuring your devices
