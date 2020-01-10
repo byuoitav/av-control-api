@@ -35,6 +35,7 @@ For a detailed step-by-step guide to get these installed on your raspberry pi, p
 == Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 == Setting up the database and configuring your devices
 
+
 We use CouchDB as the database for our solution. Within CouchDB there are five important tables that are used throughout our solution:
 
 . devices::
