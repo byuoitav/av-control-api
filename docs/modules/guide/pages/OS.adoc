@@ -1,0 +1,34 @@
+= Complete OS Setup Guide
+
+=== Getting the OS ready
+
+To get the Operating System ready to go for this solution you need a raspberry pi with the following installed on it:
+
+* docker
+* docker-compose
+* web browser of your choice
+* raspbian
+
+===docker
+
+----
+code()
+----
+
+===docker-compose
+
+----
+code()
+----
+
+===web browser
+
+----
+code()
+----
+
+===raspbian
+
+----
+code()
+----
