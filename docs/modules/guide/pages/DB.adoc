@@ -110,14 +110,14 @@ in the use of these commands.
 Sample CouchDB Entry for Raspberry Pi device-type:
 ----
 {
-  "_id": "Pi3",
-  "_rev": "9-9a60c267a9cad92da3fb85p35cbb757d",
-  "description": "A Raspberry Pi 3",
-  "display_name": "Pi",
-  "default-name": "CP",
-  "default-icon": "video_label",
-  "default-address": "[BLDG]-[ROOM]-[NAME].youruniversity.edu",
-  "roles": [
+  "_id": "Pi3", // <1>
+  "_rev": "9-9a60c267a9cad92da3fb85p35cbb757d", // <1>
+  "description": "A Raspberry Pi 3", // <1>
+  "display_name": "Pi", // <1>
+  "default-name": "CP", // <2>
+  "default-icon": "video_label", // <3>
+  "default-address": "[BLDG]-[ROOM]-[NAME].youruniversity.edu", // <4>
+  "roles": [ // <5>
     {
       "_id": "ControlProcessor",
       "description": "Acts as a device to control the AV-API in a room"
@@ -131,25 +131,44 @@ Sample CouchDB Entry for Raspberry Pi device-type:
       "description": "Acts as a device that routes events through the room to other devices"
     }
   ],
-  "commands": [
+  "commands": [ // <6>
     {
       "_id": "GenericPassthroughADCP",
       "description": "GenericPassthroughADCP",
-      "microservice": {
+      "microservice": { // <7>
         "_id": "generic-gateway-Adcp",
         "description": "used to serialize requests to and ADCP device",
         "address": "http://:gateway:8012"
       },
-      "endpoint": {
+      "endpoint": { // <8>
         "_id": "Generic Gateway",
         "description": "A generic Gateway for use in base case where microservice exists outside of the pi issuing the requests. ",
         "path": "/:path"
       },
-      "priority": 1
+      "priority": 1 // <9>
     }
   ]
 }
 ----
+<1> These fields are identical to the fields mentioned in detail in previous examples.
+<2> "default-name": The default name of the device if no name is explicitly given.
+<3> "default-icon": The default icon for the device if no alternative icon is explicitly given. Used in the UI.
+<4> "default-address": Default IP address for device if no address is explicitly given.
+<5> "roles": The roles of the device, described in detail in previous examples.
+<6> "commands": The list of commands that can be sent to this device.
+* The "_id" is the unique identifier for the command.
+* The "description" if for your own use to save info about the command.
+<7> "microservice": The info for the microservice used in making the command.
+* The "_id" is the unique identifier for the microservice.
+* The "description" if for your own use to save info about the microservice.
+* The "address" is where the microservice is running including the port it is running on.
+<8> "endpoint": The API endpoint on the microservice that corresponds to the command.
+* The "_id" is the unique identifier for the enpoint.
+* The "description" if for your own use to save info about the endpoint.
+* The "path" is the path to the endpoint.
+<9> "priority": This is used to help determine which events are more important and need to be executed first.
+
+
 === ui_config
 === rooms
 === bldgs
