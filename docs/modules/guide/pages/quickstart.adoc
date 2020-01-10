@@ -1,0 +1,40 @@
+= Quick Start
+
+Here you will find a quick start guide to getting your environment set up to use the av-control-api to communicate with devices in 
+your classroom. For the distribution of our content we use Docker simply for the ease of containerization, distribution, and use for our systems.
+You are of course able to pull own our repositories, compile the binaries, and launch the microservices independently, but feel free to use our already packaged
+Docker containers as well. For additional information about Docker please refer to https://docs.docker.com/engine/docker-overview/[Docker's Docs].
+
+There are many differrent ways to implement our AV solution in your organization. We will not outline each type of implementation but rather will outline
+the steps to one implementation method and allow others to be creative in how they want to implement our solution in their organizaiton.
+We will be outlining how to set up our solution using the following materials:
+
+* https://www.raspberrypi.org/products/raspberry-pi-4-model-b/[Raspberry Pi 4 Model B]
+* https://www.raspberrypi.org/products/raspberry-pi-touch-display/[7-inch Rapsberry Pi Touch Panel]
+* An IP enabled device
+** For demonstration purposes we will be using a https://www.sony.com/electronics/televisions/xbr-x800g-x805g-x807g-series[Sony XBR 800G]
+
+This setup guide should help you get your first room up and running, using the av-control-api to control it and optionally one of our UI's. The basic sections are as follows:
+
+. Getting the OS ready
+. Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
+. Setting up the database and configuring your devices
+. Testing the API
+
+== Getting the OS ready
+
+To get the Operating System ready to go for this solution you need a raspberry pi with the following installed on it:
+
+* docker
+* docker-compose
+* web browser of your choice
+* raspbian
+
+For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS.adoc[Complete OS Setup Guide]
+
+== Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
+== Setting up the database and configuring your devices
+== Testing the API
+----
+code()
+----
