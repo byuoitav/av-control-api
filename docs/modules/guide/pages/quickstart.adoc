@@ -1,9 +1,6 @@
 = Quick Start
 
-Here you will find a quick start guide to getting your environment set up to use the av-control-api to communicate with devices in 
-your classroom. For the distribution of our content we use Docker simply for the ease of containerization, distribution, and use for our systems.
-You are of course able to pull own our repositories, compile the binaries, and launch the microservices independently, but feel free to use our already packaged
-Docker containers as well. For additional information about Docker please refer to https://docs.docker.com/engine/docker-overview/[Docker's Docs].
+Here you will find a quick start guide to getting your environment set up to use the av-control-api to communicate with devices in your classroom. For the distribution of our content we use Docker simply for the ease of containerization, distribution, and use for our systems.You are of course able to pull down our repositories, compile the binaries, and launch the microservices independently, but feel free to use our already packaged Docker containers as well. For additional information about Docker please refer to https://docs.docker.com/engine/docker-overview/[Docker's Docs].
 
 There are many differrent ways to implement our AV solution in your organization. We will not outline each type of implementation but rather will outline
 the steps to one implementation method and allow others to be creative in how they want to implement our solution in their organizaiton.
@@ -49,6 +46,7 @@ We use CouchDB as the database for our solution. Within CouchDB there are five i
     This table holds all of the info for each of the buildings
 . room_configurations::
     This table holds all of the info for each of the room configurations
+
 
 For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, 
 please refer to the xref:DB.adoc[Complete Database Guide]
