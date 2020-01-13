@@ -9,25 +9,32 @@ To get the Operating System ready to go for this solution you need a raspberry p
 * web browser of your choice
 * raspbian
 
-===docker
+
+=== docker
+
 
 ----
 code()
 ----
 
-===docker-compose
+
+=== docker-compose
+
 
 ----
 code()
 ----
 
-===web browser
+
+=== web browser
 
 ----
 code()
 ----
 
-===raspbian
+
+=== raspbian
+
 
 ----
 code()
