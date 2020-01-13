@@ -34,6 +34,24 @@ For a detailed step-by-step guide to get these installed on your raspberry pi, p
 
 == Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 == Setting up the database and configuring your devices
+
+
+We use CouchDB as the database for our solution. Within CouchDB there are five important tables that are used throughout our solution:
+
+. devices::
+This table holds all of the info for each of the devices
+. ui_config::
+This table holds all of the info for each of the ui configs
+. rooms::
+This table holds all of the info for each of the rooms
+. bldgs::
+This table holds all of the info for each of the buildings
+. room_config::
+This table holds all of the info for each of the room configurations
+
+For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, 
+please refer to the xref:DB.adoc[Complete Database Guide]
+
 == Testing the API
 ----
 code()
