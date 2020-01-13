@@ -4,14 +4,20 @@
 
 To get the Operating System ready to go for this solution you need a raspberry pi with the following installed on it:
 
+* raspbian
 * docker
 * docker-compose
 * web browser of your choice
-* raspbian
 
+
+=== raspbian
+This section will outline the necessary steps to get a raspbian image up and running on your raspberry pi. Here are the steps you take:
+* Download the Raspberry Pi Desktop image https://www.raspberrypi.org/downloads/raspberry-pi-desktop/[here].
+----
+code()
+----
 
 === docker
-
 
 ----
 code()
@@ -20,20 +26,12 @@ code()
 
 === docker-compose
 
-
 ----
 code()
 ----
 
 
 === web browser
-
-----
-code()
-----
-
-
-=== raspbian
 
 
 ----
