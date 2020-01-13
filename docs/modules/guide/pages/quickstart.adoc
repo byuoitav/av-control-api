@@ -39,15 +39,17 @@ For a detailed step-by-step guide to get these installed on your raspberry pi, p
 We use CouchDB as the database for our solution. Within CouchDB there are five important tables that are used throughout our solution:
 
 . devices::
-This table holds all of the info for each of the devices
-. ui_config::
-This table holds all of the info for each of the ui configs
+    This table holds all of the info for each of the devices
+. device_type::
+    This table holds all of the info for each of the device types
+. ui_configuration::
+    This table holds all of the info for each of the ui configs
 . rooms::
-This table holds all of the info for each of the rooms
-. bldgs::
-This table holds all of the info for each of the buildings
-. room_config::
-This table holds all of the info for each of the room configurations
+    This table holds all of the info for each of the rooms
+. buildings::
+    This table holds all of the info for each of the buildings
+. room_configurations::
+    This table holds all of the info for each of the room configurations
 
 For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, 
 please refer to the xref:DB.adoc[Complete Database Guide]

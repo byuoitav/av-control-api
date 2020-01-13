@@ -7,10 +7,10 @@ Within CouchDB there are five important tables that are used throughout our solu
 
 . devices
 . device_type
-. ui_config
+. ui_configuration
 . rooms
-. bldgs
-. room_config
+. buildings
+. room_configurations
 
 This guide will outline each of the tables above, their purpose, what data is being stored, and how it is used within our AV solution.
 
@@ -85,22 +85,23 @@ Sample CouchDB Entry for Sony XBR device:
   ],
   "ports": [ // <2>
     {
-      "_id": "hdmi!2",
-      "friendly_name": "SonyTv HDMI input 2",
-      "source_device": "HBLL-2231-SW1",
-      "destination_device": "HBLL-2231-D2",
-      "description": "SonyTv HDMI input 2"
+      "_id": "hdmi!2", // <3>
+      "friendly_name": "SonyTv HDMI input 2", // <4>
+      "source_device": "HBLL-2231-SW1", // <5>
+      "destination_device": "HBLL-2231-D2", // <6>
+      "description": "SonyTv HDMI input 2" // <7>
     }
   ]
 }
 ----
-<1> All of these fields have been explained i nthe above example
+<1> All of these fields have been explained in the above example
 <2> "ports": A list of the ports on the device. Each input for the Sony Display that is used will be listed in this array.
-* "_id": ID of the port, "hdmi!2" is the format used in communicating with the Sony XBR display.
-* "friendly_name": What you want the input to be named on the UI
-* "source_device": The source device of the input coming into the TV (i.e. vieo switcher, computer, HDMI Pass through etc.).
+<3> "_id": ID of the port, "hdmi!2" is the format used in communicating with the Sony XBR display.
+<4> "friendly_name": What you want the input to be named on the UI
+<5> "source_device": The source device of the input coming into the TV (i.e. vieo switcher, computer, HDMI Pass through etc.).
 This is the ID of the document for the source device.
-* "description": A description of the port, this field is for your benefit to include any descriptive information you want stored.
+<6> "destination_device": The destination device of the incoming input. The source and destination device combined indicate the directionality of the video input.
+<7> "description": A description of the port, this field is for your benefit to include any descriptive information you want stored.
 
 === device_type
 The device_type database contains information about a type of devices (whereas the devices database contains info about a specific instance of a device).
@@ -114,10 +115,7 @@ Sample CouchDB Entry for Raspberry Pi device-type:
   "_rev": "9-9a60c267a9cad92da3fb85p35cbb757d", // <1>
   "description": "A Raspberry Pi 3", // <1>
   "display_name": "Pi", // <1>
-  "default-name": "CP", // <2>
-  "default-icon": "video_label", // <3>
-  "default-address": "[BLDG]-[ROOM]-[NAME].youruniversity.edu", // <4>
-  "roles": [ // <5>
+  "roles": [ // <2>
     {
       "_id": "ControlProcessor",
       "description": "Acts as a device to control the AV-API in a room"
@@ -131,45 +129,241 @@ Sample CouchDB Entry for Raspberry Pi device-type:
       "description": "Acts as a device that routes events through the room to other devices"
     }
   ],
-  "commands": [ // <6>
+  "commands": [ // <3>
     {
-      "_id": "GenericPassthroughADCP",
-      "description": "GenericPassthroughADCP",
-      "microservice": { // <7>
-        "_id": "generic-gateway-Adcp",
-        "description": "used to serialize requests to and ADCP device",
-        "address": "http://:gateway:8012"
+      "_id": "GenericPassthroughADCP", // <4>
+      "description": "GenericPassthroughADCP", // <5>
+      "microservice": { // <6>
+        "_id": "generic-gateway-Adcp", // <7>
+        "description": "used to serialize requests to and ADCP device", // <8>
+        "address": "http://:gateway:8012" // <9>
       },
-      "endpoint": { // <8>
-        "_id": "Generic Gateway",
-        "description": "A generic Gateway for use in base case where microservice exists outside of the pi issuing the requests. ",
-        "path": "/:path"
+      "endpoint": { // <10>
+        "_id": "Generic Gateway", // <11>
+        "description": "A generic Gateway for use in base case where microservice exists outside of the pi issuing the requests.", // <12>
+        "path": "/:path" // <13>
       },
-      "priority": 1 // <9>
+      "priority": 1 // <14>
     }
   ]
 }
 ----
 <1> These fields are identical to the fields mentioned in detail in previous examples.
-<2> "default-name": The default name of the device if no name is explicitly given.
-<3> "default-icon": The default icon for the device if no alternative icon is explicitly given. Used in the UI.
-<4> "default-address": Default IP address for device if no address is explicitly given.
-<5> "roles": The roles of the device, described in detail in previous examples.
-<6> "commands": The list of commands that can be sent to this device.
-* The "_id" is the unique identifier for the command.
-* The "description" if for your own use to save info about the command.
-<7> "microservice": The info for the microservice used in making the command.
-* The "_id" is the unique identifier for the microservice.
-* The "description" if for your own use to save info about the microservice.
-* The "address" is where the microservice is running including the port it is running on.
-<8> "endpoint": The API endpoint on the microservice that corresponds to the command.
-* The "_id" is the unique identifier for the enpoint.
-* The "description" if for your own use to save info about the endpoint.
-* The "path" is the path to the endpoint.
-<9> "priority": This is used to help determine which events are more important and need to be executed first.
+<2> "roles": The roles of the device, described in detail in previous examples.
+<3> "commands": The list of commands that can be sent to this device.
+<4> The "_id" is the unique identifier for the command.
+<5> The "description" if for your own use to save info about the command.
+<6> "microservice": The info for the microservice used in making the command.
+<7> The "_id" is the unique identifier for the microservice.
+<8> The "description" if for your own use to save info about the microservice.
+<9> The "address" is where the microservice is running including the port it is running on.
+<10> "endpoint": The API endpoint on the microservice that corresponds to the command.
+<11> The "_id" is the unique identifier for the enpoint.
+<12> The "description" if for your own use to save info about the endpoint.
+<13> The "path" is the path to the endpoint.
+<14> "priority": This is used to help determine which events are more important and need to be executed first.
 
+Sample CouchDB Entry for SONY XBR device-type:
+----
+{
+  "_id": "SonyXBR", // <1>
+  "_rev": "15-8f26e6d80867548a39675c73619663bc", // <1>
+  "description": "The Sony XBR TV line.", // <1>
+  "display_name": "Sony XBR TV", // <1>
+  "output": true, // <2>
+  "destination": true, // <3>
+  "default-name": "D", // <1>
+  "default-icon": "tv", // <1>
+  "roles": [ // <1>
+    {
+      "_id": "AudioOut",
+      "description": "Acts as an audio output device"
+    },
+    {
+      "_id": "VideoOut",
+      "description": "Acts as a video output device"
+    }
+  ],
+  "power_states": [ // <4>
+    {
+      "_id": "On",
+      "description": "On",
+      "tags": []
+    },
+    {
+      "_id": "Standby",
+      "description": "Standby",
+      "tags": []
+    }
+  ],
+  "ports": [ // <1>
+    {
+      "_id": "hdmi!1",
+      "friendly_name": "HDMI 1",
+      "description": "SonyTV HDMI input 1",
+      "tags": [
+        "port-in",
+        "video"
+      ]
+    },
+    ...//there are additional ports not included
+  ],
+  "commands": [ // <1>
+    {
+      "_id": "Standby",
+      "description": "Standby",
+      "microservice": {
+        "_id": "sony-control-microservice",
+        "description": "",
+        "address": "http://localhost:8007"
+      },
+      "endpoint": {
+        "_id": "Standby",
+        "description": "Standard standby endpoint.",
+        "path": "/:address/power/standby"
+      },
+      "priority": 100
+    }
+    ...//there are additional commands not included
+  ]
+}
+----
+<1> These fields are identical to the fields mentioned in detail in previous examples. The ones above are an example of the 
+implementation of these fields for a SonyXBR
+<2> "output": This field designates if the device is an output device.
+<3> "destination": This field designates if the device is a destination device.
+<4> "power_states": This field lists the different power states of the device.
 
-=== ui_config
+=== ui_configuration
+
+Here is the description for ui_config database
+Sample CouchDB Entry for SONY XBR device-type:
+----
+{
+  "_id": "BLDG-ROOM", // <1>
+  "_rev": "16-e27753c2e18168d92f839dc27a0653ff",
+  "api": [
+    "localhost"
+  ],
+  "panels": [
+    {
+      "hostname": "BLDG-ROOM-CP1",
+      "uipath": "/blueberry",
+      "preset": "Projector",
+      "features": []
+    }
+  ],
+  "presets": [
+    {
+      "name": "Projector",
+      "icon": "tv",
+      "displays": [
+        "D1"
+      ],
+      "shareableDisplays": null,
+      "audioDevices": [
+        "D1"
+      ],
+      "inputs": [
+        "HDMI1",
+        "VIA1",
+        "HDMI2"
+      ],
+      "commands": {}
+    }
+  ],
+  "inputConfiguration": [
+    {
+      "name": "HDMI1",
+      "icon": "settings_input_hdmi"
+    },
+    {
+      "name": "VIA1",
+      "icon": "settings_input_antenna"
+    }
+  ],
+  "outputConfiguration": [
+    {
+      "name": "D1",
+      "icon": "videocam"
+    }
+  ],
+  "audioConfiguration": []
+}
+----
+<1> stuff
+
 === rooms
+
+Here is the description for rooms database
+Sample CouchDB Entry for rooms database:
+----
+{
+  "_id": "BNSN-W002", // <1>
+  "_rev": "2-6eb403483e991c2a73280ed45e008cfd",
+  "name": "BNSN-W002",
+  "description": "BNSN W002",
+  "configuration": {
+    "_id": "Default"
+  },
+  "designation": "stage",
+  "attributes": {
+    "Ceiling Box": true
+  }
+}
+----
+<1> stuff
+
 === bldgs
-=== room_config
+
+Here is the description for rooms database
+Sample CouchDB Entry for rooms database:
+----
+{
+  "_id": "BNSN",
+  "_rev": "1-20e466ecb7cca0cc7ec21f3badf9e2ce",
+  "name": "Benson Building",
+  "description": "BYU Benson Building"
+}
+----
+<1> stuff
+
+=== room_configurations
+
+Each room may have the same or different system architectures. The room_configurations database contains data on various system architectures.
+The configurations include evaluators so when a device executes a given command, it check what type of room configuration the room it belongs to
+has, and then determines how the command should be evaluated.
+----
+{
+  "_id": "Default",
+  "_rev": "2-d2e604ba3d31eba5636da22beccedcfe",
+  "evaluators": [
+    {
+      "_id": "PowerOnDefault",
+      "codekey": "PowerOnDefault",
+      "description": "PowerOnDefault",
+      "priority": 1
+    },
+    {
+      "_id": "StandbyDefault",
+      "codekey": "StandbyDefault",
+      "description": "StandbyDefault",
+      "priority": 9999
+    },
+    {
+      "_id": "ChangeAudioInputDefault",
+      "codekey": "ChangeAudioInputDefault",
+      "description": "ChangeAudioInputDefault",
+      "priority": 1337
+    },
+    {
+      "_id": "MuteDefault",
+      "codekey": "MuteDefault",
+      "description": "MuteDefault",
+      "priority": 5
+    },
+    ... //there are other evaluators not included in this sample
+  ],
+  "description": "Default"
+}
+----
