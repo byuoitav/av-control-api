@@ -1,4 +1,55 @@
 = Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 
+To get the Pi up and running to control the sample room the following containers are needed:
+. https://github.com/byuoitav/couch-db-repl[couch-db (for configuration storage)]
+. https://github.com/byuoitav/av-api[av-api (base api engine)]
+. https://github.com/byuoitav/sony-control-microservice[sony-control-microservice (sony adcp protocol translation service)]
 
-Stuff goes here for this section
+Once you have each of these containers you will need a docker-compose.yml file for each of the containers.
+Below is a sample docker-compose.yml file.
+----
+version: '3'
+services:
+    couch-db:
+        image: treehouses/rpi-couchdb:2.1.1
+        ports:
+            - "5984:5984"
+        network_mode: "host"
+        restart: always
+        tty: true
+    av-api:
+        image: byuoitav/rpi-av-api:latest
+        ports:
+           - "8000:8000"
+        environment:
+            - BYPASS_AUTH=true
+            - SYSTEM_ID=BLDG-ROOM-CP1
+            - ROOM_SYSTEM=true
+            - DB_ADDRESS=http://localhost:5984
+            - HUB_ADDRESS=localhost:7100
+            - STOP_REPLICATION=true
+        network_mode: "host"
+        restart: always
+        tty: true
+    adcp-control-microservice:
+        image: byuoitav/rpi-adcp-control-microservice:latest
+        ports:
+            - "8012:8012"     
+        environment:
+            - SYSTEM_ID=BLDG-ROOM-CP1
+            - BYPASS_AUTH=true
+            - ROOM_SYSTEM=true               
+        network_mode: "host"
+        restart: always
+        tty: true
+----
+
+Once you have the couch-db container running, you should be able to access it by going to
+http://[pi-ip-addr]:5984/_utils in a web browser, using the ip address of your pi.
+
+You will need to create several databases and documents for a base configuration:
+----
+We can insert links to actual documents here
+----
+
+After you have added the required documents in your database you are ready to test the API endpoints! Please refer to the xref:API.adoc[Complete API Testing Guide] for more information.
