@@ -1,2 +1,4 @@
 * xref:guide.adoc[Guide]
 ** xref:quickstart.adoc[Quick Start]
+** xref:OS.adoc[Complete OS Setup Guide]
+** xref:DB.adoc[Complete Database Guide]
