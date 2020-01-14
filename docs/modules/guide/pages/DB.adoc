@@ -5,12 +5,12 @@ that uses JSON documents to store data. For more information about CuchDB specif
  
 Within CouchDB there are five important tables that are used throughout our solution:
 
-. devices
-. device_type
-. ui_configuration
-. rooms
-. buildings
-. room_configurations
+. xref:DB.adoc#_devices[devices]
+. xref:DB.adoc#_device_type[device_type]
+. xref:DB.adoc#_ui_configuration[ui_configuration]
+. xref:DB.adoc#_rooms[rooms]
+. xref:DB.adoc#_buildings[buildings]
+. xref:DB.adoc#_room_configurations[room_configurations]
 
 This guide will outline each of the tables above, their purpose, what data is being stored, and how it is used within our AV solution.
 
