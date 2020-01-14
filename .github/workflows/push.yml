@@ -1,0 +1,74 @@
+name: Push To Master Deploy
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'drivers/**'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13.x
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Env
+        run: |
+          echo "::set-env name=GOPATH::$(go env GOPATH)"
+          echo "::add-path::$(go env GOPATH)/bin"
+
+      - name: Setup Secrets
+        run: export GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}}
+
+      - name: Install GolangCI-Lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.22.2
+
+      - name: Lint
+        run: make info lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13.x
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Secrets
+        run: export GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}}
+
+      - name: Test
+        run: make info test
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Secrets
+        run: |
+          export GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}}
+          export DOCKER_USERNAME=$GITHUB_ACTOR
+          export DOCKER_PASSWORD=${{secrets.GITHUB_TOKEN}}
+
+      - name: Build
+        run: make info release

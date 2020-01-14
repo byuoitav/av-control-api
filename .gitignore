@@ -13,3 +13,6 @@
 
 # mac
 *.DS_Store
+
+# Build output
+drivers/.build/
