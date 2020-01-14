@@ -77,8 +77,9 @@ cmd_get_modified_drivers(){
 	# Strip the drivers out of the files modified in the given
 	# compare
 	mapfile -t drivers < <(get_compare_body $event \
-							   | jq -r '.files[].filename' | grep "^drivers" \
-							   | cut -d "/" -f 2 | grep -v ".go$" | sort | uniq)
+							   | jq -r '.files[].filename' \
+							   | grep "^drivers/.*/.*" \
+							   | cut -d "/" -f 2 | grep -v "^_" | sort | uniq)
 
 	for d in "${drivers[@]}"; do
 		echo "$d"

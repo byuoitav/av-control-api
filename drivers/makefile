@@ -176,7 +176,7 @@ docker-login:
 	@echo ""
 	@echo "-------------------- Logging into Docker repository --------------------"
 	@echo ""
-	docker login $(DOCKER_REPO) -u $(DOCKER_USERNAME) -p $(DOCKER_PASSWORD)
+	docker login $(DOCKER_REPO) -u $(DOCKER_USERNAME) -p "$(DOCKER_PASSWORD)"
 
 # ------------------------------------------
 # |                                        |
