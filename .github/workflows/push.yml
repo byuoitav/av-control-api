@@ -63,7 +63,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build
+      - name: Build & Release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           DOCKER_USERNAME: ${{env.GITHUB_ACTOR}}
