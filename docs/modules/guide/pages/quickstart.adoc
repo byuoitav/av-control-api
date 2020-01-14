@@ -34,7 +34,8 @@ For a detailed step-by-step guide to get these installed on your raspberry pi, p
 
 == Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 
-This is where we put stuff for this section.
+This is where we put stuff for this section. For more information about how to download and start the av-control-api, refer to the
+xref:startAPI.adoc[Starting the AV API].
 
 == Setting up the database and configuring your devices
 
@@ -57,6 +58,10 @@ For a more detailed documentation on the content of each of these tables, their 
 please refer to the xref:DB.adoc[Complete Database Guide]
 
 == Testing the API
+
+Once you have followed the previous steps, you should be set to begin testing the API. Attempt to hit the API endpoints using a program like
+Postman. If it is successful then you have successfully set up your pi to control the devices in your room. For more detailed documentation
+on how to test the API enpoints please refer to the xref:API.adoc[Complete API Testing Guide]
 ----
 code()
 ----
