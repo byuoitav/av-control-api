@@ -66,6 +66,7 @@ jobs:
       - name: Build & Release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          DOCKER_USERNAME: ${{env.GITHUB_ACTOR}}
           DOCKER_PASSWORD: ${{secrets.GITHUB_TOKEN}}
-        run: cd drivers && make info release
+        run: |
+          export DOCKER_USERNAME=$GITHUB_ACTOR
+          cd drivers && make info release
