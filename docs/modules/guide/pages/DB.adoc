@@ -394,3 +394,4 @@ has, and then determines how the command should be evaluated.
 <4> `+"codekey"+`: The codekey is a key in a map of commands that is used to determine what command needs to be sent for the room/device.
 <5> `+"description"+`: Description of the evaluator.
 <6> `+"priority"+`: This designates the priority of the command being sent.
+
