@@ -1,4 +1,8 @@
 * xref:guide.adoc[Guide]
 ** xref:quickstart.adoc[Quick Start]
 ** xref:OS.adoc[Complete OS Setup Guide]
+** xref:startAPI.adoc[Starting the AV API]
 ** xref:DB.adoc[Complete Database Guide]
+** xref:API.adoc[Complete API Testing Guide]
+** xref:FAQ.adoc[Frequently Asked Questions]
+
