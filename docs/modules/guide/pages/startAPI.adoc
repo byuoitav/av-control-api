@@ -1,6 +1,7 @@
 = Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 
 To get the Pi up and running to control the sample room the following containers are needed:
+
 . https://github.com/byuoitav/couch-db-repl[couch-db (for configuration storage)]
 . https://github.com/byuoitav/av-api[av-api (base api engine)]
 . https://github.com/byuoitav/sony-control-microservice[sony-control-microservice (sony adcp protocol translation service)]
