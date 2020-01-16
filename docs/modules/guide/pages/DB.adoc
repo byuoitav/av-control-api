@@ -5,7 +5,6 @@ that uses JSON documents to store data. For more information about CuchDB specif
  
 Within CouchDB there are five important tables that are used throughout our solution:
 
-
 . xref:DB.adoc#_devices[devices]
 . xref:DB.adoc#_device_type[device_type]
 . xref:DB.adoc#_ui_configuration[ui_configuration]
