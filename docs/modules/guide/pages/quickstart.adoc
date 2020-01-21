@@ -1,9 +1,6 @@
 = Quick Start
 
-Here you will find a quick start guide to getting your environment set up to use the av-control-api to communicate with devices in 
-your classroom. For the distribution of our content we use Docker simply for the ease of containerization, distribution, and use for our systems.
-You are of course able to pull own our repositories, compile the binaries, and launch the microservices independently, but feel free to use our already packaged
-Docker containers as well. For additional information about Docker please refer to https://docs.docker.com/engine/docker-overview/[Docker's Docs].
+Here you will find a quick start guide to getting your environment set up to use the av-control-api to communicate with devices in your classroom. For the distribution of our content we use Docker simply for the ease of containerization, distribution, and use for our systems.You are of course able to pull down our repositories, compile the binaries, and launch the microservices independently, but feel free to use our already packaged Docker containers as well. For additional information about Docker please refer to https://docs.docker.com/engine/docker-overview/[Docker's Docs].
 
 There are many differrent ways to implement our AV solution in your organization. We will not outline each type of implementation but rather will outline
 the steps to one implementation method and allow others to be creative in how they want to implement our solution in their organizaiton.
@@ -33,8 +30,31 @@ To get the Operating System ready to go for this solution you need a raspberry p
 For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS.adoc[Complete OS Setup Guide]
 
 == Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
+
+This is where we put stuff for this section. For more information about how to download and start the av-control-api, refer to the
+xref:startAPI.adoc[Starting the AV API].
+
 == Setting up the database and configuring your devices
+
+We use CouchDB as the database for our solution. Within CouchDB there are five important tables that are used throughout our solution:
+
+. devices
+.. This table holds all of the info for each of the devices
+. device_type
+.. This table holds all of the info for each of the device types
+. rooms
+..  This table holds all of the info for each of the rooms
+. buildings
+.. This table holds all of the info for each of the buildings
+. room_configurations
+.. This table holds all of the info for each of the room configurations
+
+For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, 
+please refer to the xref:DB.adoc[Complete Database Guide]
+
 == Testing the API
-----
-code()
-----
+
+Once you have followed the previous steps, you should be set to begin testing the API. Attempt to hit the API endpoints using a program like
+Postman. If it is successful then you have successfully set up your pi to control the devices in your room. For more detailed documentation
+on how to test the API enpoints please refer to the xref:API.adoc[Complete API Testing Guide]
+

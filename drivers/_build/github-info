@@ -1,0 +1,182 @@
+#!/bin/bash
+
+#------------ Public Commands --------------
+
+# Help Command
+cmd_help(){
+    echo "Usage: $base_command <command> <event_file>"
+	echo ""
+    echo "Commands:"
+	echo "    get_modified_drivers    Get a list of drivers modified in the" \
+		 "given event"
+    echo "    get_version             Get the version of the tag if this" \
+		 "event has one"
+	echo "    is_library_modified     Check to see if the library was" \
+		 "modified by the given event"
+    echo "    is_tagged_release       Check to see if the event is for a" \
+		 "pushed tag"
+    echo ""
+}
+
+# Check to see if the event given is for a tag
+cmd_is_tagged_release(){
+	# Check for a passed in event path
+	check_for_event_file_param $@
+	event=$1
+
+	num=$(jq -r '.ref' $event | grep "^refs/tags" | wc -l)
+	if [ $num != "0" ]; then
+		echo "True"
+	else
+		echo "False"
+	fi
+}
+
+# Return the version of this tagged release
+# Note: this returns only the very last portion of the tag (as separated
+# by "/"). This typically will be something like v1.0.1
+cmd_get_version(){
+	is_version=$(cmd_is_tagged_release $@)
+
+	# Just exit if this isn't a versioned release
+	if [[ $is_version != "True" ]]; then
+		exit 0
+	fi
+
+	event=$1
+	version=$(jq -r '.ref' $event | rev | cut -d "/" -f 1 | rev)
+
+	echo $version
+}
+
+# Return a list of drivers that were modified in the given event
+cmd_get_modified_drivers(){
+
+	# Check for a passed in event path
+	check_for_event_file_param $@
+	event=$1
+
+	# If this is a tagged release then find the driver
+	# in the tag itself.
+	# Note: if the tag is not for a specific driver, this
+	# command will return nothing which will work correctly
+	# with make as the makefile will simply not target any
+	# drivers, so nothing will get built
+	if [[ $(cmd_is_tagged_release $@) == "True" ]]; then
+		driver=$(jq -r '.ref' $event \
+					 | grep "^refs/tags/drivers/.*/.*$" \
+					 | cut -d "/" -f 4)
+
+		if [[ $driver != "" ]]; then
+			echo $driver
+		fi
+
+		exit 0
+	fi
+
+	# Strip the drivers out of the files modified in the given
+	# compare
+	mapfile -t drivers < <(get_compare_body $event \
+							   | jq -r '.files[].filename' \
+							   | grep "^drivers/.*/.*" \
+							   | cut -d "/" -f 2 | grep -v "^_" | sort | uniq)
+
+	for d in "${drivers[@]}"; do
+		echo "$d"
+	done
+
+}
+
+# Check to see if the library was modified in the given event
+cmd_is_library_modified(){
+	# Check for a passed in event path
+	check_for_event_file_param $@
+	event=$1
+
+	# If this is a tagged release then check to see if it is a tag for the
+	# library, if yes then return True otherwise False
+	if [ $(cmd_is_tagged_release $@) == "True" ]; then
+		version=$(jq -r '.ref' $event \
+					 | grep "^refs/tags/drivers/[^/]*$" \
+					 | cut -d "/" -f 4)
+
+		if [[ $version != "" ]]; then
+			echo "True"
+		else
+			echo "False"
+		fi
+
+		exit 0
+	fi
+
+	# Pull the list of files out of the compare body and check for any file
+	# in the drivers directory that is not in a sub directory. If any exist
+	# then we assume the library was modified in some way and we will echo
+	# "True"
+	files=$(get_compare_body $event | jq -r '.files[].filename' 2>/dev/null\
+				| grep "^drivers/[^/]*$" | wc -l)
+
+	if [[ $files == "0" ]]; then
+		echo "False"
+	else
+		echo "True"
+	fi
+}
+
+#------------ Internal Functions --------------
+
+# Returns the body of the response from the github compare API call
+# This function automatically finds the commits to compare for pull
+# requests and pushes from the given event body file (as expected to exist
+# in github actions)
+get_compare_body(){
+	event=$1
+
+	# If the event we are looking at is a pull request
+	is_pull=$(jq -r '.pull_request' $event | grep -v "null" | wc -l)
+	if [ $is_pull != "0" ]; then
+		head=$(jq -r '.pull_request.head.sha' $event)
+		base=$(jq -r '.pull_request.base.sha' $event)
+	else # If it's a push
+		head=$(jq -r '.after' $event)
+		base=$(jq -r '.before' $event)
+	fi
+
+	compare_url=$(jq -r '.repository.compare_url' $event)
+	compare_url=${compare_url/\{base\}/$base}
+	compare_url=${compare_url/\{head\}/$head}
+
+	echo $(curl \
+			   --header "authorization: Bearer ${GITHUB_TOKEN}" \
+			   --header "content-type: application/json" \
+			   $compare_url 2>/dev/null)
+}
+
+# Check for a passed in event path
+check_for_event_file_param(){
+	if [[ -z ${1+x} ]]; then
+		echo "Error: Expected a path to an event to be passed in"
+		echo "    Usage: $base_command $command {path_to_event}"
+		echo ""
+		exit 1
+	fi
+}
+
+
+#------------ Command Parsing/Routing --------------
+base_command=$(basename $0)
+command=$1
+
+case $command in
+	"" | "-h" | "--help")
+		cmd_help
+		;;
+	*)
+		shift # shift positional arguments over by 1
+		cmd_${command} $@ # Call the requested command
+		if [ $? = 127 ]; then
+			echo "Error: '$command' is not a valid command"
+			exit 1
+		fi
+		;;
+esac
