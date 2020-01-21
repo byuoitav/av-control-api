@@ -19,6 +19,7 @@ This section will outline the necessary steps to get a raspbian image up and run
 === docker
 This section will outline the necessary steps to get docker on your raspberry pi. Here are the commands you run:
 
+[source,bash]
 ----
 curl -fsSL https://get.docker.com | sh
 usermod -aG docker pi
@@ -29,6 +30,7 @@ systemctl enable docker # make sure it starts at login
 === docker-compose
 This section will outline the necessary steps to get docker-compose on your raspberry pi. Here are the commands you run:
 
+[source,bash]
 ----
 apt update
 apt -y install python3 python3-pip libffi-dev
@@ -41,7 +43,8 @@ reboot
 This section will outline the necessary steps to get a web browser on your raspberry pi. _Please note that this step is only necessary if you 
 downloaded  an image different than the one specified above (Raspbian Buster with desktop)_. Here are the commands you run:
 
+[source,bash]
 ----
 apt update
-apt install -y xserver-xorg xinit i3 chromium-browser tmux imagemagick x11-apps dnsmasq salt-minion ntpdate htop
+apt install -y chromium-browser
 ----
