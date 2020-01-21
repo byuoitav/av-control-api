@@ -31,23 +31,26 @@ For a detailed step-by-step guide to get these installed on your raspberry pi, p
 
 == Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 
-This is where we put stuff for this section. For more information about how to download and start the av-control-api, refer to the
-xref:startAPI.adoc[Starting the AV API].
+To get the Pi up and running to control the sample room the following containers are needed:
+
+. https://github.com/byuoitav/couch-db-repl[couch-db (for configuration storage)]
+. https://github.com/byuoitav/av-api[av-api (base api engine)]
+. https://github.com/byuoitav/sony-control-microservice[sony-control-microservice (sony adcp protocol translation service)]
+. https://github.com/byuoitav/demoUI[Demo UI]
+
+Once you have each of these containers you will need a docker-compose.yml file for each of the containers.
+
+Use docker-compose to get the containers up and running on your pi. For more detailed steps on how to accomplish this step please refer to xref:startAPI.adoc[Starting the AV API].
 
 == Setting up the database and configuring your devices
 
 We use CouchDB as the database for our solution. Within CouchDB there are five important tables that are used throughout our solution:
 
 . devices
-.. This table holds all of the info for each of the devices
 . device_type
-.. This table holds all of the info for each of the device types
 . rooms
-..  This table holds all of the info for each of the rooms
 . buildings
-.. This table holds all of the info for each of the buildings
 . room_configurations
-.. This table holds all of the info for each of the room configurations
 
 For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, 
 please refer to the xref:DB.adoc[Complete Database Guide]

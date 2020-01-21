@@ -1,13 +1,16 @@
 = Complete API Testing Guide
 
-#### Postman / cURL
+=== Postman / cURL
+
 You may use any HTTP client program to talk to the av-api.   To use Postman, send a PUT request to
 
 ----
-`http://[pi-ip-addr]:8000/buildings/DEMO/rooms/123`
+http://[pi-ip-addr]:8000/buildings/DEMO/rooms/123
 ----
 
- with a  `Content-Type` header of `application/json`, and a json body similar to this:
+
+with a  `+Content-Type+` header of `+application/json+`, and a json body similar to this:
+
 
 [source,json]
 ----
