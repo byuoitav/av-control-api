@@ -42,8 +42,6 @@ We use CouchDB as the database for our solution. Within CouchDB there are five i
 .. This table holds all of the info for each of the devices
 . device_type
 .. This table holds all of the info for each of the device types
-. ui_configuration
-.. This table holds all of the info for each of the ui configs
 . rooms
 ..  This table holds all of the info for each of the rooms
 . buildings
@@ -59,6 +57,4 @@ please refer to the xref:DB.adoc[Complete Database Guide]
 Once you have followed the previous steps, you should be set to begin testing the API. Attempt to hit the API endpoints using a program like
 Postman. If it is successful then you have successfully set up your pi to control the devices in your room. For more detailed documentation
 on how to test the API enpoints please refer to the xref:API.adoc[Complete API Testing Guide]
-----
-code()
-----
+

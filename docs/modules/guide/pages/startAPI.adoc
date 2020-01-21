@@ -45,12 +45,8 @@ services:
         tty: true
 ----
 
-Once you have the couch-db container running, you should be able to access it by going to
-http://[pi-ip-addr]:5984/_utils in a web browser, using the ip address of your pi.
+Once you have the couch-db container running, you should be able to access it by going to `+http://[pi-ip-addr]:5984/_utils+`  in a web browser, using the ip address of your pi.
 
-You will need to create several databases and documents for a base configuration:
-----
-We can insert links to actual documents here
-----
+You will need to create several databases and documents for a base configuration. These documents will be detailed in the next section: xref:DB.adoc[Complete Database Guide]
 
 After you have added the required documents in your database you are ready to test the API endpoints! Please refer to the xref:API.adoc[Complete API Testing Guide] for more information.
