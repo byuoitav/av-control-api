@@ -5,6 +5,7 @@ To get the Pi up and running to control the sample room the following containers
 . https://github.com/byuoitav/couch-db-repl[couch-db (for configuration storage)]
 . https://github.com/byuoitav/av-api[av-api (base api engine)]
 . https://github.com/byuoitav/sony-control-microservice[sony-control-microservice (sony adcp protocol translation service)]
+. https://github.com/byuoitav/demoUI[Demo UI]
 
 Once you have each of these containers you will need a docker-compose.yml file for each of the containers.
 Below is a sample docker-compose.yml file.
@@ -40,6 +41,14 @@ services:
             - SYSTEM_ID=BLDG-ROOM-CP1
             - BYPASS_AUTH=true
             - ROOM_SYSTEM=true               
+        network_mode: "host"
+        restart: always
+        tty: true
+    demoUI:
+        image: byuoitav/demoUI:latest
+        ports:
+            - "8081:8081"     
+        environment:           
         network_mode: "host"
         restart: always
         tty: true
