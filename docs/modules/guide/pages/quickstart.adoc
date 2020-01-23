@@ -8,7 +8,7 @@ We will be outlining how to set up our solution using the following materials:
 
 * https://www.raspberrypi.org/products/raspberry-pi-4-model-b/[Raspberry Pi 4 Model B]
 * https://www.raspberrypi.org/products/raspberry-pi-touch-display/[7-inch Rapsberry Pi Touch Panel]
-* An IP enabled device
+* An IP enabled display (one which we have already written a driver for)
 ** For demonstration purposes we will be using a https://www.sony.com/electronics/televisions/xbr-x800g-x805g-x807g-series[Sony XBR 800G]
 
 This setup guide should help you get your first room up and running, using the av-control-api to control it and optionally one of our UI's. The basic sections are as follows:
@@ -22,10 +22,10 @@ This setup guide should help you get your first room up and running, using the a
 
 To get the Operating System ready to go for this solution you need a raspberry pi with the following installed on it:
 
+* raspbian
 * docker
 * docker-compose
-* web browser of your choice
-* raspbian
+* web browser
 
 For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS.adoc[Complete OS Setup Guide]
 
