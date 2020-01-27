@@ -1,4 +1,4 @@
-= Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
+= Downloading and Starting Necesary Docker Containers
 
 To get the Pi up and running to control the sample room the following containers are needed:
 

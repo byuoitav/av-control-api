@@ -3,5 +3,8 @@ version: master
 title: AV Control API
 nav:
   - modules/ROOT/nav.adoc
-  - modules/guide/nav.adoc
+  - modules/quickstart/nav.adoc
+  - modules/OS/nav.adoc
+  - modules/DB/nav.adoc
+  - modules/API/nav.adoc
   - modules/drivers/nav.adoc
