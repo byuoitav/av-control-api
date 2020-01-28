@@ -28,7 +28,7 @@ To get the Operating System ready to go for this solution you need a raspberry p
 * docker-compose
 * web browser
 
-For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS.adoc[Complete OS Setup Guide]
+For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS/OS.adoc[Complete OS Setup Guide]
 
 == Downloading and Starting Necesary Docker Containers
 
@@ -41,7 +41,7 @@ To get the Pi up and running to control the sample room the following containers
 
 Once you have each of these containers you will need a docker-compose.yml file for each of the containers.
 
-Use docker-compose to get the containers up and running on your pi. For more detailed steps on how to accomplish this step please refer to xref:startAPI.adoc[Starting the AV API].
+Use docker-compose to get the containers up and running on your pi. For more detailed steps on how to accomplish this step please refer to xref:API/startAPI.adoc[Starting the AV API].
 
 == Setting up the database and configuring your devices
 
@@ -54,11 +54,11 @@ We use CouchDB as the database for our solution. Within CouchDB there are five i
 . room_configurations
 
 For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, 
-please refer to the xref:DB.adoc[Complete Database Guide]
+please refer to the xref:DB/DB.adoc[Complete Database Guide]
 
 == Testing the API
 
 Once you have followed the previous steps, you should be set to begin testing the API. Attempt to hit the API endpoints using a program like
 Postman. If it is successful then you have successfully set up your pi to control the devices in your room. For more detailed documentation
-on how to test the API enpoints please refer to the xref:API.adoc[Complete API Testing Guide]
+on how to test the API enpoints please refer to the xref:API/API.adoc[Complete API Testing Guide]
 
