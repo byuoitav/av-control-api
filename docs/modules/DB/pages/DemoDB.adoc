@@ -120,6 +120,7 @@ HDMI1 device document:
 ----
 
 Create two more of these documents and change the ID of one to DEMO-123-HDMI2 and its name to HDMI2, and the other document's ID to DEMO-123-HDMI3 and its name to HDMI3
+
 === device_type
 
 Raspberry Pi device_type document:
