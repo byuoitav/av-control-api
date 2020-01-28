@@ -1,0 +1,9 @@
+* xref:DB.adoc[Database]
+** xref:DemoDB.adoc[DemoDB]
+** xref:roles.adoc[Roles]
+** xref:devices.adoc[devices table]
+** xref:device_type.adoc[device_type table]
+** xref:rooms.adoc[rooms table]
+** xref:buildings.adoc[buildings table]
+** xref:room_configurations.adoc[room_configurations table]
+

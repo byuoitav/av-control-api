@@ -1,0 +1,32 @@
+=== Hardware List
+
+Here is a list of the approved hardware for our rooms. Approved hardware simply means that the following devices have been tested and used in our rooms,  have microservices written to communicate with them, and are compatible with the av-api.
+
+Displays
+[cols=2*,options=header]
+|===
+|Device
+|Microservice
+
+|Sony XBR (Flatpanels)
+|https://github.com/byuoitav/sony-control-microservice[Sony FPD Microservice]
+
+|Epson Projector
+|https://github.com/byuoitav/epson-driver[Epson Microservice]
+
+|Sony Projector
+|https://github.com/byuoitav/sonyrest-driver[Sony Microservice]
+|===
+
+Video Switchers
+[cols=2*,options=header]
+|===
+|Device
+|Microservice
+
+|Atlona Video Swithcer
+|https://github.com/byuoitav/atlona-driver[Atlona Microservice]
+
+|
+|
+|===
