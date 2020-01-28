@@ -1,0 +1,13 @@
+=== buildings
+
+The buildings database simply contains a basic entry for each of the buildings on campus. It contains very simple information about it as well.
+Sample CouchDB Entry for buildings database:
+----
+{
+  "_id": "BLDG", // <1>
+  "_rev": "1-20e466ecb7cca0cc7ec21f3badf9e2ce",
+  "name": "Building Name",
+  "description": "Description of the building on your campus."
+}
+----
+<1> The fields in this database entry are self-explanatory.
