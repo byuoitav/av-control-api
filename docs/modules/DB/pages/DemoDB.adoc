@@ -60,7 +60,7 @@ Sony XBR device document:
   "name": "D1",
   "address": "255.255.255.255", // <1>
   "description": "Display 1",
-  "display_name": "Display 1"
+  "display_name": "Display 1",
   "type": {
     "_id": "SonyXBR"
   },
