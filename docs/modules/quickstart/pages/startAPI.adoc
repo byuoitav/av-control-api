@@ -7,7 +7,8 @@ To get the Pi up and running to control the sample room the following containers
 . https://github.com/byuoitav/sony-control-microservice[sony-control-microservice (sony adcp protocol translation service)]
 . https://github.com/byuoitav/demoUI[Demo UI]
 
-Once you have each of these containers you will need a docker-compose.yml file for each of the containers.
+In order to download and run the necessary docker containers you will need a `+docker-compose.yml+` file specifying which containers to download and the startup parameters for each of the containers.
+
 Below is a sample docker-compose.yml file.
 ----
 version: '3'
