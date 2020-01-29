@@ -12,10 +12,10 @@ To get the Operating System ready to go for this solution you need a raspberry p
 === raspbian
 This section will outline the necessary steps to get a raspbian image up and running on your raspberry pi. Here are the steps you take:
 
-*Download the 'Raspbian Buster with desktop' image https://www.raspberrypi.org/downloads/raspbian/[here].
-*Using Etcher flash the image to an SD card.
-*Place the SD card into the Pi and connect it to the network. Then wait until the Pi boots up.
-**If you use the 'Raspbian Buster with desktop' image, it comes preinstalled with a web browser.
+* Download the 'Raspbian Buster with desktop' image https://www.raspberrypi.org/downloads/raspbian/[here].
+* Using Etcher flash the image to an SD card.
+* Place the SD card into the Pi and connect it to the network. Then wait until the Pi boots up.
+** If you use the 'Raspbian Buster with desktop' image, it comes preinstalled with a web browser.
 
 === docker
 This section will outline the necessary steps to get docker on your raspberry pi. Here are the commands you run:
