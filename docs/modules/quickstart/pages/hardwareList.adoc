@@ -34,5 +34,5 @@ Video Switchers
 |https://github.com/byuoitav/crestron-driver[Crestron Driver]
 
 |Just add power stuff
-|https://github.com/byuoitav/crestron-driver[Crestron Driver]
+|https://github.com/byuoitav/justaddpower-driver[Just Add Power Driver]
 |===
