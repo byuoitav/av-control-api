@@ -1,6 +1,6 @@
 = Roles Documentation
 
-The roles determine how the AV-API interacts with device
+The roles determine how the AV-API interacts with device.
 
 Roles
 [cols=2*,options=header]
@@ -9,18 +9,18 @@ Roles
 |Description
 
 |VideoOut
-|
+|A device that displays an input (i.e. a display or projector of some kind)
 
 |VideoIn
-|
+|A device that can take video inputs (i.e. displays, projectors, videoswitchers etc.)
 
 |AudioIn
-|
+|A device that can take in audio from a source
 
 |AudioOut
-|
+|A device that outputs audio (i.e. Displays, projectors etc.)
 
 |DSP
-|
+|Designates the device as a DSP
 
 |===
