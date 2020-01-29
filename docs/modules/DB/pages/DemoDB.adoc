@@ -1,6 +1,14 @@
 = Demo DB Files
 
-These files contain the documents you will need for this demo. There are changes that must be made in each of the documents to make it work for your specific device (i.e. IP address)
+These files contain the documents you will need for this demo. There are changes that must be made in each of the documents to make it work for your specific device (i.e. IP address).
+
+If you already have couch installed and running on port 5894, you can use the https://github.com/byuoitav/DemoCouchDBSetup[following script] to automatically create the Databases and documents required for the demo. Steps for using this script are found below:
+
+1. Download the repository from github.
+2. navigate to the repository
+3. The username and password are passed in as arguments when running the script: run `+python3 Couch_Demo_Set_Up_Script.py {username} {password}+` to handle authorization for your db properly.
+
+After running the script make the changes described below. 
 
 Each section below will have all of the DB Documents you need for that table. Explanations of each of these tables and the meaning of the fields in these documents can be found in the xref:DB.adoc[Complete Database Guide].
 
