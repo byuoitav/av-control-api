@@ -21,4 +21,12 @@ The exact documents that you need for terms of this demo can be found xref:DemoD
 
 === Local vs. Central DB Setup
 
+Our current infrastructure utilizes both central and local databases. We deployed our central database in AWS and each pi has its own local database. 
+
+*_Central Database_*: Stored in AWS. Contains all tables used for our organization (not only the ones required for the av-api).
+
+*_Local Database_*: When the Pi is deployed and configured for a room, a script runs that replicates the five required tables (mentioned above) from our central DB in AWS to the pi locally.
+
 === Setting Up Central DB and Replication
+
+After setting up a central DB in a remote location you can set up replication for each of the databses tables from the remote DB. for additional information and documentation on how to implement replication in your solution, please refer to https://guide.couchdb.org/draft/replication.html[Couch's Replication Documentation].

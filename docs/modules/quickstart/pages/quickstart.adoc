@@ -4,7 +4,10 @@ Here you will find a quick start guide to getting your environment set up to use
 
 There are many differrent ways to implement our AV solution in your organization. We will not outline each type of implementation but rather will outline
 the steps to one implementation method and allow others to be creative in how they want to implement our solution in their organization.
-We will be outlining how to set up our solution using the following materials:
+
+== Demo Solution
+
+For the purpose of this demo we will be setting up a single display room that is controlled by a raspberry pi running the AV-API. The raspberry pi will act as the room control system and be able to control the input being shown on the display as well as the volume of the display. For this demo you will need the following materials:
 
 * https://www.raspberrypi.org/products/raspberry-pi-4-model-b/[Raspberry Pi 4 Model B]
 * https://www.raspberrypi.org/products/raspberry-pi-touch-display/[7-inch Rapsberry Pi Touch Panel]
