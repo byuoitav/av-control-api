@@ -37,11 +37,11 @@ made to specific microservices.The data below is then used for these actions.
   "description": "Default" // <1>
 }
 ----
-<1> These fields are identical to the fields mentioned in detail in previous examples.
-<2> `+"evaluators"+`: This is where you are going to hit the API endpoints. We currently run docker containers on the rapsberry pi so it is localhost.
-<3> `+"_id"+`: Id of the evaluator
-<4> `+"codekey"+`: The codekey is a key in a map of commands that is used to determine what command needs to be sent for the room/device.
-<5> `+"description"+`: Description of the evaluator.
-<6> `+"priority"+`: This designates the order in which the actions are executed. (i.e. if a power on action and a change input action are both
+. These fields are identical to the fields mentioned in detail in previous examples.
+. `+"evaluators"+`: This is where you are going to hit the API endpoints. We currently run docker containers on the rapsberry pi so it is localhost.
+. `+"_id"+`: Id of the evaluator
+. `+"codekey"+`: The codekey is a key in a map of commands that is used to determine what command needs to be sent for the room/device.
+. `+"description"+`: Description of the evaluator.
+. `+"priority"+`: This designates the order in which the actions are executed. (i.e. if a power on action and a change input action are both
 executed you want the power on action to have a lower number in the priority field than the change input - designating that the power on action
 will execute before the change input action will execute.)
