@@ -1,4 +1,5 @@
 .xref:quickstart.adoc[Quick Start]
+* xref:hardwareSetup.adoc[Hardware Set Up]
 * xref:OS.adoc[Operating System]
 * xref:DB.adoc[Database]
 ** xref:DemoDB.adoc[DemoDB]
@@ -10,5 +11,6 @@
 ** xref:room_configurations.adoc[room_configurations table]
 * xref:startAPI.adoc[API]
 ** xref:API.adoc[Using the AV API]
+** xref:APIBody.adoc[API Body & Response]
 * xref:FAQ.adoc[Frequently Asked Questions]
 

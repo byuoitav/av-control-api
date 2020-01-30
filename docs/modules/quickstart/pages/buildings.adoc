@@ -10,4 +10,8 @@ Sample CouchDB Entry for buildings database:
   "description": "Description of the building on your campus."
 }
 ----
-<1> The fields in this database entry are self-explanatory.
+. The fields in this database entry are self-explanatory.
+
+
+==== Up Next:
+xref:room_configurations.adoc[room_configurations]
