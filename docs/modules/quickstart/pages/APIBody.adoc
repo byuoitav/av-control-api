@@ -1,0 +1,118 @@
+== API Request Body and Response 
+
+This document will outline the JSON body requred for requests made to the AV-API.
+
+==== Request for current room state (GET request):
+
+URL: `+{IP Address of Pi}:8000/buildings/{BLDG}/rooms/{RM}+`
+
+Request Type: `+GET+`
+
+To get the current state of the demo room (DEMO-123) send the following request.
+
+URL: `+{IP Address of Pi}:8000/buildings/Demo/rooms/123+`
+
+Response for current room state request:
+[source,json]
+----
+{
+    "displays": [ // <1>
+        {
+            "name": "D1", // <2>
+            "power": "on", // <3>
+            "input": "HDMI1", // <4>
+            "blanked": false // <5>
+        }
+    ],
+    "audioDevices": [ // <6>
+        {
+            "name": "D1", // <7>
+            "power": "on", // <8>
+            "input": "HDMI1", // <9>
+            "muted": false, // <10>
+            "volume": 30 // <11>
+        }
+    ]
+}
+----
+. `+"displays"+`: An array of display devices in the room. These are the devices that have the `+ViceoOut+` role and display a video input of some kind.
+. `+"name"+`: the name of the display device.
+. `+"power"+`: the power status of the display device.
+. `+"input"+`: the current input that is being shown the display device. In terms of device, meaning that the current input's source is HDMI1.
+. `+"blanked"+`: the blanked status of the display device, boolean value.
+. `+"audioDevices"+`: An array of audio devices in the room. These are the devices that have the `+AudioOut+` role and can be an audio source for the room.
+. `+"name"+`: the name of the audio device.
+. `+"power"+`: the power status of the audio device.
+. `+"input"+`: the current input that is the source of the audio. In terms of device, meaning that the current audio source is HDMI1.
+. `+"muted"+`: the mute status of the audio device, boolean value.
+. `+"volume"+`: the current volume leve lof the audio device. accepts whole values 0-100.
+
+
+==== Request for changing room state (PUT request):
+
+URL: `+{IP Address of Pi}:8000/buildings/{BLDG}/rooms/{RM}+` 
+
+Request Type: `+PUT+`
+
+Headers: `+Content-Type+` : `+application/json+`
+
+Request Body:
+[source,json]
+----
+{
+    "displays": [ // <1>
+        {
+            "name": "D1", // <2>
+            "power": "on", // <3>
+            "input": "HDMI1", // <4>
+            "blanked": true // <5>
+        }
+    ],
+    "audioDevices": [ // <6>
+        {
+            "name": "D1", // <7>
+            "power": "on", // <8>
+            "input": "HDMI2", // <9>
+            "muted": false, // <10>
+            "volume": 35 // <11>
+        }
+    ]
+}
+----
+. `+"displays"+`: an array of the desired displays you want to change.
+. `+"name"+`: the name of the display device you would like to change.
+. `+"power"+`: the desired power status of the device. (options: "on", "standby")
+. `+"input"+`: the desired input to be shown shown the display device.
+. `+"blanked"+`: the desired blanked status of the display device, boolean value.
+. `+"audioDevices"+`: an array of the desired audio devices you want to change.
+. `+"name"+`: the name of the desired audio device.
+. `+"power"+`: the desired power status of the audio device.
+. `+"input"+`: the desired input that is the source of the audio. 
+. `+"muted"+`: the desired mute status of the audio device, boolean value.
+. `+"volume"+`: the desired volume leve lof the audio device. accepts whole values 0-100.
+
+
+Response of changing room state request:
+[source,json]
+----
+{
+    "displays": [ // <1>
+        {
+            "name": "D1",
+            "power": "on",
+            "input": "HDMI1",
+            "blanked": true
+        }
+    ],
+    "audioDevices": [
+        {
+            "name": "D1",
+            "power": "on",
+            "input": "HDMI2",
+            "muted": false, 
+            "volume": 35 
+        }
+    ]
+}
+----
+. The response of the PUT request is the updated room state

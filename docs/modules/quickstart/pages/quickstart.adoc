@@ -7,20 +7,28 @@ the steps to one implementation method and allow others to be creative in how th
 
 == Demo Solution
 
-For the purpose of this demo we will be setting up a single display room that is controlled by a raspberry pi running the AV-API. The raspberry pi will act as the room control system and be able to control the input being shown on the display as well as the volume of the display. For this demo you will need the following materials:
+For the purpose of this demo we will be setting up a single display room that is controlled by a raspberry pi running the AV-API. The raspberry pi will act as the room's control system and be able to control the input being shown on the display as well as the volume of the display. For this demo you will need the following materials:
 
 * https://www.raspberrypi.org/products/raspberry-pi-4-model-b/[Raspberry Pi 4 Model B]
 * https://www.raspberrypi.org/products/raspberry-pi-touch-display/[7-inch Rapsberry Pi Touch Panel]
 * An IP controllable display (one which we xref:hardwareList.adoc[have already written a driver for])
 ** For demonstration purposes we will be using a https://www.sony.com/electronics/televisions/xbr-x800g-x805g-x807g-series[Sony XBR 800G]
 
-This setup guide should help you get your first room up and running, using the av-control-api to control it and optionally one of our UI's. The basic sections are as follows:
+This setup guide should help you get your first room up and running, using the av-control-api to control it and optionally one of our UI's. _This UI is *not* a production UI, rather a simple interface that was been created for sole purpose of this demo_.
 
+The basic sections are as follows:
+
+. Getting the hardware set up
 . Getting the OS ready
 . Downloading/starting the av-control-api docker containers and (optionally) a basic UI container
 . Setting up the database and configuring your devices
 . Testing the API
-. Control 
+. Using the UI
+. Exploring BYU's Implementation
+
+== Getting the hardware set up
+
+For more detailed information on how to set up the devices for this demo please see the xref:hardwareSetup.adoc[Hardware Setup Guide]. This guide will also outline any necssary configurations that need to be in place for the AV-API to work.
 
 == Getting the OS ready
 
@@ -31,7 +39,7 @@ To get the Operating System ready to go for this solution you need a raspberry p
 * docker-compose
 * web browser
 
-For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS/OS.adoc[Complete OS Setup Guide]
+For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS.adoc[Complete OS Setup Guide]
 
 == Downloading and Starting Necesary Docker Containers
 
@@ -64,4 +72,12 @@ please refer to the xref:DB.adoc[Complete Database Guide]
 Once you have followed the previous steps, you should be set to begin testing the API. Attempt to hit the API endpoints using a program like
 Postman. If it is successful then you have successfully set up your pi to control the devices in your room. For more detailed documentation
 on how to test the API enpoints please refer to the xref:API.adoc[Complete API Testing Guide]
+
+== Using the UI
+
+The UI is awesome. Figure out how it works xref:UI.adoc[here].
+
+== Exploring BYU's Implementation
+
+BYU's implementation  is awesome. Figure out how it works xref:byuArchitecture.adoc[here].
 

@@ -50,7 +50,7 @@ Raspberry Pi Document:
   "ports": [] 
 }
 ----
-<2> Replace this with your IP address.
+. Replace this with your IP address.
 
 Sony XBR device document:
 ----
@@ -99,7 +99,7 @@ Sony XBR device document:
   ]
 }
 ----
-<1> Replace this with your IP address.
+. Replace this with your IP address.
 
 HDMI1 device document:
 ----
@@ -529,7 +529,7 @@ Sample CouchDB Entry for rooms database:
   }
 }
 ----
-<1> Change this to your actual DEMO-123 info (i.e. ACB-2231)
+. Change this to your actual DEMO-123 info (i.e. ACB-2231)
 
 === buildings
 
@@ -542,7 +542,7 @@ Sample CouchDB Entry for buildings database:
   "description": "This building is made up for Demo purposes"
 }
 ----
-<1> Whatever you put here as your BLDG abbreviation (the demo is "DEMO") must be used in all of documents that contain "DEMO-123". If you change DEMO to your actual building abbreviation you must update the other documents to reflect that change.
+. Whatever you put here as your BLDG abbreviation (the demo building is "DEMO") must be used in all of documents that contain "DEMO-123". If you change DEMO to your actual building abbreviation you must update the other documents to reflect that change.
 
 === room_configurations
 

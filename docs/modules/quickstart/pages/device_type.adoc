@@ -44,20 +44,20 @@ Sample CouchDB Entry for Raspberry Pi device-type:
   ]
 }
 ----
-<1> These fields are identical to the fields mentioned in detail in previous examples.
-<2> `+"roles"+`: The roles of the device, described in detail in previous examples.
-<3> `+"commands"+`: The list of commands that can be sent to this device.
-<4> `+"_id"+`: the unique identifier for the command.
-<5> `+"description"+`: for your own use to save info about the command.
-<6> `+"microservice"+`: The info for the microservice used in making the command.
-<7> `+"_id"+`: the unique identifier for the microservice.
-<8> `+"description"+`: for your own use to save info about the microservice.
-<9> `+"address"+`: is where the microservice is running including the port it is running on.
-<10> `+"endpoint"+`: The API endpoint on the microservice that corresponds to the command.
-<11> `+"_id"+`: is the unique identifier for the enpoint.
-<12> `+"description"+`: for your own use to save info about the endpoint.
-<13> `+"path"+`: is the path to the endpoint.
-<14> `+"priority"+`: This is used to help determine which events are more important and need to be executed first.
+. These fields are identical to the fields mentioned in detail in previous examples.
+. `+"roles"+`: The roles of the device, described in detail in previous examples.
+. `+"commands"+`: The list of commands that can be sent to this device.
+. `+"_id"+`: the unique identifier for the command.
+. `+"description"+`: for your own use to save info about the command.
+. `+"microservice"+`: The info for the microservice used in making the command.
+. `+"_id"+`: the unique identifier for the microservice.
+. `+"description"+`: for your own use to save info about the microservice.
+. `+"address"+`: is where the microservice is running including the port it is running on.
+. `+"endpoint"+`: The API endpoint on the microservice that corresponds to the command.
+. `+"_id"+`: is the unique identifier for the enpoint.
+. `+"description"+`: for your own use to save info about the endpoint.
+. `+"path"+`: is the path to the endpoint.
+. `+"priority"+`: This is used to help determine which events are more important and need to be executed first.
 
 Sample CouchDB Entry for SONY XBR device-type:
 ----
@@ -124,8 +124,12 @@ Sample CouchDB Entry for SONY XBR device-type:
   ]
 }
 ----
-<1> These fields are identical to the fields mentioned in detail in previous examples. The ones above are an example of the 
+. These fields are identical to the fields mentioned in detail in previous examples. The ones above are an example of the 
 implementation of these fields for a SonyXBR
-<2> `+"output"+`: This field designates if the device is an output device.
-<3> `+"destination"+`: This field designates if the device is a destination device.
-<4> `+"power_states"+`: This field lists the different power states of the device.
+. `+"output"+`: This field designates if the device is an output device.
+. `+"destination"+`: This field designates if the device is a destination device.
+. `+"power_states"+`: This field lists the different power states of the device.
+
+
+==== Up Next:
+xref:rooms.adoc[rooms table]
