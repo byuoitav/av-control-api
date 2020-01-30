@@ -17,8 +17,13 @@ Sample CouchDB Entry for rooms database:
   }
 }
 ----
-<1> These fields are identical to the fields mentioned in detail in previous examples.
-<2> `+"configuration"+`: This is the configuration of the room. It maps to an entry in the room_configurations database.
+. These fields are identical to the fields mentioned in detail in previous examples.
+. `+"configuration"+`: This is the configuration of the room. It maps to an entry in the room_configurations database.
 The purpose of this field will be discussed later along with the room_configurations database.
-<3> `+"designation"+`: This field designates if the room is in development, stage, or production.
-<4> `+"attributes"+`: This field is for any other room attributes you would like to document.
+. `+"designation"+`: This field designates if the room is in development, stage, or production.
+. `+"attributes"+`: This field is for any other room attributes you would like to document.
+
+
+
+==== Up Next
+xref:buildings.adoc[buildings table]

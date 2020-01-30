@@ -1,0 +1,11 @@
+= Hardware Set Up Guide
+
+This document will outline the materials required for the demo. It will also go through any necessary configuration for devices to make them work properly with the AV-API.
+
+For the purpose of this demo we will be setting up a single display room that is controlled by a raspberry pi running the AV-API. The raspberry pi will act as the room's control system and be able to control the input being shown on the display as well as the volume of the display. For this demo you will need the following materials:
+
+* https://www.raspberrypi.org/products/raspberry-pi-4-model-b/[Raspberry Pi 4 Model B]
+* https://www.raspberrypi.org/products/raspberry-pi-touch-display/[7-inch Rapsberry Pi Touch Panel]
+* An IP controllable display (one which we xref:hardwareList.adoc[have already written a driver for])
+** For demonstration purposes we will be using a https://www.sony.com/electronics/televisions/xbr-x800g-x805g-x807g-series[Sony XBR 800G]
+
