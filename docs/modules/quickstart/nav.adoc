@@ -12,5 +12,7 @@
 * xref:startAPI.adoc[Starting the AV API]
 ** xref:API.adoc[Using the AV API]
 ** xref:APIBody.adoc[API Body & Response]
+* xref:UI.adoc[Using the UI]
+* xref:byuArchitecture.adoc[Exploring BYU's Implementation]
 * xref:FAQ.adoc[Frequently Asked Questions]
 
