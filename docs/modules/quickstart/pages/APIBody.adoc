@@ -2,7 +2,7 @@
 
 This document will outline the JSON body requred for requests made to the AV-API.
 
-==== Request for current room state (GET request):
+=== Request for current room state (GET request):
 
 URL: `+{IP Address of Pi}:8000/buildings/{BLDG}/rooms/{RM}+`
 
@@ -48,7 +48,7 @@ Response for current room state request:
 . `+"volume"+`: the current volume leve lof the audio device. accepts whole values 0-100.
 
 
-==== Request for changing room state (PUT request):
+=== Request for changing room state (PUT request):
 
 URL: `+{IP Address of Pi}:8000/buildings/{BLDG}/rooms/{RM}+` 
 

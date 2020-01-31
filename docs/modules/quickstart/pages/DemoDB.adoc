@@ -2,11 +2,12 @@
 
 These files contain the documents you will need for this demo. There are changes that must be made in each of the documents to make it work for your specific device (i.e. IP address).
 
-If you already have couch installed and running on port 5894, you can use the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] to automatically create the Databases and documents required for the demo. Steps for using this script are found below:
+If you already have couch installed and running on port 5894, you can use a script to automatically create the tables and documents required for the demo. Steps for using this script are found below:
 
-1. Download the repository from github.
-2. navigate to the repository
-3. The username and password are passed in as arguments when running the script: run `+python3 Couch_Demo_Set_Up_Script.py {username} {password}+` to handle authorization for your db properly.
+. Download the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository from github.
+. navigate to the repository
+. Run the python script on your raspberry pi
+.. The username and password are passed in as arguments when running the script: run `+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+` to handle authorization for your db properly (admin and AVAPIPASSWORD are the default username and password. If you want to change it you MUST change it in the xref:startAPI.adoc[docker-compose.yml] file as well.).
 
 After running the script make the changes described below. 
 
@@ -17,6 +18,8 @@ Each section below will have all of the DB Documents you need for that table. Ex
 . xref:DemoDB.adoc#_device_type[device_type]
 . xref:DemoDB.adoc#_buildings[buildings]
 . xref:DemoDB.adoc#_room_configurations[room_configurations]
+
+Note: *Using the script is the much faster and seamless way of doing this demo*. It is much more time intensive to create each of the tables by hand and then manually copy and paste the documents below.
 
 === devices
 Below are the dcuments required for the devices table.
@@ -127,7 +130,7 @@ HDMI1 device document:
 }
 ----
 
-Create two more of these documents and change the ID of one to DEMO-123-HDMI2 and its name to HDMI2, and the other document's ID to DEMO-123-HDMI3 and its name to HDMI3
+Create two more of these documents and change the ID of one to DEMO-123-HDMI2 and its name to HDMI2, and the other document's ID to DEMO-123-HDMI3 and its name to HDMI3. _Note: if you used the script to automatically import the documents into your DB, all three have already been created for you_
 
 === device_type
 
