@@ -19,6 +19,5 @@ This guide will outline each of the tables above, their purpose, what data is be
 
 If you are looking for the exact documents needed for this demo, or even a script that automatically imports them into your database, both can be found xref:DemoDB.adoc[here]. 
 
-
 ==== Up Next:
 xref:devices.adoc[devices table]

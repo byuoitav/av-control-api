@@ -45,4 +45,3 @@ In order for the pi and the flat panel to cmmunicate with each other, the flat p
 .. Enter Gateway
 .. Enter Network Prefix length
 .. Enter DNS 1 and DNS 2
-
