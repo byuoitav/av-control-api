@@ -13,3 +13,27 @@ Our current infrastructure utilizes both central and local databases. We deploye
 === Setting Up Central DB and Replication
 
 After setting up a central DB in a remote location you can set up replication for each of the databses tables from the remote DB. for additional information and documentation on how to implement replication in your solution, please refer to https://guide.couchdb.org/draft/replication.html[Couch's Replication Documentation].
+
+=== Monitoring System Health
+
+Stuff to be added here
+
+=== Events
+
+Stuff to be added here
+
+=== Automating Configuration and Set Up
+
+Stuff to be added here
+
+=== Produciton UI
+
+Stuff to be added here
+
+=== Collecting User Metrics
+
+Stuff to be added here
+
+=== Mirrored Rooms?
+
+Stuff to be added here

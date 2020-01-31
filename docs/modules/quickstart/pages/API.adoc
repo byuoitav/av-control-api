@@ -79,3 +79,5 @@ You can send multiple commands at once, to turn the display on, set the input to
     ]
 }
 ----
+
+For additional information on each of these commands, please refer to the xref:APIBody.adoc[API Body & Response] documentation.

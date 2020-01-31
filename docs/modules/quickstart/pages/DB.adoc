@@ -17,10 +17,7 @@ This guide will outline each of the tables above, their purpose, what data is be
 
 *_Please note that the documents below are meant to explain each of the tables and a illustrate what data is stored in each of the documents. These examples are not the meant to be copied and pasted for the demo._* 
 
-The exact documents that you need for terms of this demo, as well as a script that automatically imports them into your database, can be found xref:DemoDB.adoc[here]. 
-
-
-
+If you are looking for the exact documents needed for this demo, or even a script that automatically imports them into your database, both can be found xref:DemoDB.adoc[here]. 
 
 ==== Up Next:
 xref:devices.adoc[devices table]

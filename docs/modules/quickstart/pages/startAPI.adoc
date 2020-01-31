@@ -26,22 +26,25 @@ services:
            - "8000:8000"
         environment:
             - BYPASS_AUTH=true
-            - SYSTEM_ID=BLDG-ROOM-CP1
+            - SYSTEM_ID=DEMO-123-CP1
             - ROOM_SYSTEM=true
             - DB_ADDRESS=http://localhost:5984
             - HUB_ADDRESS=localhost:7100
             - STOP_REPLICATION=true
+            - COUCHDB_USER=admin
+            - COUCHDB_PASSWORD=AVAPIPASSWORD
         network_mode: "host"
         restart: always
         tty: true
-    adcp-control-microservice:
-        image: byuoitav/rpi-adcp-control-microservice:latest
+    sony-control-microservice:
+        image: byuoitav/rpi-sony-control-microservice:latest
         ports:
             - "8012:8012"     
         environment:
             - SYSTEM_ID=BLDG-ROOM-CP1
             - BYPASS_AUTH=true
-            - ROOM_SYSTEM=true               
+            - ROOM_SYSTEM=true 
+            - SONY_TV_PSK=AVAPI              
         network_mode: "host"
         restart: always
         tty: true
