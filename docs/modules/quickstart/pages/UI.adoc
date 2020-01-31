@@ -2,9 +2,8 @@
 
 Here is a screenshot of the UI that has been created for the purposes of this demo.
 
-image::SimpleUI.jpg[UI]
+image::SimpleUI.png[UI]
 
 This UI will give you basic control ofver the room, allowing you to turn on and off the display, change or mute the volume, and change inputs. This UI was created with basic HTMl and JQuery and can be easily created with a different frameworks. At Brigham Young university we use an Angular application, but hopefully this UI can give you ideas of the kind of interface you can build that matches the design patterns your organization has.
 
 Note: If there is an error in the UI check the console for any network errors and make sure that the URL in the index.js file is set to `+http://localhost:8000/buildings/DEMO/rooms/123/configuration+`
-
