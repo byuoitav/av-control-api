@@ -7,15 +7,17 @@ To get the Operating System ready to go for this solution you need a raspberry p
 * xref:OS.adoc#_raspbian[raspbian]
 * xref:OS.adoc#_docker[docker]
 * xref:OS.adoc#_docker_compose[docker-compose]
-* xref:OS.adoc#_web_browser[web browser]
+* xref:OS.adoc#_web_browser[web browser and window manager]
 
 === raspbian
 This section will outline the necessary steps to get a raspbian image up and running on your raspberry pi. Here are the steps you take:
 
-* Download the 'Raspbian Buster with desktop' image https://www.raspberrypi.org/downloads/raspbian/[here].
+* Download the 'Raspbian Buster Lite' image https://www.raspberrypi.org/downloads/raspbian/[here].
 * Using Etcher flash the image to an SD card.
 * Place the SD card into the Pi and connect it to the network. Then wait until the Pi boots up.
 ** If you use the 'Raspbian Buster with desktop' image, it comes preinstalled with a web browser.
+
+*NOTE: When you are running `+apt+` commands you need to run sudo with each of the commands. or run `+sudo su+` first and all subsequent commands will be run
 
 === docker
 This section will outline the necessary steps to get docker on your raspberry pi. Here are the commands you run:
@@ -40,12 +42,11 @@ pip3 install docker-compose
 reboot
 ----
 
-=== web browser
-This section will outline the necessary steps to get a web browser on your raspberry pi. _Please note that this step is only necessary if you 
-downloaded  an image different than the one specified above (Raspbian Buster with desktop)_. Here are the commands you run:
+=== web browser and window manager
+This section will outline the necessary steps to get a web browser and a window manager (i3 and xorg xserver) on your raspberry pi. Here are the commands you run:
 
 [source,bash]
 ----
 apt update
-apt install -y chromium-browser
+apt install -y chromium-browser i3 xserver-xorg xinit
 ----

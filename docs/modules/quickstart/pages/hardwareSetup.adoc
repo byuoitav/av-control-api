@@ -9,3 +9,40 @@ For the purpose of this demo we will be setting up a single display room that is
 * An IP controllable display (one which we xref:hardwareList.adoc[have already written a driver for])
 ** For demonstration purposes we will be using a https://www.sony.com/electronics/televisions/xbr-x800g-x805g-x807g-series[Sony XBR 800G]
 
+This guide will go over how to get the hardware set up so it is functional. It will go over:
+
+- Assembling the Pi
+- The room "wiring"
+- configuring the flat panel
+
+==== Assembling the Pi
+
+Here is a pretty good video of how to assemble the raspberry pi and the touch screen.
+https://www.youtube.com/watch?time_continue=135&v=E1lua5mgrJs&feature=emb_logo[Raspberry Pi 7" Touch Screen LCD - Assembly]
+
+==== Room "Wiring"
+image::wiring.jpg[Wiring]
+As shown above the wiring for this room is pretty straight forward.
+
+- Have network cables running from a nework switch to the raspberry pi and the Sony Flat Panel Display. This will put the Raspberry Pi and the Flat Panel on the same network for them to communicate.
+- Have three devices (shown in the drawing as computers) that can act as video source devices. Connect these three devices up to the Flat Panel. 
+. With the Sony Flat Panels, Input 1 can be in an awkward location making it difficult to get an HDMI cord in place during installation (especially when using a wall mount). For ease of isntallation please use Inputs 2-4 located on the side of the display for your devices as described in the image above.
+
+==== Configuring the flat panel
+
+In order for the pi and the flat panel to cmmunicate with each other, the flat panel needs to first be configured in a particular way. Here are the steps for the configuration.
+
+. Go to Home -> Settings -> Network -> Home Network
+.. Renderer: On
+.. IP Control -> Authentication -> Normal -> Normal and Pre-shared key
+.. Enter a Pre-shared Key of: "AVAPI"
+.. Simple IP Control -> On
+. Go to Home -> Settings -> Network
+.. Remote Start: On
+. Home -> Network Settings -> IP Settings
+.. Static
+.. Enter IP Address
+.. Enter Gateway
+.. Enter Network Prefix length
+.. Enter DNS 1 and DNS 2
+

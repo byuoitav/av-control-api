@@ -6,15 +6,19 @@ Displays
 [cols=2*,options=header]
 |===
 |Device
+|Model(s)
 |Driver
 
 |Sony XBR (Flatpanels)
+|
 |https://github.com/byuoitav/sonyrest-driver[Sony FPD Driver]
 
 |Epson Projector
+|
 |https://github.com/byuoitav/epson-driver[Epson Driver]
 
 |Sony Projector
+|
 |https://github.com/byuoitav/adcp-driver[Sony Driver]
 |===
 
@@ -22,17 +26,22 @@ Video Switchers
 [cols=2*,options=header]
 |===
 |Device
+|Model(s)
 |Driver
 
 |Atlona Video Switcher
+|https://atlona.com/product/at-hdvs-210u-tx-wp/[2x1] https://atlona.com/product/at-juno-451-hdbt/[4x1 HDBT] https://atlona.com/product/at-juno-451/[4x1 HDMI] https://atlona.com/product/at-uhd-sw-52ed/[5x1]
 |https://github.com/byuoitav/atlona-driver[Atlona Driver]
 
 |Kramer 4x4
+|
 |https://github.com/byuoitav/kramer-driver[Kramer Driver]
 
-|Crestron stuff
+|Crestron Video Switcher
+|
 |https://github.com/byuoitav/crestron-driver[Crestron Driver]
 
-|Just add power stuff
+|Just Add Power Video Switcher
+|
 |https://github.com/byuoitav/justaddpower-driver[Just Add Power Driver]
 |===
