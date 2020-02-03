@@ -24,6 +24,7 @@ func addDeviceRoutes(e *echo.Echo, create CreateDeviceFunc) {
 		if err != nil {
 			return err
 		}
+
 		info, err := dev.GetInfo(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())

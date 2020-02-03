@@ -10,20 +10,52 @@ import (
 )
 
 type dsp interface {
-	GetVolumeByBlock(ctx context.Context, block string) (int, error)
+	GetVolumeByBlock(ctx context.Context, block string) (uint, error)
 	GetMutedByBlock(ctx context.Context, block string) (bool, error)
 
-	SetVolumeByBlock(ctx context.Context, block string, volume int) error
+	SetVolumeByBlock(ctx context.Context, block string, volume uint) error
 	SetMutedByBlock(ctx context.Context, block string, muted bool) error
 }
 
+/*
+DSP is an interface with the methods required for a DSP library to implement. It is a combination of the Device interface as well as DSP specific functions. The API will send volume levels between 0 and 100, inclusive. Drivers implementing this interface should adjust the [0-100] volume level to the appropriate level for the device.
+
+A driver library implmenting this interface should look something like this:
+	type QSC struct {
+		Address string
+		Username string
+		Password string
+	}
+
+	func (q *QSC) GetInfo(ctx context.Context) (interface{}, error) {
+		// open a connection with the dsp, return some info about the device...
+	}
+
+	func (q *QSC) GetVolumeByBlock(ctx context.Context, block string) (int, error) {
+		// open a connection with the dsp, return the volume for on block...
+	}
+
+	func (q *QSC) GetMutedByBlock(ctx context.Context, block string) (bool, error) {
+		// open a connection with the dsp, return the muted status for block...
+	}
+
+	func (q *QSC) SetVolumeByBlock(ctx context.Context, block string, volume int) (error) {
+		// open a connection with the dsp, set the volume on block...
+	}
+
+	func (q *QSC) SetMutedByBlock(ctx context.Context, block string, muted bool) (error) {
+		// open a connection with the dsp, set the muted status on block...
+	}
+*/
 type DSP interface {
 	Device
 	dsp
 }
 
-type CreateDSPFunc func(context.Context, string) (DSP, error)
+// CreateDSPFunc is passed to CreateDSPServer and is called to create a new DSP struct whenever the Server needs to communicate with a new DSP address.
+type CreateDSPFunc func(ctx context.Context, addr string) (DSP, error)
 
+// CreateDSPServer returns a Server with the appropriate endpoints for a DSP added to it.
 func CreateDSPServer(create CreateDSPFunc) (Server, error) {
 	e := newEchoServer()
 	m := &sync.Map{}
@@ -67,18 +99,19 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		volume, err := d.GetVolumeByBlock(c.Request().Context(), block)
+
+		vol, err := d.GetVolumeByBlock(c.Request().Context(), block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Volume{Volume: volume})
+		return c.JSON(http.StatusOK, volume{Volume: vol})
 	})
 
 	e.GET("/:address/block/:block/volume/:volume", func(c echo.Context) error {
 		addr := c.Param("address")
 		block := c.Param("block")
-		volume, err := strconv.Atoi(c.Param("volume"))
+		vol, err := strconv.Atoi(c.Param("volume"))
 		switch {
 		case len(addr) == 0:
 			return c.String(http.StatusBadRequest, "must include the address of the dsp")
@@ -92,11 +125,12 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if err = d.SetVolumeByBlock(c.Request().Context(), block, volume); err != nil {
+
+		if err = d.SetVolumeByBlock(c.Request().Context(), block, vol); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Volume{Volume: volume})
+		return c.JSON(http.StatusOK, volume{Volume: vol})
 	})
 
 	// muting
@@ -114,18 +148,19 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		muted, err := d.GetMutedByBlock(c.Request().Context(), block)
+
+		mute, err := d.GetMutedByBlock(c.Request().Context(), block)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Muted{Muted: muted})
+		return c.JSON(http.StatusOK, muted{Muted: mute})
 	})
 
 	e.GET("/:address/block/:block/muted/:muted", func(c echo.Context) error {
 		addr := c.Param("address")
 		block := c.Param("block")
-		muted, err := strconv.ParseBool(c.Param("muted"))
+		mute, err := strconv.ParseBool(c.Param("muted"))
 		switch {
 		case len(addr) == 0:
 			return c.String(http.StatusBadRequest, "must include the address of the dsp")
@@ -139,10 +174,11 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if err = d.SetMutedByBlock(c.Request().Context(), block, muted); err != nil {
+
+		if err = d.SetMutedByBlock(c.Request().Context(), block, mute); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Muted{Muted: muted})
+		return c.JSON(http.StatusOK, muted{Muted: mute})
 	})
 }

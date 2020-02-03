@@ -66,21 +66,22 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		power, err := disp.GetPower(c.Request().Context())
+
+		pow, err := disp.GetPower(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Power{Power: power})
+		return c.JSON(http.StatusOK, power{Power: pow})
 	})
 
 	e.GET("/:address/power/:power", func(c echo.Context) error {
 		addr := c.Param("address")
-		power := c.Param("power")
+		pow := c.Param("power")
 		switch {
 		case len(addr) == 0:
 			return c.String(http.StatusBadRequest, "must include the address of the display")
-		case len(power) == 0:
+		case len(pow) == 0:
 			return c.String(http.StatusBadRequest, "must include a power state to set")
 		}
 
@@ -88,11 +89,12 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if err := disp.SetPower(c.Request().Context(), power); err != nil {
+
+		if err := disp.SetPower(c.Request().Context(), pow); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Power{Power: power})
+		return c.JSON(http.StatusOK, power{Power: pow})
 	})
 
 	// blanked
@@ -106,17 +108,18 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		blanked, err := disp.GetBlanked(c.Request().Context())
+
+		blank, err := disp.GetBlanked(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Blanked{Blanked: blanked})
+		return c.JSON(http.StatusOK, blanked{Blanked: blank})
 	})
 
 	e.GET("/:address/blanked/:blanked", func(c echo.Context) error {
 		addr := c.Param("address")
-		blanked, err := strconv.ParseBool(c.Param("blanked"))
+		blank, err := strconv.ParseBool(c.Param("blanked"))
 		switch {
 		case len(addr) == 0:
 			return c.String(http.StatusBadRequest, "must include the address of the display")
@@ -128,11 +131,12 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if err := disp.SetBlanked(c.Request().Context(), blanked); err != nil {
+
+		if err := disp.SetBlanked(c.Request().Context(), blank); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Blanked{Blanked: blanked})
+		return c.JSON(http.StatusOK, blanked{Blanked: blank})
 	})
 
 	// input
@@ -146,21 +150,22 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		input, err := disp.GetInput(c.Request().Context())
+
+		in, err := disp.GetInput(c.Request().Context())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Input{Input: input})
+		return c.JSON(http.StatusOK, input{Input: in})
 	})
 
 	e.GET("/:address/input/:input", func(c echo.Context) error {
 		addr := c.Param("address")
-		input := c.Param("input")
+		in := c.Param("input")
 		switch {
 		case len(addr) == 0:
 			return c.String(http.StatusBadRequest, "must include the address of the display")
-		case len(input) == 0:
+		case len(in) == 0:
 			return c.String(http.StatusBadRequest, "must include a input to set")
 		}
 
@@ -168,11 +173,12 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if err := disp.SetInput(c.Request().Context(), input); err != nil {
+
+		if err := disp.SetInput(c.Request().Context(), in); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Input{Input: input})
+		return c.JSON(http.StatusOK, input{Input: in})
 	})
 
 	// active signal
@@ -187,11 +193,12 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
+
 		asignal, err := disp.GetActiveSignal(c.Request().Context(), port)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, ActiveSignal{ActiveSignal: asignal})
+		return c.JSON(http.StatusOK, activeSignal{ActiveSignal: asignal})
 	})
 }
