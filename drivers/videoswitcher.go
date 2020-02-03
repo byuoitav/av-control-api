@@ -57,11 +57,11 @@ func CreateVideoSwitcherServer(create CreateVideoSwitcherFunc) Server {
 func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 	e.GET("/:address/output/:output/input", func(c echo.Context) error {
 		addr := c.Param("address")
-		output := c.Param("output")
+		out := c.Param("output")
 		switch {
 		case len(addr) == 0:
 			return c.String(http.StatusBadRequest, "must include the address of the video switcher")
-		case len(output) == 0:
+		case len(out) == 0:
 			return c.String(http.StatusBadRequest, "must include an output port for the video switcher")
 		}
 
@@ -69,24 +69,25 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		input, err := vs.GetInputByOutput(c.Request().Context(), output)
+
+		in, err := vs.GetInputByOutput(c.Request().Context(), out)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Input{Input: fmt.Sprintf("%v:%v", input, output)})
+		return c.JSON(http.StatusOK, input{Input: fmt.Sprintf("%v:%v", in, out)})
 	})
 
 	e.GET("/:address/output/:output/input/:input", func(c echo.Context) error {
 		addr := c.Param("address")
-		output := c.Param("output")
-		input := c.Param("input")
+		out := c.Param("output")
+		in := c.Param("input")
 		switch {
 		case len(addr) == 0:
 			return c.String(http.StatusBadRequest, "must include the address of the video switcher")
-		case len(output) == 0:
+		case len(out) == 0:
 			return c.String(http.StatusBadRequest, "must include an output port")
-		case len(input) == 0:
+		case len(in) == 0:
 			return c.String(http.StatusBadRequest, "must include an input portr")
 		}
 
@@ -94,10 +95,11 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if err := vs.SetInputByOutput(c.Request().Context(), output, input); err != nil {
+
+		if err := vs.SetInputByOutput(c.Request().Context(), out, in); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, Input{Input: fmt.Sprintf("%v:%v", input, output)})
+		return c.JSON(http.StatusOK, input{Input: fmt.Sprintf("%v:%v", in, out)})
 	})
 }

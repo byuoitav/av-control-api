@@ -1,25 +1,25 @@
 package drivers
 
-type Power struct {
+type power struct {
 	Power string `json:"power"`
 }
 
-type Blanked struct {
+type blanked struct {
 	Blanked bool `json:"blanked"`
 }
 
-type Input struct {
+type input struct {
 	Input string `json:"input"`
 }
 
-type Muted struct {
+type muted struct {
 	Muted bool `json:"muted"`
 }
 
-type Volume struct {
+type volume struct {
 	Volume int `json:"volume"`
 }
 
-type ActiveSignal struct {
+type activeSignal struct {
 	ActiveSignal bool `json:"activeSignal"`
 }
