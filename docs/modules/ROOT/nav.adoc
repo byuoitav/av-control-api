@@ -1,1 +1,0 @@
-* .xref:whats-new.adoc[What's New]
