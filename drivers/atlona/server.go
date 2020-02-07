@@ -39,17 +39,11 @@ func main() {
 
 	// import driver library
 	createVS := func(ctx context.Context, addr string) (drivers.VideoSwitcherDSP, error) {
-		deviceType, err := atlona.GetDeviceType(context.TODO(), addr)
+		vs, err := atlona.CreateVideoSwitcher(context.TODO(), addr, username, password)
 		if err != nil {
 			return nil, fmt.Errorf("failed to discover device: %w", err)
 		}
-
-		return &atlona.AtlonaVideoSwitcher{
-			Address:    addr,
-			Username:   username,
-			Password:   password,
-			DeviceType: deviceType,
-		}, nil
+		return vs, nil
 	}
 
 	// create server
