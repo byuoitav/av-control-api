@@ -22,7 +22,7 @@ func main() {
 
 	// variable declarations
 
-	pflag.IntVarP(&port, "port", "P", 80, "port to run the server on")
+	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.StringVarP(&username, "username", "u", "***REMOVED***", "username for device")
 	pflag.StringVarP(&password, "password", "p", "***REMOVED***", "password for device")
 	// other flags
@@ -39,17 +39,11 @@ func main() {
 
 	// import driver library
 	createVS := func(ctx context.Context, addr string) (drivers.VideoSwitcherDSP, error) {
-		deviceType, err := atlona.GetDeviceType(context.TODO(), addr)
+		vs, err := atlona.CreateVideoSwitcher(context.TODO(), addr, username, password)
 		if err != nil {
 			return nil, fmt.Errorf("failed to discover device: %w", err)
 		}
-
-		return &atlona.***REMOVED***VideoSwitcher{
-			Address:    addr,
-			Username:   username,
-			Password:   password,
-			DeviceType: deviceType,
-		}, nil
+		return vs, nil
 	}
 
 	// create server
