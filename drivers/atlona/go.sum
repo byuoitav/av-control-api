@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/byuoitav/atlona-driver v1.2.0/go.mod h1:XSpZGCyxTJPkdg8sEwPt8AaKCs4nY8G0RlYu6jVXrSg=
-github.com/byuoitav/atlona-driver v1.3.0 h1:T1I2p0ZOq7ayOcF3HLfUhgGlBrUvRPM3fwFbjmsky4A=
-github.com/byuoitav/atlona-driver v1.3.0/go.mod h1:uelks1KhO4lqS7QLKa95Kf/RkdzYImuO/1HCr8olN4g=
+github.com/byuoitav/atlona-driver v1.3.1 h1:07gcSWwnycPFQMuP4mAQpqx1i47Qjke99GsiAtPXV3I=
+github.com/byuoitav/atlona-driver v1.3.1/go.mod h1:kef+AXz7d1l8cj58BbouYqcUc4c+jq6u7pEknpHSCHk=
 github.com/byuoitav/atlona-switcher-microservice v0.0.0-20191126173619-b128fd301655/go.mod h1:ExUW9dnW/M+r88tpEarzK13TQf0j/S/w3hVY8rF8QVs=
 github.com/byuoitav/av-control-api v0.1.0/go.mod h1:EKbFkLF+6X64f6gUmveKxfKobgCVNv7i4qQMJKlz3jY=
 github.com/byuoitav/av-control-api v0.3.1 h1:0IsTN9ceSv8NSxHz4swGQ6dULa//HsChrACeBZlENGY=
@@ -18,6 +18,8 @@ github.com/byuoitav/nec-driver v1.0.0/go.mod h1:g7EUxjGYKyJLcJ1G3ZXPomTYaP8uedou
 github.com/byuoitav/pooled v0.0.0-20191022213741-dad43433a657/go.mod h1:MzHJMzI9sQZ/uUzshHzlYJE9ofTOUauZlCT/LQg2DYE=
 github.com/byuoitav/qsc-driver v0.1.4/go.mod h1:9jWqVoK3+9rNKSQPAQITDHMYQnCnEXhV6mOmzbcvhmA=
 github.com/byuoitav/sonyrest-driver v0.1.2/go.mod h1:+d4nbt2XDbPgyQO0hicDauIzJScfq4QHcgNTizSc8nw=
+github.com/byuoitav/wspool v0.0.1 h1:Gme/SeZUeP95Bb2aF3yA38s43rBxpuWo8XQOibxxjuE=
+github.com/byuoitav/wspool v0.0.1/go.mod h1:X5fAYVDvdxfAVBULIlTAqlsTXz/AKG7InOtrM7q5xso=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
