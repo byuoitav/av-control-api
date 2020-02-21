@@ -43,6 +43,7 @@ func main() {
 		if err != nil {
 			return nil, fmt.Errorf("failed to discover device: %w", err)
 		}
+		vs.SetLogger(drivers.Log)
 		return vs, nil
 	}
 
