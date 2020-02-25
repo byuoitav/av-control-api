@@ -1,0 +1,23 @@
+= Demo DB Files
+
+These files contain the documents you will need for this demo. There are changes that must be made in each of the documents to make it work for your specific device (i.e. IP address).
+
+If you already have couch installed and running on port 5894, you can use a script to automatically create the tables and documents required for the demo. Steps for using this script are found below:
+
+. Download the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository from github.
+. navigate to the repository
+. Run the following command: `+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+`
+.. The username and password are passed in as arguments when running the script to handle authorization for your db properly (admin and AVAPIPASSWORD are the default username and password. If you want to change it you MUST change it in the xref:startAPI.adoc[docker-compose.yml] file as well.).
+
+
+After running this script you can view the contents of your database by visiting '+localhost:5984/_utils+'
+
+The username and password for your database is mentioned above.
+
+After logging into the database please make the following changes:
+. In the devices database the following changes are needed:
+.. open the DEMO-123-CP1 document and update the address attribute to the IP address of your pi.
+.. open the DEMO-123-D1 document and update the address attribute to the IP address of your flatpanel
+
+If you would like to see the exact contents of the documents created in each of the databases they can be viewed at the url mentioned above or in the xref:DemoDBTables.adoc[Demo DB Tables] document.
+
