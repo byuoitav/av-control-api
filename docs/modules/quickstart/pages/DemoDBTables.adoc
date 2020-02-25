@@ -1,15 +1,8 @@
-= Demo DB Files
+=== Demo DB Tables
 
-These files contain the documents you will need for this demo. There are changes that must be made in each of the documents to make it work for your specific device (i.e. IP address).
+These documents below are the documents automatically added to your Couch DB by using the python script.
 
-If you already have couch installed and running on port 5894, you can use a script to automatically create the tables and documents required for the demo. Steps for using this script are found below:
 
-. Download the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository from github.
-. navigate to the repository
-. Run the python script on your raspberry pi
-.. The username and password are passed in as arguments when running the script: run `+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+` to handle authorization for your db properly (admin and AVAPIPASSWORD are the default username and password. If you want to change it you MUST change it in the xref:startAPI.adoc[docker-compose.yml] file as well.).
-
-After running the script make the changes described below. 
 
 Each section below will have all of the DB Documents you need for that table. Explanations of each of these tables and the meaning of the fields in these documents can be found in the xref:DB.adoc[Complete Database Guide].
 
@@ -22,7 +15,7 @@ Each section below will have all of the DB Documents you need for that table. Ex
 Note: *Using the script is the much faster and seamless way of doing this demo*. It is much more time intensive to create each of the tables by hand and then manually copy and paste the documents below.
 
 === devices
-Below are the dcuments required for the devices table.
+Below are the documents required for the devices table.
 
 Raspberry Pi Document:
 ----
@@ -519,10 +512,10 @@ Here is the description for rooms database
 Sample CouchDB Entry for rooms database:
 ----
 {
-  "_id": "DEMO-123", // <1>
+  "_id": "DEMO-123", 
   "_rev": "[Keep this from the new document you create]",
-  "name": "DEMO-123", // <1>
-  "description": "DEMO-123", // <1>
+  "name": "DEMO-123", 
+  "description": "DEMO-123", 
   "configuration": {
     "_id": "Default"
   },
@@ -532,14 +525,13 @@ Sample CouchDB Entry for rooms database:
   }
 }
 ----
-. Change this to your actual DEMO-123 info (i.e. ACB-2231)
 
 === buildings
 
 Sample CouchDB Entry for buildings database:
 ----
 {
-  "_id": "DEMO", // <1>
+  "_id": "DEMO", 
   "_rev": "[Keep this from the new document you create]",
   "name": "This is the Demo building",
   "description": "This building is made up for Demo purposes"
