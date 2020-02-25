@@ -15,6 +15,7 @@ After running this script you can view the contents of your database by visiting
 The username and password for your database is mentioned above.
 
 After logging into the database please make the following changes:
+
 . In the devices database the following changes are needed:
 .. open the DEMO-123-CP1 document and update the address attribute to the IP address of your pi.
 .. open the DEMO-123-D1 document and update the address attribute to the IP address of your flatpanel
