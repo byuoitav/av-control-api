@@ -7,7 +7,7 @@
 ** xref:rooms.adoc[rooms table]
 ** xref:buildings.adoc[buildings table]
 ** xref:room_configurations.adoc[room_configurations table]
-** xref:DemoDB.adoc[Demo Couch Documents]
+** xref:DemoDBScript.adoc[Demo Couch Documents]
 ** xref:roles.adoc[Device Roles]
 * xref:startAPI.adoc[Starting the AV API]
 ** xref:API.adoc[Using the AV API]
