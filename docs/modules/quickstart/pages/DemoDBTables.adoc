@@ -8,7 +8,7 @@ Each section below will have all of the DB Documents you need for that table. Ex
 
 . xref:DemoDB.adoc#_devices[devices]
 . xref:DemoDB.adoc#_rooms[rooms]
-. xref:DemoDB.adoc#_device_type[device_type]
+. xref:DemoDB.adoc#_device_types[device_types]
 . xref:DemoDB.adoc#_buildings[buildings]
 . xref:DemoDB.adoc#_room_configurations[room_configurations]
 
@@ -125,7 +125,7 @@ HDMI1 device document:
 
 Create two more of these documents and change the ID of one to DEMO-123-HDMI2 and its name to HDMI2, and the other document's ID to DEMO-123-HDMI3 and its name to HDMI3. _Note: if you used the script to automatically import the documents into your DB, all three have already been created for you_
 
-=== device_type
+=== device_types
 
 Raspberry Pi device_type document:
 ----

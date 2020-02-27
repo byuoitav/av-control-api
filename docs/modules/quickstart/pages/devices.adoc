@@ -40,8 +40,8 @@ for optimistic-concurrency detection. For more information about this field refe
 abnd use the name as shown in the above example, or you can simply put in the IP address (i.e. 10.254.254.254).
 . `+"description"+`: Description of the device, this field is for your benefit to include any descriptive information you want stored.
 . `+"display_name"+`: The name that you want displayed for the device.
-. `+"type"+`: Type refers to the device type. The "_id" maps back to a document in the device_type database. This will be explained in greater
-detail in the device_type section.
+. `+"type"+`: Type refers to the device type. The "_id" maps back to a document in the device_types database. This will be explained in greater
+detail in the device_types section.
 . `+"roles"+`: A list of roles that the device has. A complete list of roles and how they relate to each device can be found xref:roles.adoc[here].
 . `+"ports"+`: A list of the ports on the device. A Pi does not have any ports so the array is empty. This will make more sense in the next device example.
 
@@ -89,4 +89,4 @@ This is the ID of the document for the source device.
 
 
 ==== Up Next:
-xref:device_type.adoc[device_type table]
+xref:device_types.adoc[device_types table]
