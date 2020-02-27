@@ -6,8 +6,8 @@ Please follow the steps below:
 
 . ssh into your pi by running `+ssh [ip-address-of-pi]+`
 .. if there is default username and password the username is "pi" and the password is "raspberry"
-. use the the editor of your choice to add the text below to a file named `+docker-compose.yml+`
-. After saving the file, run `+docker-compose up+`
+. use the the text editor of your choice to add the text below to a file named `+docker-compose.yml+`
+. After saving the file, run `+docker-compose up -d+`. `+-d+` will run the docker containers in the background (detached mode).
 . The docker containers are now running. You can verify that the containers are up by using `+docker ps+`
 ----
 version: '3'
@@ -56,6 +56,12 @@ services:
         restart: always
         tty: true
 ----
+
+For those that may not be very familiar with Docker there are a few commands that you should be aware of:
+
+. `+docker-compose stop+`: this command with Stops running containers without removing them.
+. `+docker-compose start+`: This command will start the containers again.
+. *_Warning_* : Do not use `+docker-compose down+`. This not only stops the contaners but also removes the containers. Any changes that are made to the database will be removed as well.
 
 
 If you are interested in looking at the code found in each of these containers, the repositories are found below.:

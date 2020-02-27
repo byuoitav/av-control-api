@@ -1,6 +1,6 @@
 
-=== device_type
-The device_type database contains information about a type of devices (whereas the devices database contains info about a specific instance of a device).
+=== device_types
+The device_types database contains information about a type of devices (whereas the devices database contains info about a specific instance of a device).
 This Database is important because it contains info on what commands are available for the device, and what microservices and endpoints are used
 in the use of these commands.
 

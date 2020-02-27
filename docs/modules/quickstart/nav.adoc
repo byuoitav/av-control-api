@@ -3,7 +3,7 @@
 * xref:OS.adoc[Setting Up the Operating System]
 * xref:DB.adoc[Database]
 ** xref:devices.adoc[devices table]
-** xref:device_type.adoc[device_type table]
+** xref:device_types.adoc[device_types table]
 ** xref:rooms.adoc[rooms table]
 ** xref:buildings.adoc[buildings table]
 ** xref:room_configurations.adoc[room_configurations table]

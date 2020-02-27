@@ -8,7 +8,7 @@ that uses JSON documents to store data. For more information about CouchDB speci
 Within CouchDB there are five important tables that are used throughout our solution:
 
 . xref:devices.adoc[devices]
-. xref:device_type.adoc[device_type]
+. xref:device_types.adoc[device_types]
 . xref:rooms.adoc[rooms]
 . xref:buildings.adoc[buildings]
 . xref:room_configurations.adoc[room_configurations]

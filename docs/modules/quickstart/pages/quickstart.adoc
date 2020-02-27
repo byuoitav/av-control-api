@@ -58,7 +58,7 @@ We will be using docker-compose to get the required containers up and running on
 We use CouchDB as the database for our solution. Within CouchDB there are five important tables that are used throughout our solution:
 
 . devices
-. device_type
+. device_types
 . rooms
 . buildings
 . room_configurations
