@@ -19,7 +19,7 @@ Here is a pretty good video of how to assemble the raspberry pi and the touch sc
 https://www.youtube.com/watch?time_continue=135&v=E1lua5mgrJs&feature=emb_logo[Raspberry Pi 7" Touch Screen LCD - Assembly]
 
 ==== Wiring the System
-image::assets/images/wiring.jpg[Wiring]
+image::wiring.jpg[Wiring]
 As shown above the wiring for this room is pretty straight forward.
 
 - Have network cables running from a nework switch to the raspberry pi and the Sony Flat Panel Display. This will put the Raspberry Pi and the Flat Panel on the same network for them to communicate.

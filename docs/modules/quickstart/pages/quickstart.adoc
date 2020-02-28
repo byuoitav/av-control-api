@@ -26,16 +26,17 @@ The guid is broken down into the following sections:
 
 == Getting the hardware set up
 
-There are only three hardware componets to this guide: the Raspbery Pi, a touchscreen and the television.  The TV will need a little configuration to enable it's network API.  .   xref:hardwareSetup.adoc[Hardware Setup Guide].
+There are only three hardware components for this setup: the Raspbery Pi, a touchscreen and the television.  The TV will need a little configuration to enable it's network API.  Please follow the xref:hardwareSetup.adoc[Hardware Setup Guide] for more instructions.
 
 == Getting the OS ready
 
 To get the Operating System ready to go for this solution you need a raspberry pi with the following installed on it:
 
-* raspbian
-* docker
+* Raspbian Lite
+* Docker
 * docker-compose
-* web browser
+* Chromium Web Browser
+* i3 Window Manager (minimal windowing envrionment for launching chromium)
 
 For a detailed step-by-step guide to get these installed on your raspberry pi, please refer to the xref:OS.adoc[Complete OS Setup Guide]
 
