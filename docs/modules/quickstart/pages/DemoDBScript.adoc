@@ -9,17 +9,23 @@ Before running this script you first need to create an admin account for your co
 
 image::Couch.jpg[Couch DB]
 
-These files contain the documents you will need for this demo. There are changes that must be made in each of the documents to make it work for your specific device (i.e. IP address).
+We will now create the DB entries needed for this demo. We will dowload some sample file to kickstart the entries.  But there will be a few changes that must be made in each of the documents to make it work for your specific devices (i.e. IP address).
 
 If you already have couch installed and running on port 5894, you can use a script to automatically create the tables and documents required for the demo. Steps for using this script are found below:
 
-. Download the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository from github.
-. navigate to the repository
-. Run the following command: `+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+`
+. Download the Couch_Demo_Set_Up_Script from the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository in github.
+.. From the Raspberry pi you can simply run 
++
+`+wget https://raw.githubusercontent.com/byuoitav/DemoCouchDBSetup/master/Couch_Demo_Set_Up_Script.py+` 
+.. This script will download the .json files from the repo and then inject them into the courch DB. If you already have the json files download, it will use the local versions. Please note that you may first need to install wget if not already installed on your device, you cna install it by running `+sudo pip3 install wget+`
+. Run the following command:
++
+`+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+`
+
 .. The username and password are passed in as arguments when running the script to handle authorization for your db properly (admin and AVAPIPASSWORD are the default username and password. If you want to change it you MUST change it in the xref:startAPI.adoc[docker-compose.yml] file and add the admin user to the DB as well following the steps mentioned above).
 
 
-After running this script you can view the contents of your database by visiting `+localhost:5984/_utils+`
+After running this script you can view the contents of your database by visiting `+localhost:5984/_utils+` from chromium running on the pi (run `+chromium-browser+` from the CLI)
 
 The username and password for your database is mentioned above.
 
@@ -29,5 +35,6 @@ After logging into the database please make the following changes:
 .. open the DEMO-123-CP1 document and update the address attribute to the IP address of your pi.
 .. open the DEMO-123-D1 document and update the address attribute to the IP address of your flatpanel
 
-If you would like to see the exact contents of the documents created in each of the databases they can be viewed at the url mentioned above or in the xref:DemoDBTables.adoc[Demo DB Tables] document.
+*_Congratulations, at this point you should be able to got to `+localhost:8081+` using chromium on the Raspberry Pi to launch the demo UI and test your system._*
 
+If you would like to see the exact contents of the documents created in each of the databases they can be viewed at the url mentioned above or in the xref:DemoDBTables.adoc[Demo DB Tables] document.
