@@ -1,7 +1,5 @@
 = Hardware Set Up Guide
 
-This document will outline the materials required for the demo. It will also go through any necessary configuration for devices to make them work properly with the AV-API.
-
 For the purpose of this demo we will be setting up a single display room that is controlled by a raspberry pi running the AV-API. The raspberry pi will act as the room's control system and be able to control the input being shown on the display as well as the volume of the display. For this demo you will need the following materials:
 
 * https://www.raspberrypi.org/products/raspberry-pi-4-model-b/[Raspberry Pi 4 Model B]
@@ -12,7 +10,7 @@ For the purpose of this demo we will be setting up a single display room that is
 This guide will go over how to get the hardware set up so it is functional. It will go over:
 
 - Assembling the Pi
-- The room "wiring"
+- Wiring the System
 - configuring the flat panel
 
 ==== Assembling the Pi
@@ -20,13 +18,13 @@ This guide will go over how to get the hardware set up so it is functional. It w
 Here is a pretty good video of how to assemble the raspberry pi and the touch screen.
 https://www.youtube.com/watch?time_continue=135&v=E1lua5mgrJs&feature=emb_logo[Raspberry Pi 7" Touch Screen LCD - Assembly]
 
-==== Room "Wiring"
+==== Wiring the System
 image::wiring.jpg[Wiring]
 As shown above the wiring for this room is pretty straight forward.
 
 - Have network cables running from a nework switch to the raspberry pi and the Sony Flat Panel Display. This will put the Raspberry Pi and the Flat Panel on the same network for them to communicate.
-- Have three devices (shown in the drawing as computers) that can act as video source devices. Connect these three devices up to the Flat Panel. 
-. With the Sony Flat Panels, Input 1 can be in an awkward location making it difficult to get an HDMI cord in place during installation (especially when using a wall mount). For ease of isntallation please use Inputs 2-4 located on the side of the display for your devices as described in the image above.
+- Have three devices (shown in the drawing as computers) that can act as video source devices. Connect these three devices to the Flat Panel. 
+. We will be using HDMI 1-3 on the TV for this guide.
 
 ==== Configuring the flat panel
 
