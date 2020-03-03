@@ -14,7 +14,7 @@ For the purpose of this demo we will be setting up a single display room that is
 
 This setup guide will help you get your first room up and running. It uses the av-control-api for control and Demo UI. *_Please Note: The UI was created for the purposes of this demo only, it is not code we intend for use in a production environment_*  
 
-The guid is broken down into the following sections:
+The guide is broken down into the following sections:
 
 . Getting the hardware set up
 . Getting the Raspberry Pi OS ready
@@ -49,7 +49,7 @@ In order to get the Pi up and running to control the sample room, the following 
 . sony-control-microservice (sony adcp protocol translation service)
 . Demo UI
 
-We will be using docker-compose to get the required containers up and running on your pi. Please refer to the documentation in xref:startAPI.adoc[Starting the AV API] for more detailed steps on how to use docker-compose to get these containers on your device.
+We will be using docker-compose to get the required containers up and running on your pi. Please refer to the documentation in xref:startAPI.adoc[Deploying Docker Containers] for more detailed steps on how to use docker-compose to get these containers on your device.
 
 
 == Setting up the database and configuring your devices

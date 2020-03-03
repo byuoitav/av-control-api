@@ -38,4 +38,3 @@ After logging into the database please make the following changes:
 *_Congratulations, at this point you should be able to got to `+localhost:8081+` using chromium on the Raspberry Pi to launch the demo UI and test your system._*
 
 If you would like to see the exact contents of the documents created in each of the databases they can be viewed at the url mentioned above or in the xref:DemoDBTables.adoc[Demo DB Tables] document.
-

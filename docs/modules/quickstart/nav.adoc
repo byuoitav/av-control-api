@@ -9,7 +9,7 @@
 ** xref:room_configurations.adoc[room_configurations table]
 ** xref:DemoDBScript.adoc[Demo Couch Documents]
 ** xref:roles.adoc[Device Roles]
-* xref:startAPI.adoc[Starting the AV API]
+* xref:startAPI.adoc[Deploying Docker Containers]
 ** xref:API.adoc[Using the AV API]
 ** xref:APIBody.adoc[API Body & Response]
 * xref:UI.adoc[Using the UI]

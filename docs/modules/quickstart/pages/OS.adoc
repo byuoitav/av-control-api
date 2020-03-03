@@ -33,6 +33,7 @@ systemctl enable docker # make sure it starts at login
 ----
 
 === docker-compose
+
 These are the commands to get https://docs.docker.com/compose/[docker-compose] on your raspberry pi:
 
 [source,bash]
@@ -45,6 +46,7 @@ reboot
 ----
 
 === web browser and window manager
+
 These are the commands to get the chromium web browser and the https://i3wm.org/[i3 window manager] on your raspberry pi:
 
 [source,bash]
