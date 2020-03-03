@@ -1,11 +1,5 @@
 = Frequently Asked Questions
 
 [qanda]
-Can I eat my raspberry pi?::
-  No.
-Why doesn't my raspberry pi taste like raspberry?::
-  umm... please refer to question one.
-What if I already ate my raspberry pi?::
-  You should probably see a doctor. And you will probably need to buy a new one if you want to complete this demo.
 Do I need to use a Sony XBR?::
   You can use other IP controllable displays, but you will need to write the driver that communicates with the device.
