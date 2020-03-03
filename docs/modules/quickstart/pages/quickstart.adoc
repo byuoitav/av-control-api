@@ -14,7 +14,7 @@ For the purpose of this demo we will be setting up a single display room that is
 
 This setup guide will help you get your first room up and running. It uses the av-control-api for control and Demo UI. *_Please Note: The UI was created for the purposes of this demo only, it is not code we intend for use in a production environment_*  
 
-The guid is broken down into the following sections:
+The guide is broken down into the following sections:
 
 . Getting the hardware set up
 . Getting the Raspberry Pi OS ready
