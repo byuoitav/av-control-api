@@ -15,9 +15,7 @@ import (
 
 func main() {
 	var (
-		port     int
-		username string
-		password string
+		port int
 	)
 
 	// variable declarations
@@ -46,7 +44,7 @@ func main() {
 	}
 
 	// create server
-	server := drivers.CreateVideoSwitcherFunc(createVS)
+	server := drivers.CreateVideoSwitcherServer(createVS)
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("failed to listen: %s\n", err)
 		os.Exit(1)

@@ -1,5 +1,4 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/byuoitav/atlona-driver v1.2.0 h1:m6urdKwZfr2UXLFNR3BDb2B0W/Aylhl8Y5Xl4g29CIU=
 github.com/byuoitav/atlona-driver v1.2.0/go.mod h1:XSpZGCyxTJPkdg8sEwPt8AaKCs4nY8G0RlYu6jVXrSg=
 github.com/byuoitav/av-control-api v0.1.0/go.mod h1:EKbFkLF+6X64f6gUmveKxfKobgCVNv7i4qQMJKlz3jY=
 github.com/byuoitav/av-control-api v0.3.2 h1:+V0ElKvgLZtoNM/8SqC9fnrYg+8byKJVFU3XYFy7M9Y=
@@ -10,8 +9,8 @@ github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d h1:F3/vBL2hw+zjCm7
 github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/connpool v0.1.5 h1:r1AY7n1/9jDkZd5nEW8VpB+Oq8fvMmkKzmAiTbi9H90=
 github.com/byuoitav/connpool v0.1.5/go.mod h1:9jVn2IL91Wp6eHEymqxZ5v7zPy07FtIWp/JIfDCMGQY=
-github.com/byuoitav/keydigital-driver v0.0.1 h1:QKfd+s+x+mV8ZpOnzE8mWkZuoxTly90PU281HGK4Wdw=
-github.com/byuoitav/keydigital-driver v0.0.1/go.mod h1:jXt1cJUc5AK4ikzTI0Mf801ciuDyh18MtirHgwU36dI=
+github.com/byuoitav/keydigital-driver v0.0.3 h1:GkUQgdF40VtYxfpe6NOZNa682W/hhl4Hnc5gJ+p72y0=
+github.com/byuoitav/keydigital-driver v0.0.3/go.mod h1:jXt1cJUc5AK4ikzTI0Mf801ciuDyh18MtirHgwU36dI=
 github.com/byuoitav/kramer-driver v0.0.0-20200109164211-27eaf3a97894/go.mod h1:WMvHM0vGixpSux/EpPEPUYZ6pgXjBJyLd4DSh/DRuHw=
 github.com/byuoitav/london-driver v0.0.1/go.mod h1:/mtjR2i0y6jbInJHu7n9KFa1BEvQBTezn276MXdYNRE=
 github.com/byuoitav/nec-driver v1.0.0/go.mod h1:g7EUxjGYKyJLcJ1G3ZXPomTYaP8uedounwkguJBQFUg=
@@ -47,9 +46,7 @@ github.com/mattn/go-isatty v0.0.12 h1:wuysRhFDzyxgEmMf5xjvJ2M9dZoWAXNNr5LSBS7uHX
 github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Kysco4FUpU=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/reiver/go-oi v1.0.0 h1:nvECWD7LF+vOs8leNGV/ww+F2iZKf3EYjYZ527turzM=
 github.com/reiver/go-oi v1.0.0/go.mod h1:RrDBct90BAhoDTxB1fenZwfykqeGvhI6LsNfStJoEkI=
-github.com/reiver/go-telnet v0.0.0-20180421082511-9ff0b2ab096e h1:quuzZLi72kkJjl+f5AQ93FMcadG19WkS7MO6TXFOSas=
 github.com/reiver/go-telnet v0.0.0-20180421082511-9ff0b2ab096e/go.mod h1:+5vNVvEWwEIx86DB9Ke/+a5wBI464eDRo3eF0LcfpWg=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/sevenNt/echo-pprof v0.1.0/go.mod h1:3B009ccno8WPXjh4Ut/B2+FOVt/ulHBV8w/cNdsodXA=
