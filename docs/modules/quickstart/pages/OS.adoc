@@ -13,16 +13,16 @@ To get the Operating System ready, you need a raspberry pi with the following in
 This section will outline the necessary steps to get a raspbian image up and running on your raspberry pi. Here are the steps you take:
 
 * Download the 'Raspbian Buster Lite' image https://www.raspberrypi.org/downloads/raspbian/[here].
-** Default username password is `+pi+` and `+raspberry+`
-** Feel free to update the OS with the latest patches (`+sudo apt upgrade+`)
-* Using Etcher flash the image to an SD card.
-* Place the SD card into the Pi and connect it to the network. Then wait until the Pi boots up.
-** If you use the 'Raspbian Buster with desktop' image, it comes preinstalled with a web browser.
+* Using the https://www.balena.io/etcher/[Balena Etcher utility], flash the downlaoded image to an SD card.
+** If you want to enable ssh by default, now is the time.  With the SD card still connected to your computer, add an empty file called `+ssh+` to the `+boot+` directory on the SD card.
+* Place the SD card into the Pi and connect it to the network and turn in on.
+** The default username is `+Pi+` and the password is `+raspberry+`
+** On first boot you may need to change keyboard settings and enable ssh (if you haven't already).  You can use the built in config utility called `+raspi-config+` (run that command after logging in).
 
 *NOTE: When you are running the following commands you need to prefix each command with `+sudo+` if you get a permission error. Alternatively you can run `+sudo su+` first and all subsequent commands will be run with "root" priviledges.
 
 === docker
-This section will outline the necessary steps to get https://www.docker.com/why-docker[docker] on your raspberry pi. Here are the commands you run:
+These are the commands to get https://www.docker.com/why-docker[docker] on your raspberry pi: 
 
 [source,bash]
 ----
@@ -33,7 +33,7 @@ systemctl enable docker # make sure it starts at login
 ----
 
 === docker-compose
-This section will outline the necessary steps to get https://docs.docker.com/compose/[docker-compose] on your raspberry pi. Here are the commands you run:
+These are the commands to get https://docs.docker.com/compose/[docker-compose] on your raspberry pi:
 
 [source,bash]
 ----
@@ -45,7 +45,7 @@ reboot
 ----
 
 === web browser and window manager
-This section will outline the necessary steps to get the chromium web browser and the https://i3wm.org/[i3 window manager] on your raspberry pi. Here are the commands you run:
+These are the commands to get the chromium web browser and the https://i3wm.org/[i3 window manager] on your raspberry pi:
 
 [source,bash]
 ----
@@ -55,7 +55,7 @@ apt install -y chromium-browser i3 xserver-xorg xinit
 reboot
 ----
 
-Once installed, you will need to setup i3 to launch from the console on login.  First we need to create a the config file for i3:
+Once installed, you will need to setup i3 to launch from the console on login.  First we need to create a config file for i3:
 
 [source,bash]
 ----
