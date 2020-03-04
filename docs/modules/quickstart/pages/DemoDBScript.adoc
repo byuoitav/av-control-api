@@ -17,7 +17,7 @@ If you already have couch installed and running on port 5894, you can use a scri
 .. From the Raspberry pi you can simply run 
 +
 `+wget https://raw.githubusercontent.com/byuoitav/DemoCouchDBSetup/master/Couch_Demo_Set_Up_Script.py+` 
-.. This script will download the .json files from the repo and then inject them into the courch DB. If you already have the json files download, it will use the local versions. Please note that you may first need to install wget if not already installed on your device, you can install it by running `+sudo pip3 install wget+`
+.. This script will download the .json files from the repo and then inject them into the courch DB. If you already have the json files download, it will use the local versions.
 . Run the following command:
 +
 `+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+`
