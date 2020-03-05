@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -27,12 +28,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	create := func(addr string) drivers.Display {
-		return nec.NewProjector(addr, nec.WithDelay(300*time.Second)) // TODO add options
+	create := func(ctx context.Context, addr string) (drivers.Display, error) {
+		return nec.NewProjector(addr, nec.WithDelay(300*time.Second)), err // TODO add options
 	}
 
 	// create server
-	server := drivers.CreateDisplayServer(create)
+	server, err := drivers.CreateDisplayServer(create)
+
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)
 		os.Exit(1)
