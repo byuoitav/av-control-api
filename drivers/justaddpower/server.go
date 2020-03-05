@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -33,10 +34,10 @@ func main() {
 	}
 
 	// import driver library
-	createJ := func(addr string) drivers.VideoSwitcher {
+	createJ := func(ctx context.Context, addr string) (drivers.VideoSwitcher, error) {
 		return &justaddpower.JustAddPowerReciever{
 			Address: addr,
-		}
+		}, nil
 	}
 
 	// create server
