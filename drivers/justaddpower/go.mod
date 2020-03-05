@@ -1,6 +1,6 @@
 module github.com/byuoitav/drivers/justaddpower
 
-go 1.13
+go 1.14
 
 require (
 	github.com/byuoitav/atlona-driver v1.2.0 // indirect
