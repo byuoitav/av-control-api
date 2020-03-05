@@ -32,4 +32,11 @@ func addDeviceRoutes(e *echo.Echo, create CreateDeviceFunc) {
 
 		return c.JSON(http.StatusOK, info)
 	})
+
+	// /healthz simply reports on the server being up and thus returns
+	// a generic string rather than real health data. Real health data
+	// will be left up to each individual driver as necessary.
+	e.GET("/healthz", func(c echo.Context) error {
+		return c.String(http.StatusOK, "It lives!")
+	})
 }
