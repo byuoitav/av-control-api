@@ -7,8 +7,8 @@ import (
 
 type DisplayDSP interface {
 	Device
-	display
-	dsp
+	Display
+	DSP
 }
 
 type CreateDisplayDSPFunc func(context.Context, string) (DisplayDSP, error)

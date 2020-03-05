@@ -9,7 +9,8 @@ import (
 	"github.com/labstack/echo"
 )
 
-type dsp interface {
+type DSP interface {
+	Device
 	GetVolumeByBlock(ctx context.Context, block string) (int, error)
 	GetMutedByBlock(ctx context.Context, block string) (bool, error)
 
@@ -47,10 +48,6 @@ A driver library implmenting this interface should look something like this:
 		// open a connection with the dsp, set the muted status on block...
 	}
 */
-type DSP interface {
-	Device
-	dsp
-}
 
 // CreateDSPFunc is passed to CreateDSPServer and is called to create a new DSP struct whenever the Server needs to communicate with a new DSP address.
 type CreateDSPFunc func(ctx context.Context, addr string) (DSP, error)
