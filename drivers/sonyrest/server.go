@@ -15,7 +15,7 @@ func main() {
 	var port int
 	var psk string
 	pflag.IntVarP(&port, "port", "p", 8080, "port to run the server on")
-	pflag.StringVarP(&psk, "psk", "p", "", "pre-shared key for the device")
+	pflag.StringVarP(&psk, "psk", "k", "", "pre-shared key for the device")
 
 	pflag.Parse()
 
