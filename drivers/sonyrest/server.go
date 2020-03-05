@@ -13,7 +13,9 @@ import (
 
 func main() {
 	var port int
+	var psk string
 	pflag.IntVarP(&port, "port", "p", 8080, "port to run the server on")
+	pflag.StringVarP(&psk, "psk", "p", "", "pre-shared key for the device")
 
 	pflag.Parse()
 
@@ -27,7 +29,7 @@ func main() {
 	create := func(ctx context.Context, addr string) (drivers.DisplayDSP, error) {
 		return &sonyrest.TV{
 			Address: addr,
-			PSK:     "***REMOVED***",
+			PSK:     psk,
 		}, nil
 	}
 
