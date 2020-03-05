@@ -20,11 +20,12 @@ func main() {
 		password string
 	)
 
-	// variable declarations
+	// Variable declarations
 
 	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.StringVarP(&username, "username", "u", "***REMOVED***", "username for device")
 	pflag.StringVarP(&password, "password", "p", "***REMOVED***", "password for device")
+
 	// other flags
 
 	pflag.Parse()
