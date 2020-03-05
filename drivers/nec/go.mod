@@ -3,7 +3,7 @@ module github.com/byuoitav/av-control-api/drivers/nec
 go 1.14
 
 require (
-	github.com/byuoitav/av-control-api v0.3.5
+	github.com/byuoitav/av-control-api v0.3.6
 	github.com/byuoitav/nec-driver v0.1.3
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/spf13/pflag v1.0.5

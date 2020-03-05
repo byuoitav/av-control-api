@@ -1,7 +1,7 @@
 module github.com/byuoitav/drivers/atlona6x2
 
 require (
-	github.com/byuoitav/av-control-api v0.3.5
+	github.com/byuoitav/av-control-api v0.3.6
 	github.com/byuoitav/keydigital-driver v0.0.3
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/spf13/pflag v1.0.5
