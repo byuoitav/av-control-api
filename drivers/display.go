@@ -9,7 +9,10 @@ import (
 	"github.com/labstack/echo"
 )
 
-type display interface {
+// Display represents the interface necessary to implement to fulfill the
+// functions of a display
+type Display interface {
+	Device
 	GetPower(ctx context.Context) (string, error)
 	GetBlanked(ctx context.Context) (bool, error)
 	GetInput(ctx context.Context) (string, error)
@@ -18,11 +21,6 @@ type display interface {
 	SetPower(ctx context.Context, power string) error
 	SetBlanked(ctx context.Context, blanked bool) error
 	SetInput(ctx context.Context, input string) error
-}
-
-type Display interface {
-	Device
-	display
 }
 
 type CreateDisplayFunc func(context.Context, string) (Display, error)

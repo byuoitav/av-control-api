@@ -7,8 +7,8 @@ import (
 
 type VideoSwitcherDSP interface {
 	Device
-	videoSwitcher
-	dsp
+	VideoSwitcher
+	DSP
 }
 
 type CreateVideoSwitcherDSPFunc func(context.Context, string) (VideoSwitcherDSP, error)

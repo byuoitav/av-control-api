@@ -9,18 +9,14 @@ import (
 	"github.com/labstack/echo"
 )
 
-type videoSwitcher interface {
+type VideoSwitcher interface {
+	Device
 	// TODO notes about being 1 indexed
 
 	GetInputByOutput(ctx context.Context, output string) (string, error)
 	SetInputByOutput(ctx context.Context, output, input string) error
 
 	// TODO active input ?
-}
-
-type VideoSwitcher interface {
-	Device
-	videoSwitcher
 }
 
 type CreateVideoSwitcherFunc func(context.Context, string) (VideoSwitcher, error)
