@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/byuoitav/av-control-api v0.3.5 h1:IJBW1G6Xf0eiIb8TAdqwjgQS24GQ09vs3yoKiHAJhXE=
 github.com/byuoitav/av-control-api v0.3.5/go.mod h1:MqT7iIWtz6Wv7fcVUX9P9bA1B+FttJrE9k9lMkLgl7k=
+github.com/byuoitav/av-control-api v0.3.6 h1:fvi1CFhBZMAhrx4xoqDYl9KEXsiQjiersjFFViFbx5k=
+github.com/byuoitav/av-control-api v0.3.6/go.mod h1:MqT7iIWtz6Wv7fcVUX9P9bA1B+FttJrE9k9lMkLgl7k=
 github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d h1:F3/vBL2hw+zjCm78sWss6eCozj5IopBzN2bIHvKj2hw=
 github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/connpool v0.1.5 h1:r1AY7n1/9jDkZd5nEW8VpB+Oq8fvMmkKzmAiTbi9H90=
