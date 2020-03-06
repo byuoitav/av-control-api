@@ -1,0 +1,220 @@
+version: "3"
+services:
+  av-api:
+    image: byuoitav/av-api:${DOCKER_HUB_TAG}
+    ports:
+      - "8000:8000"
+    environment:
+      - SYSTEM_ID=$SYSTEM_ID
+      - BYPASS_AUTH=true
+      - ENDPOINT_AUTHORIZATION_MICROSERVICE=$ENDPOINT_AUTHORIZATION_MICROSERVICE
+      - HUB_ADDRESS=$HUB_ADDRESS
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - CONFIGURATION_DATABASE_MICROSERVICE_ADDRESS=$CONFIGURATION_DATABASE_MICROSERVICE_ADDRESS
+      - DB_ADDRESS=$DB_ADDRESS
+      - DB_USERNAME=$DB_USERNAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  pjlink-microservice:
+    image: byuoitav/pjlink-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8005:8005"
+    environment:
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - BYPASS_AUTH=true
+      - PJLINK_PORT=$PJLINK_PORT
+      - PJLINK_PASS=$PJLINK_PASS
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  configuration-database-microservice:
+    image: byuoitav/configuration-database-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8006:8006"
+    environment:
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - BYPASS_AUTH=true
+      - CONFIGURATION_DATABASE_USERNAME=$CONFIGURATION_DATABASE_USERNAME
+      - CONFIGURATION_DATABASE_PASSWORD=$CONFIGURATION_DATABASE_PASSWORD
+      - CONFIGURATION_DATABASE_HOST=$CONFIGURATION_DATABASE_HOST
+      - CONFIGURATION_DATABASE_PORT=$CONFIGURATION_DATABASE_PORT
+      - CONFIGURATION_DATABASE_NAME=$CONFIGURATION_DATABASE_NAME
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  sony-control-microservice:
+    image: byuoitav/sony-control-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8007:8007"
+    environment:
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - BYPASS_AUTH=true
+      - SONY_TV_PSK=$SONY_TV_PSK
+      - DB_ADDRESS=$DB_ADDRESS
+      - DB_USERNAME=$DB_USERNAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  london-audio-microservice:
+    image: byuoitav/london-audio-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8009:8009"
+    environment:
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - BYPASS_AUTH=true
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  pulse-eight-neo-microservice:
+    image: byuoitav/pulse-eight-neo-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8011:8011"
+    environment:
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - BYPASS_AUTH=true
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  kramer-microservice:
+    image: byuoitav/kramer-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8014:8014"
+    environment:
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - BYPASS_AUTH=true
+      - VIA_USERNAME=$VIA_USERNAME
+      - VIA_PASSWORD=$VIA_PASSWORD
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  adcp-control-microservice:
+    image: byuoitav/adcp-control-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8012:8012"
+    environment:
+      - BYPASS_AUTH=true
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - DB_ADDRESS=$DB_ADDRESS
+      - DB_USERNAME=$DB_USERNAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  touchpanel-ui-microservice:
+    image: byuoitav/touchpanel-ui-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8888:8888"
+    environment:
+      - BYPASS_AUTH=true
+      - SYSTEM_ID=$SYSTEM_ID
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - HELP_SLACKBOT_WEBHOOK=$HELP_SLACKBOT_WEBHOOK
+      - UI_CONFIGURATION_ADDRESS=$UI_CONFIGURATION_ADDRESS
+      - HUB_ADDRESS=$HUB_ADDRESS
+      - DB_ADDRESS=$DB_ADDRESS
+      - DB_USERNAME=$DB_USERNAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  central-event-hub:
+    image: byuoitav/central-event-hub:${DOCKER_HUB_TAG}
+    ports:
+      - "7100:7100"
+    environment:
+      - BYPASS_AUTH=true
+      - SYSTEM_ID=$SYSTEM_ID
+      - DEV_HUB=true
+      - STOP_REPLICATION=true
+      - ROOM_SYSTEM=true
+      - CONFIGURATION_DATABASE_MICROSERVICE_ADDRESS=$CONFIGURATION_DATABASE_MICROSERVICE_ADDRESS
+      - DB_ADDRESS=$DB_ADDRESS
+      - DB_USERNAME=$DB_USERNAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    tty: true
+  event-translator-microservice:
+    image: byuoitav/event-translator-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "7002:7002"
+    environment:
+      - BYPASS_AUTH=true
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - ELASTIC_API_EVENTS=$ELASTIC_API_EVENTS
+      - HUB_ADDRESS=$HUB_ADDRESS
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+    restart: always
+    tty: true
+  shure-audio-microservice:
+    image: byuoitav/shure-audio-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8013:8013"
+    environment:
+      - BYPASS_AUTH=true
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - ELASTIC_API_EVENTS=$ELASTIC_API_EVENTS
+      - ELASTIC_API_EVENTS_DEV=$ELASTIC_API_EVENTS_DEV
+      - CONFIGURATION_DATABASE_MICROSERVICE_ADDRESS=$CONFIGURATION_DATABASE_MICROSERVICE_ADDRESS
+      - PI_HOSTNAME=$SYSTEM_ID
+      - SYSTEM_ID=$SYSTEM_ID
+      - HUB_ADDRESS=$HUB_ADDRESS
+      - STOP_REPLICATION="true"
+    network_mode: "host"
+  just-add-power-hdip-ms:
+    image: byuoitav/just-add-power-hdip-ms:${DOCKER_HUB_TAG}
+    ports:
+      - "8022:8022"
+    environment:
+      - BYPASS_AUTH=true
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - PI_HOSTNAME=$SYSTEM_ID
+      - STOP_REPLICATION="true"
+      - SYSTEM_ID=$SYSTEM_ID
+    network_mode: "host"
+    tty: true
+  atlona-switcher-ms:
+    image: byuoitav/atlona-switcher-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8022:8022"
+    environment:
+      - BYPASS_AUTH=true
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - SYSTEM_ID=$SYSTEM_ID
+      - ATLONA_AUTH=$ATLONA_AUTH
+      - PI_HOSTNAME=$SYSTEM_ID
+    network_mode: "host"
+    tty: true
+  qsc-ms:
+    image: byuoitav/qsc-microservice:${DOCKER_HUB_TAG}
+    ports:
+      - "8016:8016"
+    environment:
+      - BYPASS_AUTH=true
+      - LOCAL_ENVIRONMENT=$LOCAL_ENVIRONMENT
+      - SYSTEM_ID=$SYSTEM_ID
+    network_mode: "host"
+    tty: true
+  crestron-switcher-ms:
+    image: byuoitav/crestron-switcher-ms:${DOCKER_HUB_TAG}
+    ports:
+      - "8031:8031"
+    environment:
+      - SYSTEM_ID=$SYSTEM_ID
+      - BYPASS_AUTH=true
+      - ROOM_SYSTEM=true
+    network_mode: "host"
+    tty: true
