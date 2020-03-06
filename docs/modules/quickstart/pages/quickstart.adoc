@@ -2,19 +2,18 @@
 
 This Quick Start guide in intended to help you get a test environment up and running using the av-control-api to communicate with devices in your classroom. The project, and this guide, uses Docker to distribute pre-compiled microservices.  Docker makes it easy to containerize, distribute, and update our systems. You are of course able to pull down the repositories, compile the binaries, and launch the microservices in any way that works for your environment.  But feel free to use the already packaged Docker containers ditributed as part of the project. For additional information about Docker please refer to https://docs.docker.com/engine/docker-overview/[Docker's Docs].
 
+== AV-API Demo
 
-== Demo Solution
-
-For the purpose of this demo we will be setting up a single display room that is controlled by a Raspberry Pi computer running the AV-API. The raspberry pi will act as the room's control system and be able to control the input being shown on the display as well as the volume of the display. For this demo you will need the following materials:
+For the purpose of this demo we will be setting up a single display room that is controlled by a Raspberry Pi computer running the AV-API code. The Raspberry Pi will act as the room's control system and be able to control the input being shown on the display as well as the volume of the display. You can call the API directly on the pi, or you can use a built UI provided by the demo.  For this demo you will need the following materials:
 
 * https://www.raspberrypi.org/products/raspberry-pi-4-model-b/[Raspberry Pi 4 Model B]
 * https://www.raspberrypi.org/products/raspberry-pi-touch-display/[7-inch Rapsberry Pi Touch Panel]
 * An IP controllable display (one which we xref:hardwareList.adoc[have already written a driver for])
 ** For demonstration purposes we will be using a https://www.sony.com/electronics/televisions/xbr-x800g-x805g-x807g-series[Sony XBR Series Television (XBR-800G)]
+ 
+*_Please Note: The UI was created for the purposes of this demo only, it is not code we intend for use in a production environment_* 
 
-This setup guide will help you get your first room up and running. It uses the av-control-api for control and Demo UI. *_Please Note: The UI was created for the purposes of this demo only, it is not code we intend for use in a production environment_*  
-
-The guide is broken down into the following sections:
+This quick start guide is broken down into the following sections:
 
 . Getting the hardware set up
 . Getting the Raspberry Pi OS ready
@@ -30,7 +29,7 @@ There are only three hardware components for this setup: the Raspbery Pi, a touc
 
 == Getting the OS ready
 
-To get the Operating System ready to go for this solution you need a raspberry pi with the following installed on it:
+To get the Operating System ready for this demo, the Raspberry Pi will need the following installed on it:
 
 * Raspbian Lite
 * Docker
@@ -42,15 +41,14 @@ For a detailed step-by-step guide to get these installed on your raspberry pi, p
 
 == Downloading and Starting Necesary Docker Containers
 
-In order to get the Pi up and running to control the sample room, the following containers are needed:
+In order to get the Raspberry Pi up and running with the control code, the following Docker containers are needed:
 
 . couch-db (for configuration storage)
 . av-api (base api engine)
 . sony-control-microservice (sony adcp protocol translation service)
 . Demo UI
 
-We will be using docker-compose to get the required containers up and running on your pi. Please refer to the documentation in xref:startAPI.adoc[Deploying Docker Containers] for more detailed steps on how to use docker-compose to get these containers on your device.
-
+We will be using docker-compose to download and run required containers on your Pi. Please refer to the documentation in xref:startAPI.adoc[Deploying Docker Containers] for more detailed steps on how to use docker-compose to get these containers on your device.
 
 == Setting up the database and configuring your devices
 
@@ -64,14 +62,11 @@ We use CouchDB as the database for our solution. Within CouchDB there are five i
 
 The exact documents required for this demo are available by running the python script found in xref:DemoDBScript.adoc[Demo DB Script].
 
-For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, 
-please refer to the xref:DB.adoc[Complete Database Guide]
+For a more detailed documentation on the content of each of these tables, their purpose, and how they relate to each other, please refer to the xref:DB.adoc[Complete Database Guide]
 
 == Testing the API
 
-Once you have followed the previous steps, you should be set to begin testing the API. Attempt to hit the API endpoints using a program like
-Postman. If it is successful then you have successfully set up your pi to control the devices in your room. For more detailed documentation
-on how to test the API enpoints please refer to the xref:API.adoc[Complete API Testing Guide]
+Once you have followed the previous steps, you should be ready to begin testing the API. We suggest using a program program like Postman to test the endpoints. For more detailed documentation on how to test the API enpoints please refer to the xref:API.adoc[Complete API Testing Guide]
 
 == Using the UI
 
@@ -81,6 +76,4 @@ For information on how the UI works click xref:UI.adoc[here].
 
 == Exploring BYU's Implementation
 
-Now that you have a high level understanding of how everything is connected, there are countless ways to implement this solution for your organization. If you would liek to learn more about how Brigham young University has implemented this solution on their campus go xref:byuArchitecture.adoc[here].
-
-
+Now that you have a high level understanding of how everything is connected, there are countless ways to implement this solution for your organization. If you would like to learn more about how Brigham young University has implemented this solution on their campus go xref:byuArchitecture.adoc[here].
