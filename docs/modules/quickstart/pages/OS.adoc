@@ -14,12 +14,12 @@ This section will outline the necessary steps to get a raspbian image up and run
 
 * Download the 'Raspbian Buster Lite' image https://www.raspberrypi.org/downloads/raspbian/[here].
 * Using the https://www.balena.io/etcher/[Balena Etcher utility], flash the downlaoded image to an SD card.
-** If you want to enable ssh by default, now is the time.  With the SD card still connected to your computer, add an empty file called `+ssh+` to the `+boot+` directory on the SD card.
-* Place the SD card into the Pi and connect it to the network and turn in on.
-** The default username is `+Pi+` and the password is `+raspberry+`
-** On first boot you may need to change keyboard settings and enable ssh (if you haven't already).  You can use the built in config utility called `+raspi-config+` (run that command after logging in).
+** If you want to enable ssh by default, now is a good time.  After the image is transferred to the SD card, and the card is still connected to your computer, add an empty file called `+ssh+` to the `+boot+` directory on the SD card.
+* Place the SD card into the Pi, connect it to the network and turn in on.
+** The default username is `+pi+` and the password is `+raspberry+`
+** On first boot you may need to change keyboard settings and enable ssh (if you haven't already).  You can use the built in config utility called `+raspi-config+` to change these settings (and more). Simply run `+raspi-config+` after logging in.
 
-*NOTE: When you are running the following commands you need to prefix each command with `+sudo+` if you get a permission error. Alternatively you can run `+sudo su+` first and all subsequent commands will be run with "root" priviledges.
+*NOTE: When running most of the commands in this guide, you will need to prefix each command with `+sudo+` to avoid permission errors. Alternatively you can run `+sudo su+` first and all subsequent commands will be run with "root" priviledges.
 
 === docker
 These are the commands to get https://www.docker.com/why-docker[docker] on your raspberry pi: 
@@ -57,7 +57,9 @@ apt install -y chromium-browser i3 xserver-xorg xinit
 reboot
 ----
 
-Once installed, you will need to setup i3 to launch from the console on login.  First we need to create a config file for i3:
+Once i3 is installed, you will need to set it up to launch on login.  
+
+First we need to create i3's config file:
 
 [source,bash]
 ----
@@ -82,7 +84,7 @@ Once created, you need to give the file execute permissions:
 chmod +x ~/.xinitrc
 ----
 
-And last, you need to create a file called .bash_profile (also in the home directory) with the following contents.  This will launch i3 whenever you login as the `+pi+` user from the console (not ssh).
+And last, you need to create a file called .bash_profile (also in the home directory) with the following contents.  This will launch i3 whenever you login as the `+pi+` user from the console (but not through ssh).
 
 ----
 if [[ -z $DISPLAY && $(tty) == /dev/tty1 ]]; then
