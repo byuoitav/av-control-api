@@ -4,10 +4,10 @@ We will be using docker-compose to get the required contianers up and running on
 
 Please follow the steps below:
 
-. `+ssh+` into the Raspberry Pi by running `+ssh [ip-address-of-pi]+`
-.. If there is default username and password the username is "pi" and the password is "raspberry"
-. Use the the text editor of your choice to add the text below to a file named `+docker-compose.yml+`
-.. We rcommend creating a sub-directory in your home directory for the following files and tasks.
+. First we recommend creating a sub-directory in your home directory for the following files and tasks.
+. Login to the Pi (trough the local console or through ssh - `+ssh pi@[ip-address-of-pi]+`)
+.. Default username is "pi" and the password is "raspberry"
+. Use the the text editor of your choice to add the text below to a file named `+docker-compose.yml+` (if you don't have a favorite, try `+nano docker-compose.yml+` to create and edit the file)
 +
 ----
 version: '3'
@@ -57,8 +57,9 @@ services:
 ----
 
 . After saving the file, run `+docker-compose up -d+`. The `+-d+` attribute will run the docker-compose command in the background (detached mode).
+.. This donloads the dockers container specified in the compose file and starts them up.
+.. Once downloaded, you can simply use `+docker-compose start+` when you need to start them up again.
 . The docker containers are now running. You can verify that the containers are up by using `+docker ps+`
-
 
 For those that may not be very familiar with docker-compose there are a few commands that you should be aware of:
 
@@ -68,7 +69,7 @@ For those that may not be very familiar with docker-compose there are a few comm
 . *_Warning_* : Please be careful when you use `+docker-compose down+`. This not only stops the contaners but also removes the containers. Any changes that are made to the database will be removed with this command.
 
 
-If you are interested in looking at the code found in each of these containers, the repositories are found below.:
+Remember that the code is running inside the docker containers as a compiled binary.  If you are interested in looking at the code found in each of these containers, the repositories are found below.:
 
 . https://github.com/byuoitav/couch-db-repl[couch-db (for configuration storage)]
 . https://github.com/byuoitav/av-api[av-api (base api engine)]
@@ -76,10 +77,8 @@ If you are interested in looking at the code found in each of these containers, 
 . https://github.com/byuoitav/demoUI[Demo UI]
 
 
-Once you have the couch-db container running, you should be able to access it by going to `+http://[pi-ip-addr]:5984/_utils+`  in a web browser, using the ip address of your pi.
+Once you have the couch-db container running, you should be able to access it by going to `+http://[pi-ip-addr]:5984/_utils+`  in a web browser.
 
-At this point your Pi should have all the code it needs in order to control your TV.  But now we need to create the database entries that configure how the rooms works and what's in it.  These database entries also used by the demo UI tpo build the interface to control the room.
+At this point your Pi should have all the code it needs in order to control your TV.  But now we need to create the database entries that configure how the rooms works and what's in it.  These database entries are also used by the demo UI tpo build the interface to control the room.
 
 You will need to create several databases and documents for a base configuration. These documents will be detailed in the next section: xref:DB.adoc[Complete Database Guide]
-
-After you have added the required documents in your database you are ready to test the API endpoints! Please refer to the xref:API.adoc[Complete API Testing Guide] for more information.

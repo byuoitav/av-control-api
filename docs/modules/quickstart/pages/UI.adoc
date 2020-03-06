@@ -1,6 +1,6 @@
 == Demo UI
 
-With the Demo UI docker container running you can view it at `+localhost:8081+`.
+With the Demo UI docker container running you can view it at `+localhost:8081+` using the chromium-browser running on the pi.
 
 Here is a screenshot of the UI that has been created for the purposes of this demo.
 

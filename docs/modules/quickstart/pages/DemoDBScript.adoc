@@ -5,20 +5,20 @@ Before running this script you first need to create an admin account for your co
 . View your couch DB by going to `+localhost:5984/_utils+` on the pi, or `+[pi-ip-address]:5984/_utils+` on a computer on the same network.
 . The database currently does not have an admin user, so you will automatically be "logged" in to the DB.
 . Click the user icon on the bottom of the menu on the left side of the screen (please see screenshot below).
-. Add a new admin user with a username of admin and password of "AVAPIPASSWORD". These are the username and password used when running the script to load the DB.
+. Add a new admin user with the username "admin" and the password "AVAPIPASSWORD". These are the username and password used when running the following script to load the DB.  It is also the username and password used by the AV-API code to access the configurations.
 
 image::Couch.jpg[Couch DB]
 
-We will now create the DB entries needed for this demo. We will dowload some sample file to kickstart the entries.  But there will be a few changes that must be made in each of the documents to make it work for your specific devices (i.e. IP address).
+We will now create the DB entries needed for this demo. We will dowload some sample file to kickstart the entries.  But there will be a few changes that must be made in each of the documents to make it work for your specific devices.
 
-If you already have couch installed and running on port 5894, you can use a script to automatically create the tables and documents required for the demo. Steps for using this script are found below:
+With CouchDB installed and running on port 5894, you can use the following script to automatically create the tables and documents required for the demo. Steps for using this script are found below:
 
-. Download the Couch_Demo_Set_Up_Script from the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository in github.
-.. From the Raspberry pi you can simply run 
+. Download the Couch_Demo_Set_Up_Script from the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository in github to the Pi.
+.. From the Raspberry Pi you can simply run 
 +
 `+wget https://raw.githubusercontent.com/byuoitav/DemoCouchDBSetup/master/Couch_Demo_Set_Up_Script.py+` 
 .. This script will download the .json files from the repo and then inject them into the courch DB. If you already have the json files download, it will use the local versions.
-. Run the following command:
+. T execute the script, run the following command on the Pi:
 +
 `+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+`
 
@@ -31,10 +31,10 @@ The username and password for your database is mentioned above.
 
 After logging into the database please make the following changes:
 
-. In the devices database the following changes are needed:
-.. open the DEMO-123-CP1 document and update the address attribute to the IP address of your pi.
-.. open the DEMO-123-D1 document and update the address attribute to the IP address of your flatpanel
+. In the "devices" database, the following changes are needed:
+.. open the DEMO-123-CP1 document and update the address attribute to the IP address of your Raspberry Pi.
+.. open the DEMO-123-D1 document and update the address attribute to the IP address of your flatpanel TV
 
-*_Congratulations, at this point you should be able to got to `+localhost:8081+` using chromium on the Raspberry Pi to launch the demo UI and test your system._*
+*_Congratulations, at this point the code is up and running and your room is configured.  You should be ready move on to the testing sections (xref:API.adoc[Testing the API] and xref:UI.adoc[Demo UI])_*
 
-If you would like to see the exact contents of the documents created in each of the databases they can be viewed at the url mentioned above or in the xref:DemoDBTables.adoc[Demo DB Tables] document.
+Feel free to explore the contents of the documents created in your Couch DB.  For an in depth discussion of the documents, please visit the xref:DemoDBTables.adoc[Demo DB Tables] page of this guide.
