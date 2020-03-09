@@ -16,6 +16,7 @@ import (
 	"github.com/byuoitav/common/status/databasestatus"
 	"github.com/byuoitav/common/v2/auth"
 	"github.com/byuoitav/common/v2/events"
+	"github.com/labstack/echo"
 )
 
 func main() {
@@ -37,6 +38,9 @@ func main() {
 	port := ":8000"
 	router := common.NewRouter()
 
+	router.GET("/healthz", func(c echo.Context) error {
+		return c.String("Up an running!")
+	})
 	router.GET("/mstatus", databasestatus.Handler)
 	router.GET("/status", databasestatus.Handler)
 
