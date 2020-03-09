@@ -39,7 +39,7 @@ func main() {
 	router := common.NewRouter()
 
 	router.GET("/healthz", func(c echo.Context) error {
-		return c.String("Up an running!")
+		return c.String(http.StatusOK, "Up an running!")
 	})
 	router.GET("/mstatus", databasestatus.Handler)
 	router.GET("/status", databasestatus.Handler)
