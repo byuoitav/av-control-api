@@ -60,38 +60,38 @@ docker: docker-x86 docker-arm
 
 docker-x86: $(NAME)-bin
 ifeq "$(BRANCH)" "master"
-	$(eval BRANCH=development)
+	$(eval BRANCH=latest)
 endif
 ifeq "$(BRANCH)" "production"
-	$(eval BRANCH=latest)
+	$(eval BRANCH=production)
 endif
 	$(DOCKER_BUILD) --build-arg NAME=$(NAME) -f $(DOCKER_FILE) -t $(ORG)/$(NAME):$(BRANCH) .
 	@echo logging in to dockerhub...
 	@$(DOCKER_LOGIN)
 	$(DOCKER_PUSH) $(ORG)/$(NAME):$(BRANCH)
 ifeq "$(BRANCH)" "latest"
-	$(eval BRANCH=production)
+	$(eval BRANCH=master)
 endif
 ifeq "$(BRANCH)" "development"
-	$(eval BRANCH=master)
+	$(eval BRANCH=development)
 endif
 
 docker-arm: $(NAME)-arm
 ifeq "$(BRANCH)" "master"
-	$(eval BRANCH=development)
+	$(eval BRANCH=latest)
 endif
 ifeq "$(BRANCH)" "production"
-	$(eval BRANCH=latest)
+	$(eval BRANCH=production)
 endif
 	$(DOCKER_BUILD) --build-arg NAME=$(NAME) -f $(DOCKER_FILE_ARM) -t $(ORG)/rpi-$(NAME):$(BRANCH) .
 	@echo logging in to dockerhub...
 	@$(DOCKER_LOGIN)
 	$(DOCKER_PUSH) $(ORG)/rpi-$(NAME):$(BRANCH)
 ifeq "$(BRANCH)" "latest"
-	$(eval BRANCH=production)
+	$(eval BRANCH=master)
 endif
 ifeq "$(BRANCH)" "development"
-	$(eval BRANCH=master)
+	$(eval BRANCH=development)
 endif
 
 ### deps
