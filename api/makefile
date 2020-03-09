@@ -4,7 +4,7 @@ BRANCH=$(shell echo $(CIRCLE_BRANCH))
 NAME=$(shell echo $(CIRCLE_PROJECT_REPONAME))
 
 ifeq ($(NAME),)
-NAME := $(shell basename "$(PWD)")
+NAME := av-api
 endif
 
 ifeq ($(ORG),)
