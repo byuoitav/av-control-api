@@ -1,6 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/byuoitav/atlona-driver v1.4.2 h1:zQrEQGlo+ArkMY0Nyy6nJt30gZIRZEodZaC6xCCMAeM=
-github.com/byuoitav/atlona-driver v1.4.2/go.mod h1:GLlUbcTMklgAk+8QA0MqQSUnpm8fAxOi/u5xLLXaXJs=
+github.com/byuoitav/atlona-driver v1.4.3 h1:xBeEu3xIxGnnmf+5KL3ZJygakO2IuL3CBwRzRMEbTss=
+github.com/byuoitav/atlona-driver v1.4.3/go.mod h1:GLlUbcTMklgAk+8QA0MqQSUnpm8fAxOi/u5xLLXaXJs=
 github.com/byuoitav/atlona-switcher-microservice v0.0.0-20191126173619-b128fd301655/go.mod h1:ExUW9dnW/M+r88tpEarzK13TQf0j/S/w3hVY8rF8QVs=
 github.com/byuoitav/av-control-api v0.3.6 h1:fvi1CFhBZMAhrx4xoqDYl9KEXsiQjiersjFFViFbx5k=
 github.com/byuoitav/av-control-api v0.3.6/go.mod h1:MqT7iIWtz6Wv7fcVUX9P9bA1B+FttJrE9k9lMkLgl7k=
