@@ -96,6 +96,23 @@ module "atlona_driver_prd" {
   ]
 }
 
+module "justaddpower_driver_prd" {
+  source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
+
+  // required
+  name           = "justaddpower-driver-prd"
+  image          = "docker.pkg.github.com/byuoitav/av-control-api/justaddpower-driver"
+  image_version  = "v0.1.1"
+  container_port = 8080
+  repo_url       = "https://github.com/byuoitav/av-control-api"
+
+  // optional
+  image_pull_secret = "github-docker-registry"
+  container_args = [
+    "--port", 8080
+  ]
+}
+
 module "sonyrest_driver_prd" {
   source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
 
