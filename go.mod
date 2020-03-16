@@ -3,10 +3,13 @@ module github.com/byuoitav/av-control-api
 go 1.14
 
 require (
+	github.com/byuoitav/atlona-driver v1.4.3
+	github.com/byuoitav/qsc-driver v0.1.4 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
+	github.com/spf13/pflag v1.0.5
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	go.uber.org/multierr v1.4.0 // indirect
 	go.uber.org/zap v1.13.0
