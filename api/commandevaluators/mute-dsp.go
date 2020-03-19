@@ -19,6 +19,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
 	ei "github.com/byuoitav/common/v2/events"
@@ -28,7 +29,7 @@ import (
 type MuteDSP struct{}
 
 // Evaluate takes the information given and generates a list of actions.
-func (p *MuteDSP) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *MuteDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating PUT body for \"Mute\" command in DSP context...")
 
@@ -163,7 +164,7 @@ func (p *MuteDSP) GetIncompatibleCommands() []string {
 
 // GetGeneralMuteRequestActionsDSP assumes only one DSP, but allows for the possiblity of multiple devices not routed through the DSP
 //room-wide mute requests DO NOT include mics
-func GetGeneralMuteRequestActionsDSP(dbRoom structs.Room, room base.PublicRoom, eventInfo ei.Event, destination base.DestinationDevice) ([]base.ActionStructure, error) {
+func GetGeneralMuteRequestActionsDSP(dbRoom structs.Room, room rest.PublicRoom, eventInfo ei.Event, destination base.DestinationDevice) ([]base.ActionStructure, error) {
 
 	log.L.Info("[command_evaluators] Generating actions for room-wide \"Mute\" request")
 
@@ -205,7 +206,7 @@ func GetGeneralMuteRequestActionsDSP(dbRoom structs.Room, room base.PublicRoom, 
 
 // GetMicMuteAction takes the room information and a microphone and generates an action.
 //assumes the mic is only connected to a single DSP
-func GetMicMuteAction(dbRoom structs.Room, mic structs.Device, room base.PublicRoom, eventInfo ei.Event) (base.ActionStructure, error) {
+func GetMicMuteAction(dbRoom structs.Room, mic structs.Device, room rest.PublicRoom, eventInfo ei.Event) (base.ActionStructure, error) {
 
 	log.L.Infof("[command_evaluators] Generating action for command \"Mute\" on microphone %s", mic.Name)
 
@@ -259,7 +260,7 @@ func GetMicMuteAction(dbRoom structs.Room, mic structs.Device, room base.PublicR
 }
 
 // GetDSPMediaMuteAction generates a list of actions based on information about the room and the DSP.
-func GetDSPMediaMuteAction(dbRoom structs.Room, dsp structs.Device, room base.PublicRoom, eventInfo ei.Event, deviceSpecific bool) ([]base.ActionStructure, error) {
+func GetDSPMediaMuteAction(dbRoom structs.Room, dsp structs.Device, room rest.PublicRoom, eventInfo ei.Event, deviceSpecific bool) ([]base.ActionStructure, error) {
 
 	log.L.Info("[command_evaluators] Generating action for command Mute on media routed through DSP")
 
@@ -309,7 +310,7 @@ func GetDSPMediaMuteAction(dbRoom structs.Room, dsp structs.Device, room base.Pu
 }
 
 // GetDisplayMuteAction generates an action based on the information about the room and display.
-func GetDisplayMuteAction(device structs.Device, room base.PublicRoom, eventInfo ei.Event, deviceSpecific bool) (base.ActionStructure, error) {
+func GetDisplayMuteAction(device structs.Device, room rest.PublicRoom, eventInfo ei.Event, deviceSpecific bool) (base.ActionStructure, error) {
 
 	log.L.Infof("Generating action for command \"Mute\" for device %s external to DSP", device.Name)
 

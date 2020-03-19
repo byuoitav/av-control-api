@@ -8,6 +8,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
@@ -19,7 +20,7 @@ type PowerOnDefault struct {
 }
 
 // Evaluate fulfills the CommmandEvaluation evaluate requirement.
-func (p *PowerOnDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
+func (p *PowerOnDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
 	count = 0
 
 	log.L.Info("[command_evaluators] Evaluating for PowerOn command.")
@@ -130,7 +131,7 @@ func (p *PowerOnDefault) GetIncompatibleCommands() (incompatableActions []string
 }
 
 // Evaluate devices just pulls out the process we do with the audio-devices and displays into one function.
-func (p *PowerOnDefault) evaluateDevice(device base.Device,
+func (p *PowerOnDefault) evaluateDevice(device rest.Device,
 	actions []base.ActionStructure,
 	devices []structs.Device,
 	room string,

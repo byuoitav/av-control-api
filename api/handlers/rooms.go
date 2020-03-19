@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/av-control-api/api/helpers"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/inputgraph"
@@ -63,7 +63,7 @@ func SetRoomState(ctx echo.Context) error {
 
 	log.L.Infof("%s", color.HiGreenString("[handlers] putting room changes..."))
 
-	var roomInQuestion base.PublicRoom
+	var roomInQuestion rest.PublicRoom
 	err := ctx.Bind(&roomInQuestion)
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, helpers.ReturnError(err))
@@ -71,7 +71,7 @@ func SetRoomState(ctx echo.Context) error {
 
 	roomInQuestion.Room = room
 	roomInQuestion.Building = building
-	var report base.PublicRoom
+	var report rest.PublicRoom
 
 	gctx, cancel := context.WithTimeout(context.TODO(), timeout)
 	defer cancel()

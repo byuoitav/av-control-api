@@ -20,6 +20,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
 
@@ -30,7 +31,7 @@ import (
 type SetVolumeDSP struct{}
 
 // Evaluate generates a list of actions based on the room information.
-func (p *SetVolumeDSP) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *SetVolumeDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating SetVolume command in DSP context...")
 
@@ -171,7 +172,7 @@ func (p *SetVolumeDSP) GetIncompatibleCommands() (incompatibleActions []string) 
 }
 
 // GetGeneralVolumeRequestActionsDSP generates a list of actions based on the room and DSP info.
-func GetGeneralVolumeRequestActionsDSP(dbRoom structs.Room, room base.PublicRoom, eventInfo ei.Event) ([]base.ActionStructure, error) {
+func GetGeneralVolumeRequestActionsDSP(dbRoom structs.Room, room rest.PublicRoom, eventInfo ei.Event) ([]base.ActionStructure, error) {
 
 	log.L.Info("[command_evaluators] Generating actions for room-wide \"SetVolume\" request")
 
@@ -218,7 +219,7 @@ func GetGeneralVolumeRequestActionsDSP(dbRoom structs.Room, room base.PublicRoom
 // GetMicVolumeAction generates an action based on the room, microphone and event information.
 //we assume microphones are only connected to a DSP
 //commands regarding microphones are only issued to DSP
-func GetMicVolumeAction(dbRoom structs.Room, mic structs.Device, room base.PublicRoom, eventInfo ei.Event, volume int) (base.ActionStructure, error) {
+func GetMicVolumeAction(dbRoom structs.Room, mic structs.Device, room rest.PublicRoom, eventInfo ei.Event, volume int) (base.ActionStructure, error) {
 
 	log.L.Info("[command_evaluators] Identified microphone volume request")
 
@@ -285,7 +286,7 @@ func GetMicVolumeAction(dbRoom structs.Room, mic structs.Device, room base.Publi
 }
 
 // GetDSPMediaVolumeAction generates a list of actions based on the room, DSP, and event information.
-func GetDSPMediaVolumeAction(dbRoom structs.Room, dsp structs.Device, room base.PublicRoom, eventInfo ei.Event, volume int) ([]base.ActionStructure, error) { //commands are issued to whatever port doesn't have a mic connected
+func GetDSPMediaVolumeAction(dbRoom structs.Room, dsp structs.Device, room rest.PublicRoom, eventInfo ei.Event, volume int) ([]base.ActionStructure, error) { //commands are issued to whatever port doesn't have a mic connected
 	log.L.Infof("[command_evaluators] %v", volume)
 
 	log.L.Info("[command_evaluators] Generating action for command SetVolume on media routed through DSP")
@@ -344,7 +345,7 @@ func GetDSPMediaVolumeAction(dbRoom structs.Room, dsp structs.Device, room base.
 }
 
 // GetDisplayVolumeAction generates an action based on the room, display and event information.
-func GetDisplayVolumeAction(device structs.Device, room base.PublicRoom, eventInfo ei.Event, volume int) (base.ActionStructure, error) { //commands are issued to devices, e.g. they aren't connected to the DSP
+func GetDisplayVolumeAction(device structs.Device, room rest.PublicRoom, eventInfo ei.Event, volume int) (base.ActionStructure, error) { //commands are issued to devices, e.g. they aren't connected to the DSP
 
 	log.L.Infof("[command_evaluators] Generating action for SetVolume on device %s external to DSP", device.Name)
 

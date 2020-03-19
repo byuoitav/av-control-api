@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/log"
 	"github.com/byuoitav/common/structs"
@@ -31,7 +32,7 @@ e) microphones are not affected by actions generated in this command evaluator
 type ChangeAudioInputDSP struct{}
 
 // Evaluate verifies the information for a ChangeAudioInputDSP object and generates action based on the command.
-func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating PUT body for \"ChangeInput\" command in an audio DSP context...")
 
@@ -171,7 +172,7 @@ func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room base.PublicRoom
 }
 
 // GetDSPMediaInputAction determines the devices affected and actions needed for this command.
-func GetDSPMediaInputAction(dbRoom structs.Room, room base.PublicRoom, event ei.Event, input string, deviceSpecific bool, destination base.DestinationDevice) (base.ActionStructure, error) {
+func GetDSPMediaInputAction(dbRoom structs.Room, room rest.PublicRoom, event ei.Event, input string, deviceSpecific bool, destination base.DestinationDevice) (base.ActionStructure, error) {
 
 	//get DSP
 	dsps := FilterDevicesByRole(dbRoom.Devices, "DSP")

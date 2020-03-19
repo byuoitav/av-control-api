@@ -9,6 +9,7 @@ import (
 	"github.com/byuoitav/av-control-api/api/actionreconcilers"
 	"github.com/byuoitav/av-control-api/api/base"
 	ce "github.com/byuoitav/av-control-api/api/commandevaluators"
+	"github.com/byuoitav/av-control-api/api/rest"
 	se "github.com/byuoitav/av-control-api/api/statusevaluators"
 	"github.com/byuoitav/common/log"
 	"github.com/byuoitav/common/structs"
@@ -16,7 +17,7 @@ import (
 )
 
 //GenerateActions evaluates and validates each command in the configuration.
-func GenerateActions(dbRoom structs.Room, bodyRoom base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func GenerateActions(dbRoom structs.Room, bodyRoom rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Infof("%s", color.HiBlueString("[state] generating actions..."))
 

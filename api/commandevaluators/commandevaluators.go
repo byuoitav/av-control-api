@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
 )
@@ -19,7 +20,7 @@ type CommandEvaluator interface {
 			actions based on the contents of the struct. It also returns the number of status
 			that will be needed
 	*/
-	Evaluate(structs.Room, base.PublicRoom, string) ([]base.ActionStructure, int, error)
+	Evaluate(structs.Room, rest.PublicRoom, string) ([]base.ActionStructure, int, error)
 	/*
 		  Validate takes an action structure (for the command) and validates
 			that the device and parameter are valid for the command.

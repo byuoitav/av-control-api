@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	se "github.com/byuoitav/av-control-api/api/statusevaluators"
 	"github.com/byuoitav/common/log"
 	"github.com/byuoitav/common/structs"
@@ -106,18 +107,18 @@ func RunStatusCommands(commands []se.StatusCommand) (outputs []se.StatusResponse
 }
 
 // EvaluateResponses organizes the responses that are received when the commands are issued.
-func EvaluateResponses(room structs.Room, responses []se.StatusResponse, count int) (base.PublicRoom, error) {
+func EvaluateResponses(room structs.Room, responses []se.StatusResponse, count int) (rest.PublicRoom, error) {
 
 	log.L.Infof("%s", color.HiBlueString("[state] Evaluating responses..."))
 
 	if len(responses) == 0 { //make sure things aren't broken
 		msg := "no status responses found"
 		log.L.Errorf("%s", color.HiRedString("[error] %s", msg))
-		return base.PublicRoom{}, errors.New(msg)
+		return rest.PublicRoom{}, errors.New(msg)
 	}
 
-	var AudioDevices []base.AudioDevice
-	var Displays []base.Display
+	var AudioDevices []rest.AudioDevice
+	var Displays []rest.Display
 	doneCount := 0
 
 	//we need to create our return channel
@@ -209,5 +210,5 @@ func EvaluateResponses(room structs.Room, responses []se.StatusResponse, count i
 		}
 	}
 
-	return base.PublicRoom{Displays: Displays, AudioDevices: AudioDevices}, nil
+	return rest.PublicRoom{Displays: Displays, AudioDevices: AudioDevices}, nil
 }

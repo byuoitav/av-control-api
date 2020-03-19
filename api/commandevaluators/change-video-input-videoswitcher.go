@@ -8,6 +8,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
@@ -27,7 +28,7 @@ type ChangeVideoInputVideoSwitcher struct {
 }
 
 //Evaluate generates a list of actions based on the information given.
-func (c *ChangeVideoInputVideoSwitcher) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (c *ChangeVideoInputVideoSwitcher) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 	actionList := []base.ActionStructure{}
 
 	if len(room.CurrentVideoInput) != 0 {
@@ -180,7 +181,7 @@ func (c *ChangeVideoInputVideoSwitcher) Evaluate(dbRoom structs.Room, room base.
 
 //GetSwitcherAndCreateAction gets the videoswitcher in a room, matches the destination port to the new port
 // and creates an action
-func GetSwitcherAndCreateAction(dbRoom structs.Room, room base.PublicRoom, device structs.Device, selectedInput, generatingEvaluator, requestor string) (base.ActionStructure, error) {
+func GetSwitcherAndCreateAction(dbRoom structs.Room, room rest.PublicRoom, device structs.Device, selectedInput, generatingEvaluator, requestor string) (base.ActionStructure, error) {
 
 	switcher := FilterDevicesByRole(dbRoom.Devices, "VideoSwitcher")
 

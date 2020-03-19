@@ -8,6 +8,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
@@ -18,7 +19,7 @@ type StandbyDefault struct {
 }
 
 // Evaluate fulfills the CommmandEvaluation evaluate requirement.
-func (s *StandbyDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
+func (s *StandbyDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
 
 	log.L.Info("[command_evaluators] Evaluating for Standby Command.")
 
@@ -132,7 +133,7 @@ func (s *StandbyDefault) GetIncompatibleCommands() (incompatableActions []string
 }
 
 // Evaluate devices just pulls out the process we do with the audio-devices and displays into one function.
-func (s *StandbyDefault) evaluateDevice(device base.Device, destination base.DestinationDevice, actions []base.ActionStructure, devices []structs.Device, room string, building string, eventInfo events.Event) ([]base.ActionStructure, error) {
+func (s *StandbyDefault) evaluateDevice(device rest.Device, destination base.DestinationDevice, actions []base.ActionStructure, devices []structs.Device, room string, building string, eventInfo events.Event) ([]base.ActionStructure, error) {
 	// Check if we even need to start anything
 	if strings.EqualFold(device.Power, "standby") {
 		roomID := fmt.Sprintf("%s-%s", building, room)

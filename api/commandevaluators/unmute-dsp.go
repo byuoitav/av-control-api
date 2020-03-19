@@ -20,6 +20,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
@@ -29,7 +30,7 @@ import (
 type UnMuteDSP struct{}
 
 // Evaluate generates a list of actions based on the given room information.
-func (p *UnMuteDSP) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *UnMuteDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating PUT body for UNMUTE command in DSP context...")
 
@@ -151,7 +152,7 @@ func (p *UnMuteDSP) GetIncompatibleCommands() []string {
 // GetGeneralUnMuteRequestActionsDSP generates a list of actions based on the given room and event information.
 //assumes only one DSP, but allows for the possiblity of multiple devices not routed through the DSP
 //room-wide mute requests DO NOT include mics
-func GetGeneralUnMuteRequestActionsDSP(dbRoom structs.Room, room base.PublicRoom, eventInfo events.Event) ([]base.ActionStructure, error) {
+func GetGeneralUnMuteRequestActionsDSP(dbRoom structs.Room, room rest.PublicRoom, eventInfo events.Event) ([]base.ActionStructure, error) {
 
 	log.L.Info("[command_evaluators] Generating actions for room-wide \"UnMute\" request")
 
@@ -196,7 +197,7 @@ func GetGeneralUnMuteRequestActionsDSP(dbRoom structs.Room, room base.PublicRoom
 
 // GetMicUnMuteAction generates an action based on the room, microphone and event information.
 //assumes the mic is only connected to a single DSP
-func GetMicUnMuteAction(dbRoom structs.Room, mic structs.Device, room base.PublicRoom, eventInfo events.Event) (base.ActionStructure, error) {
+func GetMicUnMuteAction(dbRoom structs.Room, mic structs.Device, room rest.PublicRoom, eventInfo events.Event) (base.ActionStructure, error) {
 
 	log.L.Infof("[command_evaluators] Generating action for command \"UnMute\" on microphone %s", mic.Name)
 
@@ -243,7 +244,7 @@ func GetMicUnMuteAction(dbRoom structs.Room, mic structs.Device, room base.Publi
 }
 
 // GetDSPMediaUnMuteAction generates a list of actions based on the room, DSP, and event information.
-func GetDSPMediaUnMuteAction(dbRoom structs.Room, dsp structs.Device, room base.PublicRoom, eventInfo events.Event, deviceSpecific bool) ([]base.ActionStructure, error) {
+func GetDSPMediaUnMuteAction(dbRoom structs.Room, dsp structs.Device, room rest.PublicRoom, eventInfo events.Event, deviceSpecific bool) ([]base.ActionStructure, error) {
 	toReturn := []base.ActionStructure{}
 
 	destination := base.DestinationDevice{
@@ -287,7 +288,7 @@ func GetDSPMediaUnMuteAction(dbRoom structs.Room, dsp structs.Device, room base.
 }
 
 // GetDisplayUnMuteAction generates an action based on the display, room, and event information.
-func GetDisplayUnMuteAction(device structs.Device, room base.PublicRoom, eventInfo events.Event, deviceSpecific bool) (base.ActionStructure, error) {
+func GetDisplayUnMuteAction(device structs.Device, room rest.PublicRoom, eventInfo events.Event, deviceSpecific bool) (base.ActionStructure, error) {
 
 	log.L.Infof("[command_evaluators] Generating action for command \"UnMute\" for device %s external to DSP", device.Name)
 

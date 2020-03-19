@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/log"
 	"github.com/byuoitav/common/structs"
@@ -17,7 +18,7 @@ type BlankDisplayDefault struct {
 }
 
 // Evaluate verifies the information for a BlankDisplayDefault object and generates a list of actions based on the command.
-func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating BlankDisplay commands...")
 

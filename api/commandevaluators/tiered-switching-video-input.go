@@ -10,6 +10,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/av-control-api/api/statusevaluators"
 	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/structs"
@@ -26,7 +27,7 @@ type ChangeVideoInputTieredSwitchers struct {
 }
 
 //Evaluate fulfills the CommmandEvaluation evaluate requirement
-func (c *ChangeVideoInputTieredSwitchers) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (c *ChangeVideoInputTieredSwitchers) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 	//so first we need to go through and see if anyone even wants a piece of us, is there an 'input' field that isn't empty.
 
 	has := (len(room.CurrentVideoInput) > 0)
@@ -264,7 +265,7 @@ func (c *ChangeVideoInputTieredSwitchers) GetIncompatibleCommands() []string {
 }
 
 // RoutePath makes a path through the graph to determine the actions necessary.
-func (c *ChangeVideoInputTieredSwitchers) RoutePath(room base.PublicRoom, input, output string, graph inputgraph.InputGraph, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, error) {
+func (c *ChangeVideoInputTieredSwitchers) RoutePath(room rest.PublicRoom, input, output string, graph inputgraph.InputGraph, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, error) {
 	var ok bool
 	var inDev, outDev *inputgraph.Node
 
@@ -321,7 +322,7 @@ func (c *ChangeVideoInputTieredSwitchers) RoutePath(room base.PublicRoom, input,
 }
 
 // ChangeAll generates a list of actions based on the information about the room.
-func (c *ChangeVideoInputTieredSwitchers) ChangeAll(room base.PublicRoom, input string, devices []structs.Device, graph inputgraph.InputGraph, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, int, error) {
+func (c *ChangeVideoInputTieredSwitchers) ChangeAll(room rest.PublicRoom, input string, devices []structs.Device, graph inputgraph.InputGraph, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info(color.HiBlueString("[command_evaluators] Evaluating Room wide input."))
 
@@ -378,7 +379,7 @@ func (c *ChangeVideoInputTieredSwitchers) ChangeAll(room base.PublicRoom, input 
 }
 
 // GenerateActionsFromPath generates a list of actions from the path in the graph of the room.
-func (c *ChangeVideoInputTieredSwitchers) GenerateActionsFromPath(room base.PublicRoom, path []inputgraph.Node, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, error) {
+func (c *ChangeVideoInputTieredSwitchers) GenerateActionsFromPath(room rest.PublicRoom, path []inputgraph.Node, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, error) {
 
 	log.L.Infof("[command_evaluators] Generating actions for a path from %v to %v", path[0].ID, path[len(path)-1].ID)
 	toReturn := []base.ActionStructure{}
@@ -439,7 +440,7 @@ func (c *ChangeVideoInputTieredSwitchers) GenerateActionsFromPath(room base.Publ
 }
 
 //we assume that the change is on the receiver
-func generateActionForAVIPReceiver(room base.PublicRoom, tx, rx inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
+func generateActionForAVIPReceiver(room rest.PublicRoom, tx, rx inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
 
 	cmd := rx.Device.GetCommandByID("ChangeInput")
 	if len(cmd.ID) == 0 {
@@ -489,7 +490,7 @@ func generateActionForAVIPReceiver(room base.PublicRoom, tx, rx inputgraph.Node,
 	return tempAction, nil
 }
 
-func generateActionForNonSwitch(room base.PublicRoom, prev, cur inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
+func generateActionForNonSwitch(room rest.PublicRoom, prev, cur inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
 
 	var in = ""
 
@@ -553,7 +554,7 @@ func generateActionForNonSwitch(room base.PublicRoom, prev, cur inputgraph.Node,
 }
 
 //assume that cur is the videoswitcher
-func generateActionForSwitch(room base.PublicRoom, prev, cur, next inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
+func generateActionForSwitch(room rest.PublicRoom, prev, cur, next inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
 
 	in := ""
 	out := ""

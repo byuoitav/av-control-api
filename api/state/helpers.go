@@ -14,6 +14,7 @@ import (
 
 	"github.com/byuoitav/authmiddleware/bearertoken"
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	se "github.com/byuoitav/av-control-api/api/statusevaluators"
 	"github.com/byuoitav/common/log"
 	"github.com/byuoitav/common/v2/events"
@@ -132,11 +133,11 @@ func issueCommands(commands []se.StatusCommand, channel chan []se.StatusResponse
 	control.Done()
 }
 
-func processAudioDevice(device se.Status) (base.AudioDevice, error) {
+func processAudioDevice(device se.Status) (rest.AudioDevice, error) {
 	log.L.Infof("Adding audio device: %s", device.DestinationDevice.Name)
 	log.L.Infof("Status map: %v", device.Status)
 
-	var audioDevice base.AudioDevice
+	var audioDevice rest.AudioDevice
 
 	muted, ok := device.Status["muted"]
 	mutedBool, ok := muted.(bool)
@@ -178,11 +179,11 @@ func processAudioDevice(device se.Status) (base.AudioDevice, error) {
 	return audioDevice, nil
 }
 
-func processDisplay(device se.Status) (base.Display, error) {
+func processDisplay(device se.Status) (rest.Display, error) {
 
 	log.L.Infof("Adding display: %s", device.DestinationDevice.Name)
 
-	var display base.Display
+	var display rest.Display
 
 	blanked, ok := device.Status["blanked"]
 	blankedBool, ok := blanked.(bool)

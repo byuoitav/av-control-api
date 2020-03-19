@@ -8,6 +8,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
 )
@@ -17,7 +18,7 @@ type ChangeVideoInputDefault struct {
 }
 
 //Evaluate fulfills the CommmandEvaluation evaluate requirement.
-func (p *ChangeVideoInputDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
+func (p *ChangeVideoInputDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
 	count = 0
 	//RoomWideSetVideoInput
 	if len(room.CurrentVideoInput) > 0 { // Check if the user sent a PUT body changing the current video input
@@ -69,7 +70,7 @@ func (p *ChangeVideoInputDefault) GetIncompatibleCommands() (incompatableActions
 	return
 }
 
-func generateChangeInputByDevice(dbRoom structs.Room, dev base.Device, room, building, generatingEvaluator, requestor string) (actions []base.ActionStructure, err error) {
+func generateChangeInputByDevice(dbRoom structs.Room, dev rest.Device, room, building, generatingEvaluator, requestor string) (actions []base.ActionStructure, err error) {
 	var output structs.Device
 	var input structs.Device
 	var streamURL string
