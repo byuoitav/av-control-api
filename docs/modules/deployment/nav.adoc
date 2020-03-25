@@ -1,1 +1,1 @@
-. xref:aws.adoc[AWS] 
+* xref:aws.adoc[AWS]
