@@ -5,7 +5,6 @@ import (
 
 	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 	"github.com/fatih/color"
 )
 
@@ -27,7 +26,7 @@ func (d *DefaultReconciler) Reconcile(actions []base.ActionStructure, inCount in
 	// Next we will make a list of actions to output.
 	output := []base.ActionStructure{base.ActionStructure{
 		Action:              "Start",
-		Device:              structs.Device{ID: "DefaultReconciler"},
+		Device:              base.Device{ID: "DefaultReconciler"},
 		GeneratingEvaluator: "DefaultReconciler",
 		Overridden:          true,
 	},
@@ -42,7 +41,7 @@ func (d *DefaultReconciler) Reconcile(actions []base.ActionStructure, inCount in
 			return []base.ActionStructure{}, 0, err
 		}
 
-		sort.Sort(base.ActionByPriority(actionList))
+		sort.Sort(base.ActionByOrder(actionList))
 		if err != nil {
 			return []base.ActionStructure{}, 0, err
 		}

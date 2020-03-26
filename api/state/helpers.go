@@ -28,7 +28,7 @@ const TIMEOUT = 5
 // const GATEWAY_CHECK_INDEX = 5
 
 //builds a Status object corresponding to a device and writes it to the channel
-func issueCommands(commands []se.StatusCommand, channel chan []se.StatusResponse, control *sync.WaitGroup) {
+func issueCommands(commands []se.StatusCommand, env string, channel chan []se.StatusResponse, control *sync.WaitGroup) {
 	//final output
 	outputs := []se.StatusResponse{}
 
@@ -36,7 +36,7 @@ func issueCommands(commands []se.StatusCommand, channel chan []se.StatusResponse
 	//TODO:make sure devices can handle rapid-fire API requests
 	for _, command := range commands {
 
-		log.L.Infof("[state] issuing command: %s against device %s, destination device: %s, parameters: %v", command.Action.ID, command.Device.ID, command.DestinationDevice.Device.ID, command.Parameters)
+		log.L.Infof("[state] issuing command: %s against device %s, destination device: %s, parameters: %v", command.ActionID, command.Device.ID, command.DestinationDevice.Device.ID, command.Parameters)
 
 		output := se.StatusResponse{
 			Callback:          command.Callback,
@@ -47,9 +47,9 @@ func issueCommands(commands []se.StatusCommand, channel chan []se.StatusResponse
 		statusResponseMap := make(map[string]interface{})
 
 		// build url
-		url, lerr := command.Device.BuildCommandURL(command.Action.ID)
+		url, lerr := command.Device.BuildCommandURL(command.ActionID, env)
 		if lerr != nil {
-			msg := fmt.Sprintf("unable to build command '%s' for %s: %s", command.Action.ID, command.Device.ID, lerr.Error())
+			msg := fmt.Sprintf("unable to build command '%s' for %s: %s", command.ActionID, command.Device.ID, lerr)
 			log.L.Errorf("%s", color.HiRedString("[error] %s", msg))
 			base.PublishError(msg, events.Error, command.Device.ID)
 			continue
@@ -59,7 +59,7 @@ func issueCommands(commands []se.StatusCommand, channel chan []se.StatusResponse
 		var gerr error
 		url, gerr = ReplaceParameters(url, command.Parameters)
 		if gerr != nil {
-			msg := fmt.Sprintf("unable to replace parameters for command '%s' on %s: %s", command.Action.ID, command.Device.ID, gerr)
+			msg := fmt.Sprintf("unable to replace parameters for command '%s' on %s: %s", command.ActionID, command.Device.ID, gerr)
 			log.L.Errorf("%s", color.HiRedString("[error] %s", msg))
 			base.PublishError(msg, events.Error, command.Device.ID)
 			continue
@@ -96,7 +96,7 @@ func issueCommands(commands []se.StatusCommand, channel chan []se.StatusResponse
 			continue
 		}
 
-		log.L.Infof("[state] microservice returned: %s for action %s against device %s", string(body), command.Action.ID, command.Device.ID, string(body))
+		log.L.Infof("[state] microservice returned: %s for action %s against device %s", string(body), command.ActionID, command.Device.ID, string(body))
 
 		var status map[string]interface{}
 		gerr = json.Unmarshal(body, &status)
@@ -303,7 +303,7 @@ func ReplaceIPAddressEndpoint(path string, address string) string {
 
 //ReplaceParameters replaces parameters in the command endpoint
 //@pre the endpoint's IP parameter has already been replaced
-//@post the endpoint does not contain ':'
+//@post the endpoint does not contain '{{}}'
 func ReplaceParameters(addr string, parameters map[string]string) (string, error) {
 	if parameters == nil { //should I keep this check?
 		return addr, nil
@@ -317,7 +317,7 @@ func ReplaceParameters(addr string, parameters map[string]string) (string, error
 	endpoint := u.Path
 
 	for k, v := range parameters {
-		toReplace := ":" + k
+		toReplace := "{{" + k + "}}"
 		if !strings.Contains(endpoint, toReplace) {
 			msg := fmt.Sprintf("%s not found", toReplace)
 			log.L.Errorf("%s", color.HiRedString("[error] %s", msg))
@@ -327,10 +327,10 @@ func ReplaceParameters(addr string, parameters map[string]string) (string, error
 		endpoint = strings.Replace(endpoint, toReplace, v, -1)
 	}
 
-	index := strings.IndexRune(endpoint, ':')
+	index := strings.IndexRune(endpoint, '{')
 
 	if index >= 0 {
-		if strings.Contains(endpoint[index+1:], ":") {
+		if strings.Contains(endpoint[index+1:], "{") {
 			errorString := fmt.Sprintf("not enough parameters provided for command: %s", endpoint) //TODO change this setup?
 			return "", errors.New(errorString)
 		}

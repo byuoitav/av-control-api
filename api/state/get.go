@@ -11,13 +11,12 @@ import (
 	"github.com/byuoitav/av-control-api/api/rest"
 	se "github.com/byuoitav/av-control-api/api/statusevaluators"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
 	"github.com/fatih/color"
 )
 
 // GenerateStatusCommands determines the status commands for the type of room that the device is in.
-func GenerateStatusCommands(room structs.Room, commandMap map[string]se.StatusEvaluator) ([]se.StatusCommand, int, error) {
+func GenerateStatusCommands(room base.Room, commandMap map[string]se.StatusEvaluator) ([]se.StatusCommand, int, error) {
 	color.Set(color.FgHiCyan)
 	log.L.Info("[state] generating status commands...")
 	color.Unset()
@@ -43,7 +42,7 @@ func GenerateStatusCommands(room structs.Room, commandMap map[string]se.StatusEv
 }
 
 // RunStatusCommands maps the device names to their commands, and then puts them in a channel to be run.
-func RunStatusCommands(commands []se.StatusCommand) (outputs []se.StatusResponse, err error) {
+func RunStatusCommands(commands []se.StatusCommand, env string) (outputs []se.StatusResponse, err error) {
 
 	log.L.Infof("%s", color.HiBlueString("[state] running status commands..."))
 
@@ -74,7 +73,7 @@ func RunStatusCommands(commands []se.StatusCommand) (outputs []se.StatusResponse
 
 	for _, deviceCommands := range commandMap {
 		group.Add(1)
-		go issueCommands(deviceCommands, channel, &group)
+		go issueCommands(deviceCommands, env, channel, &group)
 
 		log.L.Infof("%s", color.HiBlueString("[state] commands to issue:"))
 
@@ -107,7 +106,7 @@ func RunStatusCommands(commands []se.StatusCommand) (outputs []se.StatusResponse
 }
 
 // EvaluateResponses organizes the responses that are received when the commands are issued.
-func EvaluateResponses(room structs.Room, responses []se.StatusResponse, count int) (rest.PublicRoom, error) {
+func EvaluateResponses(room base.Room, responses []se.StatusResponse, count int) (rest.PublicRoom, error) {
 
 	log.L.Infof("%s", color.HiBlueString("[state] Evaluating responses..."))
 

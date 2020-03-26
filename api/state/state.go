@@ -3,15 +3,15 @@ package state
 import (
 	"fmt"
 
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/av-control-api/api/statusevaluators"
-	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/log"
 	"github.com/fatih/color"
 )
 
 //GetRoomState assesses the state of the room and returns a PublicRoom object.
-func GetRoomState(building string, roomName string) (rest.PublicRoom, error) {
+func GetRoomState(building, roomName, env string) (rest.PublicRoom, error) {
 
 	color.Set(color.FgHiCyan, color.Bold)
 	log.L.Info("[state] getting room state...")
@@ -29,7 +29,7 @@ func GetRoomState(building string, roomName string) (rest.PublicRoom, error) {
 		return rest.PublicRoom{}, err
 	}
 
-	responses, err := RunStatusCommands(commands)
+	responses, err := RunStatusCommands(commands, env)
 	if err != nil {
 		return rest.PublicRoom{}, err
 	}
@@ -50,7 +50,7 @@ func GetRoomState(building string, roomName string) (rest.PublicRoom, error) {
 }
 
 //SetRoomState changes the state of the room and returns a PublicRoom object.
-func SetRoomState(target rest.PublicRoom, requestor string) (rest.PublicRoom, error) {
+func SetRoomState(target rest.PublicRoom, env, requestor string) (rest.PublicRoom, error) {
 
 	log.L.Infof("%s", color.HiBlueString("[state] setting room state..."))
 
@@ -66,7 +66,7 @@ func SetRoomState(target rest.PublicRoom, requestor string) (rest.PublicRoom, er
 		return rest.PublicRoom{}, err
 	}
 
-	responses, err := ExecuteActions(actions, requestor)
+	responses, err := ExecuteActions(actions, env, requestor)
 	if err != nil {
 		return rest.PublicRoom{}, err
 	}

@@ -8,9 +8,8 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/av-control-api/api/rest"
-	"github.com/byuoitav/common/db"
-	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
 	"github.com/fatih/color"
 )
@@ -20,7 +19,7 @@ type PowerOnDefault struct {
 }
 
 // Evaluate fulfills the CommmandEvaluation evaluate requirement.
-func (p *PowerOnDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
+func (p *PowerOnDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
 	count = 0
 
 	log.L.Info("[command_evaluators] Evaluating for PowerOn command.")
@@ -36,7 +35,7 @@ func (p *PowerOnDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, req
 
 	eventInfo.AddToTags(events.CoreState, events.UserGenerated)
 
-	var devices []structs.Device
+	var devices []base.Device
 	if strings.EqualFold(room.Power, "on") {
 
 		log.L.Info("[command_evaluators] Room-wide PowerOn request received. Retrieving all devices.")
@@ -51,11 +50,11 @@ func (p *PowerOnDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, req
 					Device: device,
 				}
 
-				if structs.HasRole(device, "AudioOut") {
+				if base.HasRole(device, "AudioOut") {
 					destination.AudioDevice = true
 				}
 
-				if structs.HasRole(device, "VideoOut") {
+				if base.HasRole(device, "VideoOut") {
 					destination.Display = true
 				}
 
@@ -133,7 +132,7 @@ func (p *PowerOnDefault) GetIncompatibleCommands() (incompatableActions []string
 // Evaluate devices just pulls out the process we do with the audio-devices and displays into one function.
 func (p *PowerOnDefault) evaluateDevice(device rest.Device,
 	actions []base.ActionStructure,
-	devices []structs.Device,
+	devices []base.Device,
 	room string,
 	building string,
 	eventInfo events.Event) ([]base.ActionStructure, error) {
@@ -156,11 +155,11 @@ func (p *PowerOnDefault) evaluateDevice(device rest.Device,
 				Device: dev,
 			}
 
-			if structs.HasRole(dev, "AudioOut") {
+			if base.HasRole(dev, "AudioOut") {
 				destination.AudioDevice = true
 			}
 
-			if structs.HasRole(dev, "VideoOut") {
+			if base.HasRole(dev, "VideoOut") {
 				destination.Display = true
 			}
 
@@ -181,7 +180,7 @@ func (p *PowerOnDefault) evaluateDevice(device rest.Device,
 
 			////////////////////////
 			///// MIRROR STUFF /////
-			if structs.HasRole(dev, "MirrorMaster") {
+			if base.HasRole(dev, "MirrorMaster") {
 				for _, port := range dev.Ports {
 					if port.ID == "mirror" {
 						DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -189,8 +188,8 @@ func (p *PowerOnDefault) evaluateDevice(device rest.Device,
 							return actions, err
 						}
 
-						cmd := DX.GetCommandByID("PowerOn")
-						if len(cmd.ID) < 1 {
+						_, err = DX.GetCommandByID("PowerOn")
+						if err != nil {
 							continue
 						}
 

@@ -6,14 +6,13 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/byuoitav/common/inputgraph"
+	"github.com/byuoitav/av-control-api/api/inputgraph"
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/av-control-api/api/statusevaluators"
-	"github.com/byuoitav/common/db"
-	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
 	"github.com/fatih/color"
 )
@@ -27,7 +26,7 @@ type ChangeVideoInputTieredSwitchers struct {
 }
 
 //Evaluate fulfills the CommmandEvaluation evaluate requirement
-func (c *ChangeVideoInputTieredSwitchers) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (c *ChangeVideoInputTieredSwitchers) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 	//so first we need to go through and see if anyone even wants a piece of us, is there an 'input' field that isn't empty.
 
 	has := (len(room.CurrentVideoInput) > 0)
@@ -164,7 +163,7 @@ func (c *ChangeVideoInputTieredSwitchers) Evaluate(dbRoom structs.Room, room res
 			///// MIRROR STUFF /////
 			display := FindDevice(dbRoom.Devices, outputID)
 
-			if structs.HasRole(display, "MirrorMaster") {
+			if base.HasRole(display, "MirrorMaster") {
 				for _, port := range display.Ports {
 					if port.ID == "mirror" {
 						DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -218,7 +217,7 @@ func (c *ChangeVideoInputTieredSwitchers) Evaluate(dbRoom structs.Room, room res
 
 }
 
-func getDeviceIDFromShortname(shortname string, devices []structs.Device) string {
+func getDeviceIDFromShortname(shortname string, devices []base.Device) string {
 	for _, device := range devices {
 		if strings.EqualFold(shortname, device.Name) {
 			return device.ID
@@ -235,7 +234,7 @@ func (c *ChangeVideoInputTieredSwitchers) Validate(action base.ActionStructure) 
 	// check if ChangeInput is a valid name of a command (ok is a bool)
 	ok, _ := CheckCommands(action.Device.Type.Commands, "ChangeInput")
 
-	if structs.HasRole(action.Device, "MirrorSlave") {
+	if base.HasRole(action.Device, "MirrorSlave") {
 		log.L.Info("Hall pass given to the mirror device")
 		ok = true
 	}
@@ -322,7 +321,7 @@ func (c *ChangeVideoInputTieredSwitchers) RoutePath(room rest.PublicRoom, input,
 }
 
 // ChangeAll generates a list of actions based on the information about the room.
-func (c *ChangeVideoInputTieredSwitchers) ChangeAll(room rest.PublicRoom, input string, devices []structs.Device, graph inputgraph.InputGraph, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, int, error) {
+func (c *ChangeVideoInputTieredSwitchers) ChangeAll(room rest.PublicRoom, input string, devices []base.Device, graph inputgraph.InputGraph, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info(color.HiBlueString("[command_evaluators] Evaluating Room wide input."))
 
@@ -389,13 +388,13 @@ func (c *ChangeVideoInputTieredSwitchers) GenerateActionsFromPath(room rest.Publ
 	for i := 1; i < len(path); i++ {
 		cur := path[i]
 		//check to see if the current device is a 'signal passthrough' wich means that it's not going to have a command generated for it.
-		if structs.HasRole(cur.Device, "signal-passthrough") {
+		if base.HasRole(cur.Device, "signal-passthrough") {
 			log.L.Debugf("%v is a Signal passthrough device, skipping.", cur.Device.ID)
 			continue
 		}
 
 		//we look for a path from last to cur, assuming that the change has to happen on cur. if cur is a videoswitcher we need to check for an in and out port to generate the action
-		if structs.HasRole(cur.Device, "VideoSwitcher") {
+		if base.HasRole(cur.Device, "VideoSwitcher") {
 			log.L.Infof("[command_evaluators] Generating action for VS %v", cur.ID)
 			//we assume we have an in and out port
 			tempAction, err := generateActionForSwitch(room, last, cur, path[i+1], path[len(path)-1].Device, path[0].Device.Name, callbackEngine, requestor)
@@ -405,11 +404,11 @@ func (c *ChangeVideoInputTieredSwitchers) GenerateActionsFromPath(room rest.Publ
 
 			toReturn = append(toReturn, tempAction)
 
-		} else if structs.HasRole(cur.Device, "av-ip-receiver") {
+		} else if base.HasRole(cur.Device, "av-ip-receiver") {
 			log.L.Infof("[command_evaluators] Generating action for AV/IP Receiver %v", cur.ID)
 			// we look back in the path for the av-ip-reciever, that's our boy
 			for j := i; j > 0; j-- {
-				if structs.HasRole(path[j].Device, "av-ip-transmitter") {
+				if base.HasRole(path[j].Device, "av-ip-transmitter") {
 					tempAction, err := generateActionForAVIPReceiver(room, path[j], cur, path[len(path)-1].Device, path[0].Device.Name, callbackEngine, requestor)
 					if err != nil {
 						return toReturn, err
@@ -440,10 +439,10 @@ func (c *ChangeVideoInputTieredSwitchers) GenerateActionsFromPath(room rest.Publ
 }
 
 //we assume that the change is on the receiver
-func generateActionForAVIPReceiver(room rest.PublicRoom, tx, rx inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
+func generateActionForAVIPReceiver(room rest.PublicRoom, tx, rx inputgraph.Node, destination base.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
 
-	cmd := rx.Device.GetCommandByID("ChangeInput")
-	if len(cmd.ID) == 0 {
+	_, err := rx.Device.GetCommandByID("ChangeInput")
+	if err != nil {
 		color.HiRedString("Command not found Change input")
 		return base.ActionStructure{}, errors.New("Command not found Change input")
 	}
@@ -467,11 +466,11 @@ func generateActionForAVIPReceiver(room rest.PublicRoom, tx, rx inputgraph.Node,
 		Device: destination,
 	}
 
-	if structs.HasRole(destination, "AudioOut") {
+	if base.HasRole(destination, "AudioOut") {
 		destStruct.AudioDevice = true
 	}
 
-	if structs.HasRole(destination, "VideoOut") {
+	if base.HasRole(destination, "VideoOut") {
 		destStruct.Display = true
 	}
 
@@ -490,7 +489,7 @@ func generateActionForAVIPReceiver(room rest.PublicRoom, tx, rx inputgraph.Node,
 	return tempAction, nil
 }
 
-func generateActionForNonSwitch(room rest.PublicRoom, prev, cur inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
+func generateActionForNonSwitch(room rest.PublicRoom, prev, cur inputgraph.Node, destination base.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
 
 	var in = ""
 
@@ -507,8 +506,8 @@ func generateActionForNonSwitch(room rest.PublicRoom, prev, cur inputgraph.Node,
 		return base.ActionStructure{}, errors.New(msg)
 	}
 
-	cmd := destination.GetCommandByID("ChangeInput")
-	if len(cmd.ID) < 1 {
+	_, err := destination.GetCommandByID("ChangeInput")
+	if err != nil {
 		return base.ActionStructure{}, nil
 	}
 
@@ -531,11 +530,11 @@ func generateActionForNonSwitch(room rest.PublicRoom, prev, cur inputgraph.Node,
 		Device: destination,
 	}
 
-	if structs.HasRole(destination, "AudioOut") {
+	if base.HasRole(destination, "AudioOut") {
 		destStruct.AudioDevice = true
 	}
 
-	if structs.HasRole(destination, "VideoOut") {
+	if base.HasRole(destination, "VideoOut") {
 		destStruct.Display = true
 	}
 
@@ -554,7 +553,7 @@ func generateActionForNonSwitch(room rest.PublicRoom, prev, cur inputgraph.Node,
 }
 
 //assume that cur is the videoswitcher
-func generateActionForSwitch(room rest.PublicRoom, prev, cur, next inputgraph.Node, destination structs.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
+func generateActionForSwitch(room rest.PublicRoom, prev, cur, next inputgraph.Node, destination base.Device, selected string, callbackEngine *statusevaluators.TieredSwitcherCallback, requestor string) (base.ActionStructure, error) {
 
 	in := ""
 	out := ""
@@ -600,11 +599,11 @@ func generateActionForSwitch(room rest.PublicRoom, prev, cur, next inputgraph.No
 		Device: destination,
 	}
 
-	if structs.HasRole(destination, "AudioOut") {
+	if base.HasRole(destination, "AudioOut") {
 		destStruct.AudioDevice = true
 	}
 
-	if structs.HasRole(destination, "VideoOut") {
+	if base.HasRole(destination, "VideoOut") {
 		destStruct.Display = true
 	}
 

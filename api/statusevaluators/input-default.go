@@ -11,9 +11,8 @@ import (
 	"github.com/byuoitav/common/status"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/db"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 )
 
 // DefaultInputEvaluator is a constant variable for the name of the evaluator.
@@ -27,12 +26,12 @@ type InputDefault struct {
 }
 
 // GenerateCommands generates a list of commands for the given devices.
-func (p *InputDefault) GenerateCommands(room structs.Room) ([]StatusCommand, int, error) {
+func (p *InputDefault) GenerateCommands(room base.Room) ([]StatusCommand, int, error) {
 	return generateStandardStatusCommand(room.Devices, DefaultInputEvaluator, DefaultInputCommand)
 }
 
 // EvaluateResponse processes the response information that is given.
-func (p *InputDefault) EvaluateResponse(room structs.Room, label string, value interface{}, source structs.Device, dest base.DestinationDevice) (string, interface{}, error) {
+func (p *InputDefault) EvaluateResponse(room base.Room, label string, value interface{}, source base.Device, dest base.DestinationDevice) (string, interface{}, error) {
 	log.L.Infof("[statusevals] Evaluating response: %s, %s in evaluator %v", label, value, DefaultInputEvaluator)
 
 	//we need to remap the port value to the device name, for this case, that's just the device plugged into that port, as defined in the port mapping

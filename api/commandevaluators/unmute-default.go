@@ -8,9 +8,8 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/av-control-api/api/rest"
-	"github.com/byuoitav/common/db"
-	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
 )
 
@@ -19,7 +18,7 @@ type UnMuteDefault struct {
 }
 
 // Evaluate generates a list of actions based on the room information.
-func (p *UnMuteDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *UnMuteDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 	log.L.Info("[command_evaluators] Evaluating UnMute command.")
 
 	var actions []base.ActionStructure
@@ -57,7 +56,7 @@ func (p *UnMuteDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requ
 
 				destination.Device = device
 
-				if structs.HasRole(device, "VideoOut") {
+				if base.HasRole(device, "VideoOut") {
 					destination.Display = true
 				}
 
@@ -72,7 +71,7 @@ func (p *UnMuteDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requ
 
 				////////////////////////
 				///// MIRROR STUFF /////
-				if structs.HasRole(device, "MirrorMaster") {
+				if base.HasRole(device, "MirrorMaster") {
 					for _, port := range device.Ports {
 						if port.ID == "mirror" {
 							DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -80,8 +79,8 @@ func (p *UnMuteDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requ
 								return actions, len(actions), err
 							}
 
-							cmd := DX.GetCommandByID("UnMute")
-							if len(cmd.ID) < 1 {
+							_, err = DX.GetCommandByID("UnMute")
+							if err != nil {
 								continue
 							}
 
@@ -126,7 +125,7 @@ func (p *UnMuteDefault) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requ
 
 			destination.Device = device
 
-			if structs.HasRole(device, "VideoOut") {
+			if base.HasRole(device, "VideoOut") {
 				destination.Display = true
 			}
 

@@ -6,10 +6,9 @@ import (
 	"strings"
 
 	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/av-control-api/api/rest"
-	"github.com/byuoitav/common/db"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 	ei "github.com/byuoitav/common/v2/events"
 )
 
@@ -32,7 +31,7 @@ e) microphones are not affected by actions generated in this command evaluator
 type ChangeAudioInputDSP struct{}
 
 // Evaluate verifies the information for a ChangeAudioInputDSP object and generates action based on the command.
-func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *ChangeAudioInputDSP) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating PUT body for \"ChangeInput\" command in an audio DSP context...")
 
@@ -64,7 +63,7 @@ func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom
 
 		for _, device := range devices {
 
-			if device.Type.Output && !structs.HasRole(device, "Microphone") {
+			if device.Type.Output && !base.HasRole(device, "Microphone") {
 
 				log.L.Infof("[command_evaluators] Adding device %+v", device.Name)
 
@@ -88,7 +87,7 @@ func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom
 
 				////////////////////////
 				///// MIRROR STUFF /////
-				if structs.HasRole(device, "MirrorMaster") {
+				if base.HasRole(device, "MirrorMaster") {
 					for _, port := range device.Ports {
 						if port.ID == "mirror" {
 							DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -96,8 +95,8 @@ func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom
 								return []base.ActionStructure{}, 0, err
 							}
 
-							cmd := DX.GetCommandByID("ChangeAudioInputDSP")
-							if len(cmd.ID) < 1 {
+							_, err = DX.GetCommandByID("ChangeAudioInputDSP")
+							if err != nil {
 								continue
 							}
 
@@ -141,7 +140,7 @@ func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom
 				deviceID := fmt.Sprintf("%v-%v-%v", room.Building, room.Room, audioDevice.Name)
 				device := FindDevice(dbRoom.Devices, deviceID)
 
-				if structs.HasRole(device, "DSP") {
+				if base.HasRole(device, "DSP") {
 
 					dspAction, err := GetDSPMediaInputAction(dbRoom, room, e, room.AudioDevices[0].Input, true, destination)
 					if err != nil {
@@ -152,7 +151,7 @@ func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom
 
 					actions = append(actions, dspAction)
 
-				} else if structs.HasRole(device, "AudioOut") && !structs.HasRole(device, "Microphone") {
+				} else if base.HasRole(device, "AudioOut") && !base.HasRole(device, "Microphone") {
 
 					mediaAction, err := generateChangeInputByDevice(dbRoom, audioDevice.Device, room.Room, room.Building, "ChangeAudioInputDefault", requestor)
 					if err != nil {
@@ -172,7 +171,7 @@ func (p *ChangeAudioInputDSP) Evaluate(dbRoom structs.Room, room rest.PublicRoom
 }
 
 // GetDSPMediaInputAction determines the devices affected and actions needed for this command.
-func GetDSPMediaInputAction(dbRoom structs.Room, room rest.PublicRoom, event ei.Event, input string, deviceSpecific bool, destination base.DestinationDevice) (base.ActionStructure, error) {
+func GetDSPMediaInputAction(dbRoom base.Room, room rest.PublicRoom, event ei.Event, input string, deviceSpecific bool, destination base.DestinationDevice) (base.ActionStructure, error) {
 
 	//get DSP
 	dsps := FilterDevicesByRole(dbRoom.Devices, "DSP")

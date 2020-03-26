@@ -5,7 +5,6 @@ import (
 
 	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 )
 
 // VolumeDSPEvaluator is a constant variable for the name of the evaluator.
@@ -18,7 +17,7 @@ const VolumeDSPCommand = "STATUS_VolumeDSP"
 type VolumeDSP struct{}
 
 // GenerateCommands generates a list of commands for the given devices.
-func (p *VolumeDSP) GenerateCommands(room structs.Room) ([]StatusCommand, int, error) {
+func (p *VolumeDSP) GenerateCommands(room base.Room) ([]StatusCommand, int, error) {
 
 	audioDevices := FilterDevicesByRole(room.Devices, "AudioOut")
 	dsp := FilterDevicesByRole(room.Devices, "DSP")
@@ -55,11 +54,11 @@ func (p *VolumeDSP) GenerateCommands(room structs.Room) ([]StatusCommand, int, e
 }
 
 // EvaluateResponse processes the response information that is given.
-func (p *VolumeDSP) EvaluateResponse(room structs.Room, label string, value interface{}, source structs.Device, destination base.DestinationDevice) (string, interface{}, error) {
+func (p *VolumeDSP) EvaluateResponse(room base.Room, label string, value interface{}, source base.Device, destination base.DestinationDevice) (string, interface{}, error) {
 
 	const ScaleFactor = 3
 	const MINIMUM = 45
-	if structs.HasRole(destination.Device, "Microphone") {
+	if base.HasRole(destination.Device, "Microphone") {
 
 		intValue, ok := value.(int)
 		if ok {

@@ -12,12 +12,11 @@ import (
 	"github.com/byuoitav/av-control-api/api/rest"
 	se "github.com/byuoitav/av-control-api/api/statusevaluators"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 	"github.com/fatih/color"
 )
 
 //GenerateActions evaluates and validates each command in the configuration.
-func GenerateActions(dbRoom structs.Room, bodyRoom rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func GenerateActions(dbRoom base.Room, bodyRoom rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Infof("%s", color.HiBlueString("[state] generating actions..."))
 
@@ -67,7 +66,7 @@ func GenerateActions(dbRoom structs.Room, bodyRoom rest.PublicRoom, requestor st
 }
 
 //ReconcileActions produces a DAG
-func ReconcileActions(room structs.Room, actions []base.ActionStructure, inCount int) (batches []base.ActionStructure, count int, err error) {
+func ReconcileActions(room base.Room, actions []base.ActionStructure, inCount int) (batches []base.ActionStructure, count int, err error) {
 
 	log.L.Infof("%s", color.HiBlueString("[state] reconciling actions..."))
 
@@ -92,7 +91,7 @@ func ReconcileActions(room structs.Room, actions []base.ActionStructure, inCount
 
 //ExecuteActions carries out the actions defined in the struct
 //@pre TODO DestinationDevice field is populated for every action!!
-func ExecuteActions(DAG []base.ActionStructure, requestor string) ([]se.StatusResponse, error) {
+func ExecuteActions(DAG []base.ActionStructure, env string, requestor string) ([]se.StatusResponse, error) {
 	// get total number of actions in dag
 	log.L.Infof("%s", color.HiBlueString("[state] executing actions..."))
 
@@ -107,7 +106,7 @@ func ExecuteActions(DAG []base.ActionStructure, requestor string) ([]se.StatusRe
 
 	for _, child := range DAG[0].Children {
 		done.Add(1)
-		go ExecuteAction(*child, responses, &done, requestor)
+		go ExecuteAction(*child, env, responses, &done, requestor)
 	}
 
 	log.L.Info("[state] waiting for responses...")
@@ -130,7 +129,7 @@ func ExecuteActions(DAG []base.ActionStructure, requestor string) ([]se.StatusRe
 }
 
 // ExecuteAction builds a status response
-func ExecuteAction(action base.ActionStructure, responses chan<- se.StatusResponse, control *sync.WaitGroup, requestor string) {
+func ExecuteAction(action base.ActionStructure, env string, responses chan<- se.StatusResponse, control *sync.WaitGroup, requestor string) {
 	log.L.Infof("[state] Executing action %s against device %s...", action.Action, action.Device.Name)
 
 	if action.Overridden {
@@ -161,7 +160,7 @@ func ExecuteAction(action base.ActionStructure, responses chan<- se.StatusRespon
 		}
 	*/
 
-	url, err := action.Device.BuildCommandURL(action.Action)
+	url, err := action.Device.BuildCommandURL(action.Action, env)
 	if err != nil {
 		msg := fmt.Sprintf("unable to execute action '%s' on %s: %s", action.Action, action.Device.ID, err.Error())
 		log.L.Errorf("%s", color.HiRedString("[state] %s", msg))
@@ -192,7 +191,7 @@ func ExecuteAction(action base.ActionStructure, responses chan<- se.StatusRespon
 	for _, child := range action.Children {
 		log.L.Infof("[state] found child: %s. Executing...", child.Action)
 		control.Add(1)
-		go ExecuteAction(*child, responses, control, requestor)
+		go ExecuteAction(*child, env, responses, control, requestor)
 	}
 
 	control.Done()
