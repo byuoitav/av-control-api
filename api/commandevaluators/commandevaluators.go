@@ -68,7 +68,7 @@ func getKeyValueFromCommmand(action base.ActionStructure) []string {
 		return []string{"volume", action.Parameters["level"]}
 	case "BlankDisplay":
 		return []string{"blanked", "true"}
-	case "UnblankDisplay":
+	case "UnBlankDisplay":
 		return []string{"blanked", "false"}
 	case "Mute":
 		return []string{"Muted", "true"}

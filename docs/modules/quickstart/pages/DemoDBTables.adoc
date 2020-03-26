@@ -375,16 +375,16 @@ SONY XBR device_type document:
       "priority": 10
     },
     {
-      "_id": "UnblankDisplay",
-      "description": "UnblankDisplay",
+      "_id": "UnBlankDisplay",
+      "description": "UnBlankDisplay",
       "microservice": {
         "_id": "sony-control-microservice",
         "description": "",
         "address": "http://localhost:8007"
       },
       "endpoint": {
-        "_id": "UnblankScreen",
-        "description": "Standard UnblankScreen endpoint.",
+        "_id": "UnBlankScreen",
+        "description": "Standard UnBlankScreen endpoint.",
         "path": "/:address/display/unblank"
       },
       "priority": 7

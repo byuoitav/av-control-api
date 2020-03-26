@@ -35,7 +35,7 @@ func main() {
 
 	// import driver library
 	createVS := func(ctx context.Context, addr string) (drivers.VideoSwitcher, error) {
-		vs, err := keydigital.CreateVideoSwitcher(context.TODO(), addr)
+		vs, err := keydigital.CreateVideoSwitcher(context.TODO(), addr, drivers.Log.Named(addr))
 		if err != nil {
 			return nil, fmt.Errorf("failed to discover device: %w", err)
 		}

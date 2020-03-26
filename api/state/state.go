@@ -51,7 +51,7 @@ func GetRoomState(building, roomName, env string) (rest.PublicRoom, error) {
 
 //SetRoomState changes the state of the room and returns a PublicRoom object.
 func SetRoomState(target rest.PublicRoom, env, requestor string) (rest.PublicRoom, error) {
-
+	log.L.Infof("Requestor: %v\n", requestor)
 	log.L.Infof("%s", color.HiBlueString("[state] setting room state..."))
 
 	roomID := fmt.Sprintf("%v-%v", target.Building, target.Room)

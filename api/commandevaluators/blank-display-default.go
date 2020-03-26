@@ -203,7 +203,7 @@ func (p *BlankDisplayDefault) Validate(action base.ActionStructure) (err error) 
 // GetIncompatibleCommands keeps track of actions that are incompatable (on the same device)
 func (p *BlankDisplayDefault) GetIncompatibleCommands() (incompatableActions []string) {
 	incompatableActions = []string{
-		"UnblankDisplay",
+		"UnBlankDisplay",
 	}
 
 	return

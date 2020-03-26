@@ -24,7 +24,7 @@ func GenerateActions(dbRoom base.Room, bodyRoom rest.PublicRoom, requestor strin
 
 	var output []base.ActionStructure
 	for _, evaluator := range dbRoom.Configuration.Evaluators {
-
+		log.L.Debugf("Evaulator: %v\n", evaluator)
 		if strings.Contains(evaluator.CodeKey, "STATUS") {
 			continue
 		}
