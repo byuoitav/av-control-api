@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/byuoitav/common/db"
+	"github.com/byuoitav/av-control-api/api/base"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 )
 
 /*
@@ -93,7 +93,7 @@ type RoomInitializer interface {
 	  Initizlize performs the actions necessary for the room on startup.
 	  This is called when the AV-API service is spun up.
 	*/
-	Initialize(structs.Room) error
+	Initialize(base.Room) error
 }
 
 //InitializerMap is the map that contains the initializers

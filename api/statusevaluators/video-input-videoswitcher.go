@@ -7,7 +7,6 @@ import (
 
 	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 )
 
 // InputVideoSwitcherEvaluator is a constant variable for the name of the evaluator.
@@ -18,14 +17,14 @@ type InputVideoSwitcher struct {
 }
 
 // GenerateCommands generates a list of commands for the given devices.
-func (p *InputVideoSwitcher) GenerateCommands(room structs.Room) ([]StatusCommand, int, error) {
+func (p *InputVideoSwitcher) GenerateCommands(room base.Room) ([]StatusCommand, int, error) {
 	log.L.Info("[statusevals] Generating status commands from STATUS_Video_Switcher")
 
 	//xuther: we could do this via another call to the database, but looping through is actually faster.
 	log.L.Info("[statusevals] Looking for video switcher in room")
 
-	var switcher structs.Device
-	var command structs.Command
+	var switcher base.Device
+	var command base.Command
 	statusCommands := []StatusCommand{}
 
 	/*
@@ -123,7 +122,7 @@ func (p *InputVideoSwitcher) GenerateCommands(room structs.Room) ([]StatusComman
 }
 
 // EvaluateResponse processes the response information that is given.
-func (p *InputVideoSwitcher) EvaluateResponse(room structs.Room, label string, value interface{}, source structs.Device, dest base.DestinationDevice) (string, interface{}, error) {
+func (p *InputVideoSwitcher) EvaluateResponse(room base.Room, label string, value interface{}, source base.Device, dest base.DestinationDevice) (string, interface{}, error) {
 	log.L.Infof("[statusevals] Evaluating response: %s, %s in evaluator %v", label, value, BlankedDefaultEvaluator)
 
 	//in this case we assume that there's a single video switcher, so first we get the video switcher in the room, then we match source and dest

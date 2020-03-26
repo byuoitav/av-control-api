@@ -4,29 +4,29 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 	"github.com/fatih/color"
 )
 
 type SignalPathfinder struct {
-	Devices  map[string]structs.Device
+	Devices  map[string]base.Device
 	Expected int
 	Actual   int
-	Pending  map[string][]structs.Port // a list of the 'pending' ports. Really what this is is the fact that we can't add switches piecemeal into the graph
+	Pending  map[string][]base.Port // a list of the 'pending' ports. Really what this is is the fact that we can't add switches piecemeal into the graph
 }
 
 type Node struct {
 	ID     string
-	Device structs.Device
+	Device base.Device
 }
 
-func InitializeSignalPathfinder(devices []structs.Device, expected int) SignalPathfinder {
+func InitializeSignalPathfinder(devices []base.Device, expected int) SignalPathfinder {
 	log.L.Info("[Pathfinder] initializing pathfinder")
 	sf := SignalPathfinder{
 		Expected: expected,
-		Pending:  make(map[string][]structs.Port),
-		Devices:  make(map[string]structs.Device),
+		Pending:  make(map[string][]base.Port),
+		Devices:  make(map[string]base.Device),
 		Actual:   0,
 	}
 
@@ -39,15 +39,15 @@ func InitializeSignalPathfinder(devices []structs.Device, expected int) SignalPa
 }
 
 //we need to store the state so that we can later use it to trace the value
-func (sp *SignalPathfinder) AddEdge(Device structs.Device, port string) bool {
+func (sp *SignalPathfinder) AddEdge(Device base.Device, port string) bool {
 
 	log.L.Infof(color.HiCyanString("[Pathfinder] Adding edge :%v %v", Device.ID, port))
 	//we need to get the port from the list of devices
 
 	//go through the ports
-	realPort := structs.Port{}
+	realPort := base.Port{}
 
-	if structs.HasRole(Device, "VideoSwitcher") {
+	if base.HasRole(Device, "VideoSwitcher") {
 		split := strings.Split(port, ":")
 		//do the OUT port
 		outPort := "OUT" + split[1]
@@ -64,7 +64,7 @@ func (sp *SignalPathfinder) AddEdge(Device structs.Device, port string) bool {
 				realPort.SourceDevice = p.SourceDevice
 			}
 		}
-	} else if structs.HasRole(Device, "av-ip-receiver") {
+	} else if base.HasRole(Device, "av-ip-receiver") {
 		//For AV/IP Receivers we assume that the port coming in is the address of the transmitter it's connected to.
 		realPort.ID = "rx " + port
 		realPort.DestinationDevice = Device.ID
@@ -73,7 +73,7 @@ func (sp *SignalPathfinder) AddEdge(Device structs.Device, port string) bool {
 		for _, v := range sp.Devices {
 			if strings.EqualFold(v.Address, port) {
 				//check to see if the device in question is a non-controllable one
-				if structs.HasRole(v, "signal-passthrough") {
+				if base.HasRole(v, "signal-passthrough") {
 					//validate that the length of ports is 1
 					if len(v.Ports) == 1 {
 						realPort.SourceDevice = v.Ports[0].SourceDevice
@@ -93,7 +93,7 @@ func (sp *SignalPathfinder) AddEdge(Device structs.Device, port string) bool {
 	}
 
 	if _, ok := sp.Pending[Device.ID]; !ok {
-		sp.Pending[Device.ID] = []structs.Port{realPort}
+		sp.Pending[Device.ID] = []base.Port{realPort}
 	} else {
 		duplicate := false
 
@@ -120,10 +120,10 @@ func (sp *SignalPathfinder) AddEdge(Device structs.Device, port string) bool {
 //returns a map of output -> input of all available paths.
 //we assume that there is an entry for each output device - and will trace back as far as we can through that route
 //we assume that all the 'edges' have been added
-func (sp *SignalPathfinder) GetInputs() (map[string]structs.Device, error) {
+func (sp *SignalPathfinder) GetInputs() (map[string]base.Device, error) {
 	log.L.Info(color.HiCyanString("[Pathfinder] Getting all inputs"))
 
-	toReturn := make(map[string]structs.Device)
+	toReturn := make(map[string]base.Device)
 
 	log.L.Infof(color.HiCyanString("[Pathfinder] Devices: %v", len(sp.Devices)))
 	//we need to go through and find all of our output devices - then
@@ -175,7 +175,7 @@ func (sp *SignalPathfinder) getNextDeviceInPath(curDevice string, lastDevice str
 	dev := sp.Devices[curDevice]
 
 	//we have multiple entries for the device, check if it's a vs, if not it's an error
-	if !structs.HasRole(dev, "VideoSwitcher") {
+	if !base.HasRole(dev, "VideoSwitcher") {
 		log.L.Error(color.HiRedString("Non video switcher has multiple entries in the table, invalid state."))
 		return "", errors.New("Non video switcher has multiple entries in the table, invalid state.")
 	}
