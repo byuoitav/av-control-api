@@ -61,7 +61,7 @@ module "av_api_prd" {
   // required
   name           = "av-api-prd"
   image          = "byuoitav/av-api"
-  image_version  = "latest"
+  image_version  = "development"
   container_port = 8000
   repo_url       = "https://github.com/byuoitav/av-control-api"
 
