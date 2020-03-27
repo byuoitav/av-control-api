@@ -1,26 +1,28 @@
 = Deploy to AWS
 
-All of our services are deployed into a https://kubernetes.io/[Kubernetes] cluster running in AWS. We use https://www.terraform.io/[Terraform] to store our account and application infrastructure, which when deploying most services, consists of Kubernetes config files, AWS route 53 entries, and IAM policies/roles.
+All of our applications are deployed into a https://kubernetes.io/[Kubernetes] cluster running in AWS. We use https://www.terraform.io/[Terraform] to write our account and application infrastructure which, when deploying most applications, consists of Kubernetes config files, Route 53 entries, and IAM policies/roles.
 
 == Architecture Overview
 
 image::https://developers.redhat.com/blog/wp-content/uploads/2019/06/5-Using-NGINX-Ingress-Controller.png[AWS Architecture]
 
-As part of our https://github.com/byuoitav/aws/["base" account configuration], we create an NLB that points to an https://github.com/kubernetes/ingress-nginx[NGINX Ingress Controller] pod. When we deploy one of our services with a public URL, a route 53 entry is created that points to the NLB, which then forwards the traffic to NGINX, which routes to the Kubernetes service based on the host, which finally routes traffic to the matching pod.
+All traffic coming into kubernetes cluster goes through an NLB that points to a https://github.com/kubernetes/ingress-nginx[NGINX Ingress Controller] pod running in the cluster. Part of deploying an application is creating an https://kubernetes.io/docs/concepts/services-networking/ingress/[ingress] that causes the NGINX Ingress Controller to update it's config then and route traffic to the https://kubernetes.io/docs/concepts/services-networking/service/[service] associated with a pod. When a public URL is defined (part of our deployment modules, which we'll discuss below), a Route 53 entry is created that points to the NLB.
 
 We use https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html[AWS Parameter Store] to store application secrets.
 
-== Deployment guide 
+== Deployment guide
 === Requirements
-* Terraform must be installed
-* Installed and https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html[logged into] the aws-cli
-** BYU has https://github.com/byu-oit/awslogin[a tool] for us to log into our AWS accounts. Install it using pip, and run `awslogin`.
-* A text editor (probably vim :))
+* A text editor
+* Have the https://learn.hashicorp.com/terraform/getting-started/install.html[Terraform CLI installed]
+* Have AWS API credentials configured/saved. You can do this by https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html[installing the AWS CLI] and running `aws configure`
+** For BYU employees, we have https://github.com/byu-oit/awslogin[a tool] to help us to log into our AWS accounts. Install it and run `awslogin`.
 
-=== Write terraform config
-We have https://github.com/byuoitav/terraform[a few modules] to simplify most of the configuration for a deployment. The main decision you need to make is whether your application needs _permanent_ storage or not. If it does, you'll use the `kubernetes-statefulset` module. If not, you'll use the `kubernetes-deployment` module. They are pretty much the same, but the `statefulset` module adds a few additional options regarding storage. This guide will create a `statefulset`, but know that a `deployment` is pretty similar.
+=== Write Infrastructure
+We have https://github.com/byuoitav/terraform[a few modules] to simplify most of the code for a deployment. The main decision you need to make is whether your application needs _permanent_ storage or not. If it does, you'll use the https://github.com/byuoitav/terraform/tree/master/modules/kubernetes-statefulset[Kubernetes StatefulSet] module. If not, you'll use the https://github.com/byuoitav/terraform/tree/master/modules/kubernetes-deployment[Kubernetes Deployment] module. They are pretty much the same, but the `StatefulSet` module adds additional options regarding storage ("Storage" in this case is an EBS Volume). This guide will create a `StatefulSet`, but creating a `Deployment` is pretty similar. You can learn more about https://kubernetes.io/docs/concepts/workloads/controllers/deployment/[Deployments] and https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/[StatefulSets] in Kubernetes' concepts documentation.
 
-For the av-control-api, all of the terraform is in one `main.tf` file in the `terraform` folder. If you are trying to deploy a different service, you should create a `terraform` folder, and put a `main.tf` file into it. At the beginning of every terraform file, you need to add the following block to tell terraform where it should store the resulting state files:
+For the `av-control-api`, all of the terraform for the core API, as well as the driver servers, is in `terraform/main.tf`. If you are trying to deploy a different application, you should create a `terraform` folder at the root of the repo, with a `main.tf` file in it.
+
+In every terraform configuration, you need to add the following block to tell terraform where it should https://www.terraform.io/docs/backends/index.html[store and load infrastructure state]:
 [source,terraform]
 ----
 terraform {
@@ -33,10 +35,10 @@ terraform {
   }
 }
 ----
-<1> These values come from our configuration in https://github.com/byuoitav/aws/blob/master/s3_backend.tf[here]. They _will_ be different if you are deploying to a different AWS account.
-<2> Replace `SOME-UNIQUE-KEY` with something unique across all terraform files deployed into the account. Usually, the name of the service is unique.
+<1> These values come from BYU's configuration https://github.com/byuoitav/aws/blob/master/s3_backend.tf[here]. They *_will_* be different if you are deploying to a different AWS account.
+<2> Replace `SOME-UNIQUE-KEY` with something unique across all terraform configurations deployed into your account.
 
-After configuring the terraform backend, you need to set up the `aws` the `kubernetes` providers. For the kubernetes provider, the cluster endpoint is required, so we have stored the value in AWS Parameter Store. We'll talk more about those below.
+After configuring the terraform backend, you need to set up the `aws` the `kubernetes` providers. For the kubernetes provider, the cluster endpoint is required, so we have stored the value in AWS Parameter Store. We'll talk more about pulling values from AWS Parameter store below.
 [source,terraform]
 ----
 provider "aws" {
@@ -53,55 +55,72 @@ provider "kubernetes" {
 ----
 
 Next, we'll pull any secrets that your application requires from AWS Parameter Store. To put a secret into Parameter Store:
+
 . Log into AWS
 . Go to `Systems Manager`
-. Click on `Parameter Store` on the left
-. Click `Create Parameter`, and enter the name/value of your secret.
-** If your secret will be used by multiple services, prefix its name with `/env/`
-** If your secret will only be used by your service, prefix its name with `/env/<service name>/`
+. Select `Parameter Store` on the left sidebar
+. Click `Create Parameter`, and enter the name/value of the secret.
+** If the secret will be used by _multiple_ applications, prefix its name with `/env/`
+** If the secret will _only be used by your applications_, prefix its name with `/env/<application-name>/`
 
-Once all of your secrets are in Parameter Store, pull all the required values into your terraform by using blocks like these:
+Once all of your secrets are in Parameter Store, pull all the required values into terraform by using blocks like these:
 [source,terraform]
 ----
 data "aws_ssm_parameter" "secret_name" {
-  name = "/env/<secret-name>"
-} 
+  name = "/env/<application-name>/<secret-name>"
+}
 ----
 
-Now that you have all of your secrets, you can use our terraform modules to create your service.
+Now that you have all of your secrets, you can use our terraform modules to create your application.
 [source,terraform]
 ----
-module "statefulset" {
+module "ui_prd" {
   source = "github.com/byuoitav/terraform//modules/kubernetes-statefulset"
 
-  // required
-  name                 = "<service-name>" // <1>
-  image                = "docker.pkg.github.com/byuoitav/lazarette/lazarette"
-  image_version        = "v0.2.0"
+  // required variables
+  name                 = "<application-name>" // <1>
+  image                = "docker.pkg.github.com/byuoitav/ui/ui"
+  image_version        = "v0.5.0"
   container_port       = 8080 // <2>
-  repo_url             = "https://github.com/byuoitav/lazarette"
-  storage_mount_path   = "/opt/lazarette" // <3>
+  repo_url             = "https://github.com/byuoitav/ui"
+  storage_mount_path   = "/opt/ui" // <3>
   storage_request_size = "25Gi"
 
-  // optional
+  // optional variables
   image_pull_secret = "github-docker-registry" // <4>
-  public_urls       = ["lazarette-dev.av.byu.edu"]
-  container_env     = {} // <5>
-  container_args = [
+  public_urls       = ["roomcontrol.av.byu.edu"] // <5>
+  container_env     = { // <5>
+	DB_USERNAME = data.aws_ssm_parameter.db_address.value
+  }
+  container_args = [ // <6>
     "--port", "8080",
     "--log-level", "2",
-    "--persist-path", "/opt/lazarette/backup.db",
-    "--persist-interval", data.aws_ssm_parameter.dev_lazarette_interval.value 
+    "--some-path", "/opt/ui",
+	"--some-secret", data.aws_ssm_parameter.secret_name.value
   ]
-  ingress_annotations = {} // <6>
+  ingress_annotations = { // <7>
+	"nginx.ingress.kubernetes.io/proxy-read-timeout" = "3600"
+  }
 }
 ----
 <1> Put `-dev` at the end of name if this is the dev version of it.
-<2> The port that your service is running on.
-<3> Where the storage will be mounted to. This option, and `storage_request_size` are not present for a deployment.
-<4> This is only required if you are pulling an image from github package registry.
-<5> A map of string -> string that are environment variables for your service.
-<6> Annotations to add to the ingress, which will affect the NGINX configuration for your service. See options https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/[here].
+<2> The port that your application runs on.
+<3> Where the EBS volume will be mounted. This option and `storage_request_size` are not present for a deployment.
+<4> This is the name of a https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line[kubernetes secret] of type `kubernetes.io/dockerconfigjson`. This is only required if you are pulling an image from a private docker registry.
+<5> A list public hosts to reach your application. If left empty or omitted, the application will only be accessible from within the cluster.
+<6> Defines environment variables for your application.
+<7> Defines arguments passed to your application.
+<8> Annotations added to the Kubernetes Ingress, which will affect the NGINX configuration. See options https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/[here].
 
 === Deploy To AWS
-Once you have written your terraform configuration, you need to initialize it by running `terraform init`. You only need to do this once, or if you ever add any new modules or providers. Finally, run `terraform apply` to have terraform create your specified resources.
+Once you have written your terraform configuration, you need to initialize it by running:
+[source,bash]
+----
+terraform init
+----
+
+You only need to do this once, or if you ever add any new modules or providers. Finally, have terraform create the resources you have defined by running:
+[source,bash]
+-----
+terraform apply
+-----
