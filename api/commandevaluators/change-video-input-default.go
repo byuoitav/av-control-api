@@ -8,7 +8,7 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/structs"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/v2/events"
 )
 
@@ -17,7 +17,7 @@ type ChangeVideoInputDefault struct {
 }
 
 //Evaluate fulfills the CommmandEvaluation evaluate requirement.
-func (p *ChangeVideoInputDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
+func (p *ChangeVideoInputDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
 	count = 0
 	//RoomWideSetVideoInput
 	if len(room.CurrentVideoInput) > 0 { // Check if the user sent a PUT body changing the current video input
@@ -69,9 +69,9 @@ func (p *ChangeVideoInputDefault) GetIncompatibleCommands() (incompatableActions
 	return
 }
 
-func generateChangeInputByDevice(dbRoom structs.Room, dev base.Device, room, building, generatingEvaluator, requestor string) (actions []base.ActionStructure, err error) {
-	var output structs.Device
-	var input structs.Device
+func generateChangeInputByDevice(dbRoom base.Room, dev rest.Device, room, building, generatingEvaluator, requestor string) (actions []base.ActionStructure, err error) {
+	var output base.Device
+	var input base.Device
 	var streamURL string
 
 	inputDeviceString := dev.Input
@@ -123,11 +123,11 @@ func generateChangeInputByDevice(dbRoom structs.Room, dev base.Device, room, bui
 		Device: output,
 	}
 
-	if structs.HasRole(output, "AudioOut") {
+	if base.HasRole(output, "AudioOut") {
 		destination.AudioDevice = true
 	}
 
-	if structs.HasRole(output, "VideoOut") {
+	if base.HasRole(output, "VideoOut") {
 		destination.Display = true
 	}
 
@@ -180,7 +180,7 @@ func generateChangeInputByDevice(dbRoom structs.Room, dev base.Device, room, bui
 	return
 }
 
-func generateChangeInputByRole(dbRoom structs.Room, role, input, room, building, generatingEvaluator, requestor string) (actions []base.ActionStructure, err error) {
+func generateChangeInputByRole(dbRoom base.Room, role, input, room, building, generatingEvaluator, requestor string) (actions []base.ActionStructure, err error) {
 	devicesToChange := FilterDevicesByRole(dbRoom.Devices, role)
 
 	// get the input device
@@ -206,11 +206,11 @@ func generateChangeInputByRole(dbRoom structs.Room, role, input, room, building,
 			Device: d,
 		}
 
-		if structs.HasRole(d, "AudioOut") {
+		if base.HasRole(d, "AudioOut") {
 			dest.AudioDevice = true
 		}
 
-		if structs.HasRole(d, "VideoOut") {
+		if base.HasRole(d, "VideoOut") {
 			dest.Display = true
 		}
 

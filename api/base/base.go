@@ -1,43 +1,8 @@
 package base
 
 import (
-	"github.com/byuoitav/common/structs"
 	ei "github.com/byuoitav/common/v2/events"
 )
-
-//PublicRoom is the struct that is returned (or put) as part of the public API
-type PublicRoom struct {
-	Building          string        `json:"-"`
-	Room              string        `json:"-"`
-	CurrentVideoInput string        `json:"currentVideoInput,omitempty"`
-	CurrentAudioInput string        `json:"currentAudioInput,omitempty"`
-	Power             string        `json:"power,omitempty"`
-	Blanked           *bool         `json:"blanked,omitempty"`
-	Muted             *bool         `json:"muted,omitempty"`
-	Volume            *int          `json:"volume,omitempty"`
-	Displays          []Display     `json:"displays,omitempty"`
-	AudioDevices      []AudioDevice `json:"audioDevices,omitempty"`
-}
-
-//Device is a struct for inheriting
-type Device struct {
-	Name  string `json:"name,omitempty"`
-	Power string `json:"power,omitempty"`
-	Input string `json:"input,omitempty"`
-}
-
-//AudioDevice represents an audio device
-type AudioDevice struct {
-	Device
-	Muted  *bool `json:"muted,omitempty"`
-	Volume *int  `json:"volume,omitempty"`
-}
-
-//Display represents a display
-type Display struct {
-	Device
-	Blanked *bool `json:"blanked,omitempty"`
-}
 
 //ActionStructure is the internal struct we use to pass commands around once
 //they've been evaluated.
@@ -45,7 +10,7 @@ type Display struct {
 type ActionStructure struct {
 	Action              string             `json:"action"`
 	GeneratingEvaluator string             `json:"generatingEvaluator"`
-	Device              structs.Device     `json:"device"`
+	Device              Device             `json:"device"`
 	DestinationDevice   DestinationDevice  `json:"destination_device"`
 	Parameters          map[string]string  `json:"parameters"`
 	DeviceSpecific      bool               `json:"deviceSpecific,omitempty"`
@@ -57,7 +22,7 @@ type ActionStructure struct {
 
 // DestinationDevice represents the device that is being acted upon.
 type DestinationDevice struct {
-	structs.Device
+	Device
 	AudioDevice bool `json:"audio"`
 	Display     bool `json:"video"`
 }
@@ -66,7 +31,7 @@ type DestinationDevice struct {
 type StatusPackage struct {
 	Key    string
 	Value  interface{}
-	Device structs.Device
+	Device Device
 	Dest   DestinationDevice
 }
 
@@ -79,26 +44,26 @@ func (a *ActionStructure) Equals(b ActionStructure) bool {
 		a.Overridden == b.Overridden && CheckStringMapsEqual(a.Parameters, b.Parameters)
 }
 
-//ActionByPriority implements the sort.Interface for []ActionStructure
-type ActionByPriority []ActionStructure
+//ActionByOrder implements the sort.Interface for []ActionStructure
+type ActionByOrder []ActionStructure
 
-func (abp ActionByPriority) Len() int { return len(abp) }
+func (abp ActionByOrder) Len() int { return len(abp) }
 
-func (abp ActionByPriority) Swap(i, j int) { abp[i], abp[j] = abp[j], abp[i] }
+func (abp ActionByOrder) Swap(i, j int) { abp[i], abp[j] = abp[j], abp[i] }
 
-func (abp ActionByPriority) Less(i, j int) bool {
+func (abp ActionByOrder) Less(i, j int) bool {
 	var ipri int
 	var jpri int
 	//we've gotta go through and get the priorities
-	for _, command := range abp[i].Device.Type.Commands {
-		if command.ID == abp[i].Action {
-			ipri = command.Priority
+	for id, command := range abp[i].Device.Type.Commands {
+		if id == abp[i].Action {
+			ipri = command.Order
 			break
 		}
 	}
-	for _, command := range abp[j].Device.Type.Commands {
-		if command.ID == abp[j].Action {
-			jpri = command.Priority
+	for id, command := range abp[j].Device.Type.Commands {
+		if id == abp[j].Action {
+			jpri = command.Order
 			break
 		}
 	}
@@ -132,4 +97,17 @@ func CheckStringSliceEqual(a []string, b []string) bool {
 		}
 	}
 	return true
+}
+
+// ContainsAnyTags returns true if the taglist contains any of the specified tags
+func ContainsAnyTags(tagList []string, tags ...string) bool {
+	for i := range tags {
+		for j := range tagList {
+			if tagList[j] == tags[i] {
+				return true
+			}
+		}
+	}
+
+	return false
 }
