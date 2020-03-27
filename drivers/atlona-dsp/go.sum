@@ -3,6 +3,8 @@ github.com/byuoitav/atlona-driver v1.5.0 h1:OGhxZ69ygypox4Z9hOVfc1Ns83J0ubtVrSYv
 github.com/byuoitav/atlona-driver v1.5.0/go.mod h1:GLlUbcTMklgAk+8QA0MqQSUnpm8fAxOi/u5xLLXaXJs=
 github.com/byuoitav/atlona-driver v1.5.1 h1:fWgePbiI7+7GVyDxH+xOA5ce5umQIQww9Y00g9TnuxQ=
 github.com/byuoitav/atlona-driver v1.5.1/go.mod h1:GLlUbcTMklgAk+8QA0MqQSUnpm8fAxOi/u5xLLXaXJs=
+github.com/byuoitav/atlona-driver v1.5.2 h1:RQUzCq9s2YRf7WtDJyOpaF45XLcUnsHtdB3RN6LaFVg=
+github.com/byuoitav/atlona-driver v1.5.2/go.mod h1:GLlUbcTMklgAk+8QA0MqQSUnpm8fAxOi/u5xLLXaXJs=
 github.com/byuoitav/atlona-switcher-microservice v0.0.0-20191126173619-b128fd301655/go.mod h1:ExUW9dnW/M+r88tpEarzK13TQf0j/S/w3hVY8rF8QVs=
 github.com/byuoitav/av-control-api v0.3.6 h1:fvi1CFhBZMAhrx4xoqDYl9KEXsiQjiersjFFViFbx5k=
 github.com/byuoitav/av-control-api v0.3.6/go.mod h1:MqT7iIWtz6Wv7fcVUX9P9bA1B+FttJrE9k9lMkLgl7k=
