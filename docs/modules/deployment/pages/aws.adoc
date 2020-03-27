@@ -90,16 +90,16 @@ module "ui_prd" {
   image_pull_secret = "github-docker-registry" // <4>
   public_urls       = ["roomcontrol.av.byu.edu"] // <5>
   container_env     = { // <5>
-	DB_USERNAME = data.aws_ssm_parameter.db_address.value
+    DB_USERNAME = data.aws_ssm_parameter.db_address.value
   }
   container_args = [ // <6>
     "--port", "8080",
     "--log-level", "2",
     "--some-path", "/opt/ui",
-	"--some-secret", data.aws_ssm_parameter.secret_name.value
+    "--some-secret", data.aws_ssm_parameter.secret_name.value
   ]
   ingress_annotations = { // <7>
-	"nginx.ingress.kubernetes.io/proxy-read-timeout" = "3600"
+    "nginx.ingress.kubernetes.io/proxy-read-timeout" = "3600"
   }
 }
 ----
