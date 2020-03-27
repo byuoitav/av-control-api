@@ -8,8 +8,8 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/db"
-	"github.com/byuoitav/common/structs"
+	"github.com/byuoitav/av-control-api/api/db"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/v2/events"
 )
 
@@ -18,11 +18,11 @@ type StandbyDefault struct {
 }
 
 // Evaluate fulfills the CommmandEvaluation evaluate requirement.
-func (s *StandbyDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
+func (s *StandbyDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
 
 	log.L.Info("[command_evaluators] Evaluating for Standby Command.")
 
-	var devices []structs.Device
+	var devices []base.Device
 
 	roomID := fmt.Sprintf("%v-%v", room.Building, room.Room)
 
@@ -44,8 +44,8 @@ func (s *StandbyDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 			if device.Type.Output {
 				//check to see if it has the standby command
 
-				cmd := device.GetCommandByID("Standby")
-				if len(cmd.ID) < 1 {
+				_, err := device.GetCommandByID("Standby")
+				if err != nil {
 					log.L.Debugf("Device %v doesn't have standby command. Skipping.")
 					continue
 				}
@@ -56,11 +56,11 @@ func (s *StandbyDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 					Device: device,
 				}
 
-				if structs.HasRole(device, "AudioOut") {
+				if base.HasRole(device, "AudioOut") {
 					dest.AudioDevice = true
 				}
 
-				if structs.HasRole(device, "VideoOut") {
+				if base.HasRole(device, "VideoOut") {
 					dest.AudioDevice = true
 				}
 
@@ -132,7 +132,7 @@ func (s *StandbyDefault) GetIncompatibleCommands() (incompatableActions []string
 }
 
 // Evaluate devices just pulls out the process we do with the audio-devices and displays into one function.
-func (s *StandbyDefault) evaluateDevice(device base.Device, destination base.DestinationDevice, actions []base.ActionStructure, devices []structs.Device, room string, building string, eventInfo events.Event) ([]base.ActionStructure, error) {
+func (s *StandbyDefault) evaluateDevice(device rest.Device, destination base.DestinationDevice, actions []base.ActionStructure, devices []base.Device, room string, building string, eventInfo events.Event) ([]base.ActionStructure, error) {
 	// Check if we even need to start anything
 	if strings.EqualFold(device.Power, "standby") {
 		roomID := fmt.Sprintf("%s-%s", building, room)
@@ -165,7 +165,7 @@ func (s *StandbyDefault) evaluateDevice(device base.Device, destination base.Des
 
 			////////////////////////
 			///// MIRROR STUFF /////
-			if structs.HasRole(dev, "MirrorMaster") {
+			if base.HasRole(dev, "MirrorMaster") {
 				for _, port := range dev.Ports {
 					if port.ID == "mirror" {
 						DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -173,8 +173,8 @@ func (s *StandbyDefault) evaluateDevice(device base.Device, destination base.Des
 							return actions, err
 						}
 
-						cmd := DX.GetCommandByID("Standby")
-						if len(cmd.ID) < 1 {
+						_, err = DX.GetCommandByID("Standby")
+						if err != nil {
 							continue
 						}
 

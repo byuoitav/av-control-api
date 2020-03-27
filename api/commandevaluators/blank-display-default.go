@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/db"
+	"github.com/byuoitav/av-control-api/api/db"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
 )
 
@@ -17,7 +17,7 @@ type BlankDisplayDefault struct {
 }
 
 // Evaluate verifies the information for a BlankDisplayDefault object and generates a list of actions based on the command.
-func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *BlankDisplayDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating BlankDisplay commands...")
 
@@ -54,7 +54,7 @@ func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom
 					Display: true,
 				}
 
-				if structs.HasRole(device, "AudioOut") {
+				if base.HasRole(device, "AudioOut") {
 					destination.AudioDevice = true
 				}
 
@@ -72,7 +72,7 @@ func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom
 
 				////////////////////////
 				///// MIRROR STUFF /////
-				if structs.HasRole(device, "MirrorMaster") {
+				if base.HasRole(device, "MirrorMaster") {
 					for _, port := range device.Ports {
 						if port.ID == "mirror" {
 							DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -80,9 +80,9 @@ func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom
 								return []base.ActionStructure{}, 0, err
 							}
 
-							cmd := DX.GetCommandByID("BlankDisplay")
+							_, err = DX.GetCommandByID("BlankDisplay")
 
-							if len(cmd.ID) == 0 || cmd.ID != "BlankDisplay" {
+							if err != nil {
 								continue
 							}
 
@@ -126,7 +126,7 @@ func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom
 			event.AffectedRoom = events.GenerateBasicRoomInfo(dbRoom.ID)
 			event.TargetDevice = events.GenerateBasicDeviceInfo(destination.ID)
 
-			if structs.HasRole(device, "AudioOut") {
+			if base.HasRole(device, "AudioOut") {
 				destination.AudioDevice = true
 			}
 
@@ -143,7 +143,7 @@ func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom
 
 			////////////////////////
 			///// MIRROR STUFF /////
-			if structs.HasRole(device, "MirrorMaster") {
+			if base.HasRole(device, "MirrorMaster") {
 				for _, port := range device.Ports {
 					if port.ID == "mirror" {
 						DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -151,9 +151,9 @@ func (p *BlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom
 							return []base.ActionStructure{}, 0, err
 						}
 
-						cmd := DX.GetCommandByID("BlankDisplay")
+						_, err = DX.GetCommandByID("BlankDisplay")
 
-						if cmd.ID != "BlankDisplay" {
+						if err != nil {
 							continue
 						}
 

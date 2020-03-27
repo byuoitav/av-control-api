@@ -2,7 +2,7 @@ package commandevaluators
 
 import (
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/structs"
+	"github.com/byuoitav/av-control-api/api/rest"
 )
 
 //ChangeAudioInputDefault implements the CommandEvaluation struct.
@@ -10,7 +10,7 @@ type ChangeAudioInputDefault struct {
 }
 
 //Evaluate verifies the information for a ChangeAudioInputDefault object and generates a list of actions based on the command.
-func (p *ChangeAudioInputDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
+func (p *ChangeAudioInputDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) (actions []base.ActionStructure, count int, err error) {
 	count = 0
 
 	if len(room.CurrentAudioInput) > 0 { // Check if the user sent a PUT body changing the current audio input

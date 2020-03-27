@@ -3,7 +3,6 @@ package statusevaluators
 import (
 	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/common/status"
-	"github.com/byuoitav/common/structs"
 )
 
 // AudioList is a base evaluator struct.
@@ -24,7 +23,7 @@ type Status struct {
 
 // StatusResponse represents a status response, including the generator that created the command that returned the status
 type StatusResponse struct {
-	SourceDevice      structs.Device         `json:"source_device"`
+	SourceDevice      base.Device            `json:"source_device"`
 	DestinationDevice base.DestinationDevice `json:"destination_device"`
 	Callback          func(base.StatusPackage, chan<- base.StatusPackage) error
 	Generator         string                 `json:"generator"`
@@ -34,8 +33,9 @@ type StatusResponse struct {
 
 // StatusCommand contains information to issue a status command against a device
 type StatusCommand struct {
-	Action            structs.Command `json:"action"`
-	Device            structs.Device  `json:"device"`
+	ActionID          string       `json:"action_id"`
+	Action            base.Command `json:"action"`
+	Device            base.Device  `json:"device"`
 	Callback          func(base.StatusPackage, chan<- base.StatusPackage) error
 	Generator         string                 `json:"generator"`
 	DestinationDevice base.DestinationDevice `json:"destination"`
