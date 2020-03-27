@@ -19,7 +19,11 @@ func main() {
 	pflag.StringVarP(&logLevel, "log-level", "l", "info", "log level")
 	pflag.Parse()
 
-	log.SetLevel(logLevel)
+	nerr := log.SetLevel(logLevel)
+	if nerr != nil {
+		fmt.Printf("could not set log level: %v\n", nerr)
+		os.Exit(1)
+	}
 	addr := fmt.Sprintf(":%d", port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
