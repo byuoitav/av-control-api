@@ -8,8 +8,8 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/db"
-	"github.com/byuoitav/common/structs"
+	"github.com/byuoitav/av-control-api/api/db"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/v2/events"
 )
 
@@ -18,7 +18,7 @@ type SetVolumeDefault struct {
 }
 
 //Evaluate checks for a volume for the entire room or the volume of a specific device
-func (*SetVolumeDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (*SetVolumeDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	var actions []base.ActionStructure
 
@@ -55,7 +55,7 @@ func (*SetVolumeDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 
 				destination.Device = device
 
-				if structs.HasRole(device, "VideoOut") {
+				if base.HasRole(device, "VideoOut") {
 					destination.Display = true
 				}
 
@@ -71,7 +71,7 @@ func (*SetVolumeDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 
 				////////////////////////
 				///// MIRROR STUFF /////
-				if structs.HasRole(device, "MirrorMaster") {
+				if base.HasRole(device, "MirrorMaster") {
 					for _, port := range device.Ports {
 						if port.ID == "mirror" {
 							DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -79,8 +79,8 @@ func (*SetVolumeDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 								return []base.ActionStructure{}, 0, err
 							}
 
-							cmd := DX.GetCommandByID("SetVolume")
-							if len(cmd.ID) < 1 {
+							_, err = DX.GetCommandByID("SetVolume")
+							if err != nil {
 								continue
 							}
 
@@ -136,7 +136,7 @@ func (*SetVolumeDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 
 				destination.Device = device
 
-				if structs.HasRole(device, "VideoOut") {
+				if base.HasRole(device, "VideoOut") {
 					destination.Display = true
 				}
 
@@ -152,7 +152,7 @@ func (*SetVolumeDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 
 				////////////////////////
 				///// MIRROR STUFF /////
-				if structs.HasRole(device, "MirrorMaster") {
+				if base.HasRole(device, "MirrorMaster") {
 					for _, port := range device.Ports {
 						if port.ID == "mirror" {
 							DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -160,8 +160,8 @@ func (*SetVolumeDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, req
 								return actions, len(actions), err
 							}
 
-							cmd := DX.GetCommandByID("SetVolume")
-							if len(cmd.ID) < 1 {
+							_, err = DX.GetCommandByID("SetVolume")
+							if err != nil {
 								continue
 							}
 

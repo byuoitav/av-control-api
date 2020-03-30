@@ -37,7 +37,7 @@ The current list of possible commands include
 * ChangeInput
 * SetVolume
 * Blank Screen
-* UnblankScreen
+* UnBlankScreen
 * Mute
 * Unmute
 

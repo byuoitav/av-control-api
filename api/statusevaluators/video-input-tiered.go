@@ -8,13 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/byuoitav/common/db"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/common/status"
 
 	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/av-control-api/api/statusevaluators/pathfinder"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 	"github.com/fatih/color"
 )
 
@@ -26,7 +25,7 @@ type InputTieredSwitcher struct {
 }
 
 // GenerateCommands generates a list of commands for the given devices.
-func (p *InputTieredSwitcher) GenerateCommands(room structs.Room) ([]StatusCommand, int, error) {
+func (p *InputTieredSwitcher) GenerateCommands(room base.Room) ([]StatusCommand, int, error) {
 	//look at all the output devices and switchers in the room. we need to generate a status input for every port on every video switcher and every output device.
 	log.L.Debugf("Generating command from the STATUS_TIERED_SWITCHER")
 
@@ -42,10 +41,10 @@ func (p *InputTieredSwitcher) GenerateCommands(room structs.Room) ([]StatusComma
 	}
 
 	for _, d := range room.Devices {
-		isVS := structs.HasRole(d, "VideoSwitcher")
-		cmd := d.GetCommandByID("STATUS_Input")
-		if len(cmd.ID) == 0 {
-			if structs.HasRole(d, "MirrorSlave") && d.Ports[0].ID != "mirror" {
+		isVS := base.HasRole(d, "VideoSwitcher")
+		cmd, err := d.GetCommandByID("STATUS_Input")
+		if err != nil {
+			if base.HasRole(d, "MirrorSlave") && d.Ports[0].ID != "mirror" {
 				log.L.Debugf("Adding edge for mirror slave %s", d.ID)
 				mirrorEdges[d.ID] = d.Ports[0].ID
 				count++
@@ -56,7 +55,7 @@ func (p *InputTieredSwitcher) GenerateCommands(room structs.Room) ([]StatusComma
 		}
 
 		/*
-			if !d.Type.Output && !isVS && !structs.HasRole(d, "av-ip-receiver") { //we don't care about it
+			if !d.Type.Output && !isVS && !base.HasRole(d, "av-ip-receiver") { //we don't care about it
 				log.L.Debugf("Skipping %v for input commands, incorrect roles.", d.ID)
 				continue
 			}
@@ -79,6 +78,7 @@ func (p *InputTieredSwitcher) GenerateCommands(room structs.Room) ([]StatusComma
 
 					//this is where we'd add the callback
 					toReturn = append(toReturn, StatusCommand{
+						ActionID:   "STATUS_Input",
 						Action:     cmd,
 						Device:     d,
 						Generator:  InputTieredSwitcherEvaluator,
@@ -96,19 +96,20 @@ func (p *InputTieredSwitcher) GenerateCommands(room structs.Room) ([]StatusComma
 		params["address"] = d.Address
 
 		toReturn = append(toReturn, StatusCommand{
-			Action: cmd,
-			Device: d,
+			ActionID: "STATUS_Input",
+			Action:   cmd,
+			Device:   d,
 			DestinationDevice: base.DestinationDevice{
 				Device:      d,
-				AudioDevice: structs.HasRole(d, "AudioOut"),
-				Display:     structs.HasRole(d, "VideoOut"),
+				AudioDevice: base.HasRole(d, "AudioOut"),
+				Display:     base.HasRole(d, "VideoOut"),
 			},
 			Generator:  InputTieredSwitcherEvaluator,
 			Parameters: params,
 			Callback:   callbackEngine.Callback,
 		})
 		//we only count the number of output devices
-		if structs.HasRole(d, "VideoOut") || structs.HasRole(d, "AudioOut") {
+		if base.HasRole(d, "VideoOut") || base.HasRole(d, "AudioOut") {
 			count++
 		}
 
@@ -134,7 +135,7 @@ func (p *InputTieredSwitcher) GenerateCommands(room structs.Room) ([]StatusComma
 }
 
 // EvaluateResponse processes the response information that is given.
-func (p *InputTieredSwitcher) EvaluateResponse(room structs.Room, str string, face interface{}, dev structs.Device, destDev base.DestinationDevice) (string, interface{}, error) {
+func (p *InputTieredSwitcher) EvaluateResponse(room base.Room, str string, face interface{}, dev base.Device, destDev base.DestinationDevice) (string, interface{}, error) {
 	return "", nil, nil
 
 }
@@ -143,7 +144,7 @@ func (p *InputTieredSwitcher) EvaluateResponse(room structs.Room, str string, fa
 type TieredSwitcherCallback struct {
 	InChan              chan base.StatusPackage
 	OutChan             chan<- base.StatusPackage
-	Devices             []structs.Device
+	Devices             []base.Device
 	ExpectedCount       int
 	ExpectedActionCount int
 	pathfinder          pathfinder.SignalPathfinder
@@ -167,13 +168,13 @@ func (p *TieredSwitcherCallback) Callback(sp base.StatusPackage, c chan<- base.S
 	return nil
 }
 
-func (p *TieredSwitcherCallback) getDeviceByID(dev string) structs.Device {
+func (p *TieredSwitcherCallback) getDeviceByID(dev string) base.Device {
 	for d := range p.Devices {
 		if p.Devices[d].ID == dev {
 			return p.Devices[d]
 		}
 	}
-	return structs.Device{}
+	return base.Device{}
 }
 
 // GetInputPaths generates a directed graph of the tiered switching layout.
@@ -210,8 +211,8 @@ func (p *TieredSwitcherCallback) GetInputPaths(pathfinder pathfinder.SignalPathf
 
 		destDev := base.DestinationDevice{
 			Device:      outDev,
-			AudioDevice: structs.HasRole(outDev, "AudioOut"),
-			Display:     structs.HasRole(outDev, "VideoOut"),
+			AudioDevice: base.HasRole(outDev, "AudioOut"),
+			Display:     base.HasRole(outDev, "VideoOut"),
 		}
 		log.L.Infof(color.HiYellowString("[callback] Sending input %v -> %v", inputValue, k))
 
@@ -266,7 +267,7 @@ func (p *TieredSwitcherCallback) StartAggregator() {
 }
 
 // AddEdge initializes the pathfinder if it hasn't been, and then adds an edge. This should ONLY be used when there is only one port on the device.
-func (p *TieredSwitcherCallback) AddEdge(device structs.Device, port string) {
+func (p *TieredSwitcherCallback) AddEdge(device base.Device, port string) {
 	if p.pathfinder.Devices == nil {
 		p.pathfinder = pathfinder.InitializeSignalPathfinder(p.Devices, p.ExpectedActionCount)
 	}
