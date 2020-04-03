@@ -15,11 +15,15 @@ This section will outline the necessary steps to get a raspbian image up and run
 * Download the 'Raspbian Buster Lite' image https://www.raspberrypi.org/downloads/raspbian/[here].
 * Using the https://www.balena.io/etcher/[Balena Etcher utility], flash the downlaoded image to an SD card.
 ** If you want to enable ssh by default, now is a good time.  After the image is transferred to the SD card, and the card is still connected to your computer, add an empty file called `+ssh+` to the `+boot+` directory on the SD card.
-* Place the SD card into the Pi, connect it to the network and turn in on.
+* Place the SD card into the Pi, connect it to the network and turn it on.
+** Having a keyboard connected to your Pi for these initial steps, might make things a little easier.  However, if you are familiar with ssh, most of this tutorial can be done using a remote shell (with the exception of launching the UI once you are ready)
 ** The default username is `+pi+` and the password is `+raspberry+`
-** On first boot you may need to change keyboard settings and enable ssh (if you haven't already).  You can use the built in config utility called `+raspi-config+` to change these settings (and more). Simply run `+raspi-config+` after logging in.
+** On first boot you will want to use the `+raspi-config+` utility to change a few things.
+*** By default, the Raspberry Pi is configured for English (UK). You should change your keyboard layout for your locale (or you may find your keyboard entering characters you didn't expect).
+*** You can also enable ssh through this config tool (if you haven't already).  
+*** To find these settings (and more) simply run `+raspi-config+` after logging in.  For more help with this tool, you can visit the https://www.raspberrypi.org/documentation/configuration/raspi-config.md[help page] found on the Raspberry Pi site.
 
-*NOTE: When running most of the commands in this guide, you will need to prefix each command with `+sudo+` to avoid permission errors. Alternatively you can run `+sudo su+` first and all subsequent commands will be run with "root" priviledges.
+NOTE: When running most of the commands in this guide, you will need to have elevated permissions.  The simplest way to do this is to type `+sudo+` before each command. Alternatively, you can run the `+sudo su+` command and then all subsequent commands will be run with "root" priviledges.
 
 === docker
 These are the commands to get https://www.docker.com/why-docker[docker] on your raspberry pi: 
@@ -64,7 +68,7 @@ First we need to create i3's config file:
 [source,bash]
 ----
 mkdir .i3
-cp etc/i3/config .i3/config
+cp /etc/i3/config .i3/config
 ----
 
 Then you need to create a file called .xinitrc (in the pi user's home directory) with the following contents:
@@ -81,10 +85,10 @@ Once created, you need to give the file execute permissions:
 
 [source, bash]
 ----
-chmod +x ~/.xinitrc
+chmod +x .xinitrc
 ----
 
-And last, you need to create a file called .bash_profile (also in the home directory) with the following contents.  This will launch i3 whenever you login as the `+pi+` user from the console (but not through ssh).
+And last, you need to create a file called .bash_profile (also in the pi user's home directory) with the following contents.  This will launch i3 whenever you login as the `+pi+` user from the console (but not through ssh).
 
 ----
 if [[ -z $DISPLAY && $(tty) == /dev/tty1 ]]; then

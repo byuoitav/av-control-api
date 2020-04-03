@@ -1,35 +1,33 @@
 = Demo DB Files
 
-Before running this script you first need to create an admin account for your couch DB. Please follow the steps below to get it set up:
+*_Before running this script you first need to create an admin account for your couch DB._* Please follow the steps below to get it set up:
 
-. View your couch DB by going to `+localhost:5984/_utils+` on the pi, or `+[pi-ip-address]:5984/_utils+` on a computer on the same network.
-. The database currently does not have an admin user, so you will automatically be "logged" in to the DB.
+. You can access the DB management utility for your instance of the Couch DB by going to `+http://localhost:5984/_utils+` in a browser on your Pi, or by visiting `+http://[pi-ip-address]:5984/_utils+` from a browser on a computer connected to the same network as the Pi.
++
+TIP: Launching the Chromium browser from the Pi is easy.  Just type `+alt-d+` to open the i3 dmenu.  From there just type in `+chromium-browser+` and hit enter.  For more i3 tips, please refer to their https://i3wm.org/docs/userguide.htm[documentation page.]
+
+. The database currently does not have an admin user, so you will automatically be "logged" into the tool.
 . Click the user icon on the bottom of the menu on the left side of the screen (please see screenshot below).
-. Add a new admin user with the username "admin" and the password "AVAPIPASSWORD". These are the username and password used when running the following script to load the DB.  It is also the username and password used by the AV-API code to access the configurations.
+. Add a new admin user with the username "admin" and the password "AVAPIPASSWORD". 
+.. These are the username and password used when running the following script to load the DB.  It is also the username and password used by the AV-API code to access the configurations.
 
 image::Couch.jpg[Couch DB]
 
-We will now create the DB entries needed for this demo. We will dowload some sample file to kickstart the entries.  But there will be a few changes that must be made in each of the documents to make it work for your specific devices.
-
-With CouchDB installed and running on port 5894, you can use the following script to automatically create the tables and documents required for the demo. Steps for using this script are found below:
+With the admin user created, you are now ready to create the DB entries needed for this demo. We have simplified this process with a script that will download the necesarry JSON files and upload them to your instance of Couch DB.  After the database entries are in place, you will need to change just a few settings to customize the setup for your specific network and setup.
 
 . Download the Couch_Demo_Set_Up_Script from the https://github.com/byuoitav/DemoCouchDBSetup[Couch_Demo_Set_Up_Script] repository in github to the Pi.
 .. From the Raspberry Pi you can simply run 
 +
 `+wget https://raw.githubusercontent.com/byuoitav/DemoCouchDBSetup/master/Couch_Demo_Set_Up_Script.py+` 
-.. This script will download the .json files from the repo and then inject them into the courch DB. If you already have the json files download, it will use the local versions.
-. T execute the script, run the following command on the Pi:
+. To execute the script, run the following command on the Pi:
 +
 `+python3 Couch_Demo_Set_Up_Script.py admin AVAPIPASSWORD+`
 
-.. The username and password are passed in as arguments when running the script to handle authorization for your db properly (admin and AVAPIPASSWORD are the default username and password. If you want to change it you MUST change it in the xref:startAPI.adoc[docker-compose.yml] file and add the admin user to the DB as well following the steps mentioned above).
+NOTE: The username and password for the admin DB are passed into this script as arguments.  If you choose to change the password for your database admin user, you MUST also update the xref:startAPI.adoc[docker-compose.yml] file you created earlier.  Look for the Couch DB username and password settings in the AV-API section of that document.  
 
+After running this script you can validate that it worked by once again logging into the DB managment utility for your instance of Couch DB and looking for the new documents.
 
-After running this script you can view the contents of your database by visiting `+localhost:5984/_utils+` from chromium running on the pi (run `+chromium-browser+` from the CLI)
-
-The username and password for your database is mentioned above.
-
-After logging into the database please make the following changes:
+While in the DB management utility, please make the following changes:
 
 . In the "devices" database, the following changes are needed:
 .. open the DEMO-123-CP1 document and update the address attribute to the IP address of your Raspberry Pi.
