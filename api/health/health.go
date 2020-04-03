@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/db"
+	"github.com/byuoitav/av-control-api/api/db"
 	"github.com/byuoitav/common/health"
 	"github.com/byuoitav/common/log"
 	"github.com/labstack/echo"

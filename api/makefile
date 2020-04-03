@@ -60,7 +60,7 @@ docker: docker-x86 docker-arm
 
 docker-x86: $(NAME)-bin
 ifeq "$(BRANCH)" "master"
-	$(eval BRANCH=latest)
+	$(eval BRANCH=development)
 endif
 ifeq "$(BRANCH)" "production"
 	$(eval BRANCH=production)
@@ -78,7 +78,7 @@ endif
 
 docker-arm: $(NAME)-arm
 ifeq "$(BRANCH)" "master"
-	$(eval BRANCH=latest)
+	$(eval BRANCH=development)
 endif
 ifeq "$(BRANCH)" "production"
 	$(eval BRANCH=production)

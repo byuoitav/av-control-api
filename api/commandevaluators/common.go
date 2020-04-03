@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/structs"
 )
 
 //This file contains common 'helper' functions.
@@ -20,7 +19,7 @@ func checkActionListForDevice(a []base.ActionStructure, d string, room string, b
 	return -1
 }
 
-func checkDevicesEqual(dev structs.Device, name string, room string, building string) bool {
+func checkDevicesEqual(dev base.Device, name string, room string, building string) bool {
 	splits := strings.Split(dev.GetDeviceRoomID(), "-")
 	return strings.EqualFold(dev.ID, name) &&
 		strings.EqualFold(splits[1], room) &&
@@ -29,13 +28,13 @@ func checkDevicesEqual(dev structs.Device, name string, room string, building st
 
 // CheckCommands searches a list of Commands to see if it contains any command by the name given.
 // returns T/F, as well as the command if true.
-func CheckCommands(commands []structs.Command, commandName string) (bool, structs.Command) {
-	for _, c := range commands {
-		if strings.EqualFold(c.ID, commandName) {
+func CheckCommands(commands map[string]base.Command, commandName string) (bool, base.Command) {
+	for id, c := range commands {
+		if strings.EqualFold(id, commandName) {
 			return true, c
 		}
 	}
-	return false, structs.Command{}
+	return false, base.Command{}
 }
 
 func markAsOverridden(action base.ActionStructure, structs ...[]*base.ActionStructure) {
@@ -49,19 +48,19 @@ func markAsOverridden(action base.ActionStructure, structs ...[]*base.ActionStru
 }
 
 // FindDevice searches a list of devices for the device specified by the given ID and returns it
-func FindDevice(deviceList []structs.Device, searchID string) structs.Device {
+func FindDevice(deviceList []base.Device, searchID string) base.Device {
 	for i := range deviceList {
 		if deviceList[i].ID == searchID {
 			return deviceList[i]
 		}
 	}
 
-	return structs.Device{}
+	return base.Device{}
 }
 
 // FilterDevicesByRole searches a list of devices for the devices that have the given roles, and returns a new list of those devices
-func FilterDevicesByRole(deviceList []structs.Device, roleID string) []structs.Device {
-	var toReturn []structs.Device
+func FilterDevicesByRole(deviceList []base.Device, roleID string) []base.Device {
+	var toReturn []base.Device
 
 	for _, device := range deviceList {
 		if device.HasRole(roleID) {

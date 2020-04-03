@@ -8,8 +8,8 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/db"
-	"github.com/byuoitav/common/structs"
+	"github.com/byuoitav/av-control-api/api/db"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/v2/events"
 )
 
@@ -18,7 +18,7 @@ type UnBlankDisplayDefault struct {
 }
 
 //Evaluate creates UnBlank actions for the entire room and for individual devices
-func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *UnBlankDisplayDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	var actions []base.ActionStructure
 
@@ -52,12 +52,12 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 
 				destination.Device = device
 
-				if structs.HasRole(device, "AudioOut") {
+				if base.HasRole(device, "AudioOut") {
 					destination.AudioDevice = true
 				}
 
 				actions = append(actions, base.ActionStructure{
-					Action:              "UnblankDisplay",
+					Action:              "UnBlankDisplay",
 					GeneratingEvaluator: "UnBlankDisplayDefault",
 					Device:              device,
 					DestinationDevice:   destination,
@@ -67,7 +67,7 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 
 				////////////////////////
 				///// MIRROR STUFF /////
-				if structs.HasRole(device, "MirrorMaster") {
+				if base.HasRole(device, "MirrorMaster") {
 					for _, port := range device.Ports {
 						if port.ID == "mirror" {
 							DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -75,8 +75,8 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 								return actions, len(actions), err
 							}
 
-							cmd := DX.GetCommandByID("UnBlankDisplay")
-							if len(cmd.ID) < 1 {
+							_, err = DX.GetCommandByID("UnBlankDisplay")
+							if err != nil {
 								continue
 							}
 
@@ -87,7 +87,7 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 							eventInfo.TargetDevice = events.GenerateBasicDeviceInfo(destination.ID)
 
 							actions = append(actions, base.ActionStructure{
-								Action:              "UnblankDisplay",
+								Action:              "UnBlankDisplay",
 								GeneratingEvaluator: "UnBlankDisplayDefault",
 								Device:              DX,
 								DestinationDevice:   destination,
@@ -120,12 +120,12 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 
 			destination.Device = device
 
-			if structs.HasRole(device, "AudioOut") {
+			if base.HasRole(device, "AudioOut") {
 				destination.AudioDevice = true
 			}
 
 			actions = append(actions, base.ActionStructure{
-				Action:              "UnblankDisplay",
+				Action:              "UnBlankDisplay",
 				GeneratingEvaluator: "UnBlankDisplayDefault",
 				Device:              device,
 				DestinationDevice:   destination,
@@ -135,7 +135,7 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 
 			////////////////////////
 			///// MIRROR STUFF /////
-			if structs.HasRole(device, "MirrorMaster") {
+			if base.HasRole(device, "MirrorMaster") {
 				for _, port := range device.Ports {
 					if port.ID == "mirror" {
 						DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -143,8 +143,8 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 							return actions, len(actions), err
 						}
 
-						cmd := DX.GetCommandByID("UnblankDisplay")
-						if len(cmd.ID) < 1 {
+						_, err = DX.GetCommandByID("UnBlankDisplay")
+						if err != nil {
 							continue
 						}
 
@@ -155,7 +155,7 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 						eventInfo.TargetDevice = events.GenerateBasicDeviceInfo(DX.ID)
 
 						actions = append(actions, base.ActionStructure{
-							Action:              "UnblankDisplay",
+							Action:              "UnBlankDisplay",
 							GeneratingEvaluator: "UnBlankDisplayDefault",
 							Device:              DX,
 							DestinationDevice:   destination,
@@ -179,9 +179,9 @@ func (p *UnBlankDisplayDefault) Evaluate(dbRoom structs.Room, room base.PublicRo
 func (p *UnBlankDisplayDefault) Validate(action base.ActionStructure) error {
 	log.L.Info("[command_evaluators] Validating action for command \"UnBlank\"")
 
-	ok, _ := CheckCommands(action.Device.Type.Commands, "UnblankDisplay")
+	ok, _ := CheckCommands(action.Device.Type.Commands, "UnBlankDisplay")
 
-	if !ok || !strings.EqualFold(action.Action, "UnblankDisplay") {
+	if !ok || !strings.EqualFold(action.Action, "UnBlankDisplay") {
 		msg := fmt.Sprintf("[command_evaluators] ERROR. %s is an invalid command for %s", action.Action, action.Device.Name)
 		log.L.Error(msg)
 		return errors.New(msg)

@@ -17,9 +17,17 @@ import (
 	"github.com/byuoitav/common/v2/auth"
 	"github.com/byuoitav/common/v2/events"
 	"github.com/labstack/echo"
+	"github.com/spf13/pflag"
 )
 
 func main() {
+	// Parse flags
+
+	var env string
+
+	pflag.StringVarP(&env, "env", "e", "fallback", "The deployment environment for the API")
+	pflag.Parse()
+
 	var nerr *nerr.E
 
 	base.Messenger, nerr = messenger.BuildMessenger(os.Getenv("HUB_ADDRESS"), hub.Messenger, 1000)
@@ -35,6 +43,10 @@ func main() {
 		}
 	}()
 
+	h := handlers.RoomHandler{
+		Environment: env,
+	}
+
 	port := ":8000"
 	router := common.NewRouter()
 
@@ -45,11 +57,11 @@ func main() {
 	router.GET("/status", databasestatus.Handler)
 
 	// PUT requests
-	router.PUT("/buildings/:building/rooms/:room", handlers.SetRoomState, auth.AuthorizeRequest("write-state", "room", handlers.GetRoomResource))
+	router.PUT("/buildings/:building/rooms/:room", h.SetRoomState, auth.AuthorizeRequest("write-state", "room", h.GetRoomResource))
 
 	// room status
-	router.GET("/buildings/:building/rooms/:room", handlers.GetRoomState, auth.AuthorizeRequest("read-state", "room", handlers.GetRoomResource))
-	router.GET("/buildings/:building/rooms/:room/configuration", handlers.GetRoomByNameAndBuilding, auth.AuthorizeRequest("read-config", "room", handlers.GetRoomResource))
+	router.GET("/buildings/:building/rooms/:room", h.GetRoomState, auth.AuthorizeRequest("read-state", "room", h.GetRoomResource))
+	router.GET("/buildings/:building/rooms/:room/configuration", h.GetRoomByNameAndBuilding, auth.AuthorizeRequest("read-config", "room", h.GetRoomResource))
 
 	router.PUT("/log-level/:level", log.SetLogLevel)
 	router.GET("/log-level", log.GetLogLevel)

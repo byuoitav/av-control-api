@@ -6,7 +6,6 @@ import (
 
 	"github.com/byuoitav/av-control-api/api/base"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/common/structs"
 )
 
 // InputDSPEvaluator is a constant variable for the name of the evaluator.
@@ -19,7 +18,7 @@ const InputDSPCommand = "STATUS_Input"
 type InputDSP struct{}
 
 // GenerateCommands generates a list of commands for the given devices.
-func (p *InputDSP) GenerateCommands(room structs.Room) ([]StatusCommand, int, error) {
+func (p *InputDSP) GenerateCommands(room base.Room) ([]StatusCommand, int, error) {
 
 	audioDevices := FilterDevicesByRole(room.Devices, "AudioOut")
 	dsps := FilterDevicesByRole(room.Devices, "DSP")
@@ -62,9 +61,10 @@ func (p *InputDSP) GenerateCommands(room structs.Room) ([]StatusCommand, int, er
 				AudioDevice: true,
 			}
 
-			command := switchers[0].GetCommandByID(InputDSPCommand)
+			command, _ := switchers[0].GetCommandByID(InputDSPCommand)
 
 			statusCommand := StatusCommand{
+				ActionID:          InputDSPCommand,
 				Action:            command,
 				Device:            switchers[0],
 				Parameters:        parameters,
@@ -81,7 +81,7 @@ func (p *InputDSP) GenerateCommands(room structs.Room) ([]StatusCommand, int, er
 }
 
 // EvaluateResponse processes the response information that is given.
-func (p *InputDSP) EvaluateResponse(room structs.Room, label string, value interface{}, source structs.Device, DestinationDevice base.DestinationDevice) (string, interface{}, error) {
+func (p *InputDSP) EvaluateResponse(room base.Room, label string, value interface{}, source base.Device, DestinationDevice base.DestinationDevice) (string, interface{}, error) {
 	for _, port := range DestinationDevice.Ports {
 
 		valueString, ok := value.(string)

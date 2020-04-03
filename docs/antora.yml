@@ -5,3 +5,4 @@ nav:
   - modules/ROOT/nav.adoc
   - modules/quickstart/nav.adoc
   - modules/drivers/nav.adoc
+  - modules/deployment/nav.adoc
