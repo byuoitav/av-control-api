@@ -4,7 +4,7 @@
 
 . You can access the DB management utility for your instance of the Couch DB by going to `+http://localhost:5984/_utils+` in a browser on your Pi, or by visiting `+http://[pi-ip-address]:5984/_utils+` from a browser on a computer connected to the same network as the Pi.
 +
-TIP: Launching the Chromium browser from the Pi is easy.  Just type `+alt-d+` to open the i3 dmenu.  From there just type in `+chromium-browser+` and hit enter.  For more i3 tips, please refer to their https://i3wm.org/docs/userguide.htm[documentation page.]
+TIP: Launching the Chromium browser from the Pi is easy.  Just type `+alt-d+` to open the i3 dmenu.  From there just type in `+chromium-browser+` and hit enter.  For more i3 tips, please refer to their https://i3wm.org/docs/userguide.html[documentation page.]
 
 . The database currently does not have an admin user, so you will automatically be "logged" into the tool.
 . Click the user icon on the bottom of the menu on the left side of the screen (please see screenshot below).
