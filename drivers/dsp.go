@@ -2,11 +2,13 @@ package drivers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
 
 	"github.com/labstack/echo"
+	"golang.org/x/sync/singleflight"
 )
 
 type DSP interface {
@@ -81,6 +83,8 @@ func CreateDSPServer(create CreateDSPFunc) (Server, error) {
 }
 
 func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
+	single := &singleflight.Group{}
+
 	// volume
 	e.GET("/:address/block/:block/volume", func(c echo.Context) error {
 		addr := c.Param("address")
@@ -92,14 +96,21 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		d, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do(addr+block+"volume", func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return d.GetVolumeByBlock(c.Request().Context(), block)
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		vol, err := d.GetVolumeByBlock(c.Request().Context(), block)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		vol, ok := val.(int)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", vol, val))
 		}
 
 		return c.JSON(http.StatusOK, volume{Volume: vol})
@@ -118,12 +129,15 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		d, err := create(c.Request().Context(), addr)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		_, err, _ = single.Do(fmt.Sprintf("%v%v%v", addr, block, vol), func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
 
-		if err = d.SetVolumeByBlock(c.Request().Context(), block, vol); err != nil {
+			return nil, d.SetVolumeByBlock(c.Request().Context(), block, vol)
+		})
+		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
@@ -141,14 +155,21 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		d, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do(addr+block+"muted", func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return d.GetMutedByBlock(c.Request().Context(), block)
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		mute, err := d.GetMutedByBlock(c.Request().Context(), block)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		mute, ok := val.(bool)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", mute, val))
 		}
 
 		return c.JSON(http.StatusOK, muted{Muted: mute})
@@ -167,12 +188,15 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		d, err := create(c.Request().Context(), addr)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		_, err, _ = single.Do(fmt.Sprintf("%v%v%v", addr, block, mute), func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
 
-		if err = d.SetMutedByBlock(c.Request().Context(), block, mute); err != nil {
+			return nil, d.SetMutedByBlock(c.Request().Context(), block, mute)
+		})
+		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
