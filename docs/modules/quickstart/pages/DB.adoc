@@ -7,7 +7,7 @@ that uses JSON documents to store data. For more information about CouchDB speci
 
 This guide will outline each of the required tables/schemas, their purpose, what data is being stored, and how it is used within our AV solution.
 
-NOTE: The links below will drill into more detail about each of the tables and to illustrate what data is stored in each of the documents. The examples found in these links are not meant to be copied and pasted for the quick start demo. They are intented to help you explore the DB settings and how they control room behavior. To continue with the quickstart demo and download the demo databases, click xref:DemoDBScript.adoc[here.] 
+NOTE: The links below will drill into detail about each of the tables and will illustrate what data is stored in each of the documents. The examples found in these links are not meant to be copied and pasted for the quick start demo. They are intented to help you explore the DB settings and how they control room behavior. To continue with the quickstart demo and download the demo databases, click xref:DemoDBScript.adoc[here.] 
  
 Within CouchDB there are five important tables that are used throughout our solution:
 
