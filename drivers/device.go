@@ -23,7 +23,7 @@ func addDeviceRoutes(e *echo.Echo, create CreateDeviceFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the device")
 		}
 
-		val, err, _ := single.Do(addr, func() (interface{}, error) {
+		val, err, _ := single.Do("0"+addr, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err

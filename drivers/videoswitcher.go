@@ -64,7 +64,7 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 			return c.String(http.StatusBadRequest, "must include an output port for the video switcher")
 		}
 
-		val, err, _ := single.Do(addr+out+"input", func() (interface{}, error) {
+		val, err, _ := single.Do("0"+addr+out, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -97,7 +97,7 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 			return c.String(http.StatusBadRequest, "must include an input port")
 		}
 
-		_, err, _ := single.Do(fmt.Sprintf("%v%v%v", addr, out, in), func() (interface{}, error) {
+		_, err, _ := single.Do(fmt.Sprintf("1%v%v%v", addr, out, in), func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err

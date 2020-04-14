@@ -65,7 +65,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		val, err, _ := single.Do(addr+"power", func() (interface{}, error) {
+		val, err, _ := single.Do("0"+addr, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -95,7 +95,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include a power state to set")
 		}
 
-		_, err, _ := single.Do(fmt.Sprintf("%vpower%v", addr, pow), func() (interface{}, error) {
+		_, err, _ := single.Do(fmt.Sprintf("1%v%v", addr, pow), func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -117,7 +117,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		val, err, _ := single.Do(addr+"blanked", func() (interface{}, error) {
+		val, err, _ := single.Do("2"+addr, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -147,7 +147,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		_, err, _ = single.Do(fmt.Sprintf("%vblanked%v", addr, blank), func() (interface{}, error) {
+		_, err, _ = single.Do(fmt.Sprintf("3%v%v", addr, blank), func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -169,7 +169,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		val, err, _ := single.Do(addr+"input", func() (interface{}, error) {
+		val, err, _ := single.Do("4"+addr, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -199,7 +199,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include a input to set")
 		}
 
-		_, err, _ := single.Do(fmt.Sprintf("%vinput%v", addr, in), func() (interface{}, error) {
+		_, err, _ := single.Do(fmt.Sprintf("5%v%v", addr, in), func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -222,7 +222,7 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		val, err, _ := single.Do(addr+"activesignal", func() (interface{}, error) {
+		val, err, _ := single.Do("6"+addr, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err

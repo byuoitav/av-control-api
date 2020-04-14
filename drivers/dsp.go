@@ -96,7 +96,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		val, err, _ := single.Do(addr+block+"volume", func() (interface{}, error) {
+		val, err, _ := single.Do("0"+addr+block, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -129,7 +129,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		_, err, _ = single.Do(fmt.Sprintf("%v%v%v", addr, block, vol), func() (interface{}, error) {
+		_, err, _ = single.Do(fmt.Sprintf("1%v%v%v", addr, block, vol), func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -155,7 +155,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, "must include a block for the dsp")
 		}
 
-		val, err, _ := single.Do(addr+block+"muted", func() (interface{}, error) {
+		val, err, _ := single.Do("2"+addr+block, func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
@@ -188,7 +188,7 @@ func addDSPRoutes(e *echo.Echo, create CreateDSPFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		_, err, _ = single.Do(fmt.Sprintf("%v%v%v", addr, block, mute), func() (interface{}, error) {
+		_, err, _ = single.Do(fmt.Sprintf("3%v%v%v", addr, block, mute), func() (interface{}, error) {
 			d, err := create(c.Request().Context(), addr)
 			if err != nil {
 				return nil, err
