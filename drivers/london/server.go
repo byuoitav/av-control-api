@@ -9,7 +9,6 @@ import (
 	"github.com/byuoitav/av-control-api/drivers"
 	"github.com/byuoitav/london-driver"
 	"github.com/spf13/pflag"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -37,8 +36,6 @@ func main() {
 		fmt.Printf("failed to start listener: %s\n", err)
 		os.Exit(1)
 	}
-
-	drivers.Config.Level.SetLevel(zap.DebugLevel)
 
 	drivers.Log.Infof("Starting server on: %s", lis.Addr().String())
 	if err = server.Serve(lis); err != nil {
