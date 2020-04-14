@@ -23,7 +23,7 @@ type DSP interface {
 /*
 DSP is an interface with the methods required for a DSP library to implement. It is a combination of the Device interface as well as DSP specific functions. The API will send volume levels between 0 and 100, inclusive. Drivers implementing this interface should adjust the [0-100] volume level to the appropriate level for the device.
 
-A driver library implmenting this interface should look something like this:
+A driver library implementing this interface should look something like this:
 	type QSC struct {
 		Address string
 		Username string

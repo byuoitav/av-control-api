@@ -3,6 +3,7 @@ package drivers
 import (
 	"context"
 	"fmt"
+	"internal/singleflight"
 	"net/http"
 	"sync"
 
@@ -51,6 +52,8 @@ func CreateVideoSwitcherServer(create CreateVideoSwitcherFunc) Server {
 }
 
 func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
+	single := &singleflight.Group{}
+
 	e.GET("/:address/output/:output/input", func(c echo.Context) error {
 		addr := c.Param("address")
 		out := c.Param("output")
@@ -61,14 +64,21 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 			return c.String(http.StatusBadRequest, "must include an output port for the video switcher")
 		}
 
-		vs, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do(fmt.Sprintf("%v%vinput", addr, out), func() (interface{}, error) {
+			vs, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return vs.GetInputByOutput(c.Request().Context(), out)
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		in, err := vs.GetInputByOutput(c.Request().Context(), out)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		in, ok := val.(string)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", in, val))
 		}
 
 		return c.JSON(http.StatusOK, input{Input: fmt.Sprintf("%v:%v", in, out)})
@@ -87,12 +97,16 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 			return c.String(http.StatusBadRequest, "must include an input portr")
 		}
 
-		vs, err := create(c.Request().Context(), addr)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		// vs, err := create(c.Request().Context(), addr)
+		_, err, _ := single.Do(fmt.Sprintf("%v%v%v", addr, out, in), func() (interface{}, error) {
+			vs, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := vs.SetInputByOutput(c.Request().Context(), out, in); err != nil {
+			return nil, vs.SetInputByOutput(c.Request().Context(), out, in)
+		})
+		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
