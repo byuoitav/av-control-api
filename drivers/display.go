@@ -2,11 +2,13 @@ package drivers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
 
 	"github.com/labstack/echo"
+	"golang.org/x/sync/singleflight"
 )
 
 // Display represents the interface necessary to implement to fulfill the
@@ -38,6 +40,7 @@ func CreateDisplayServer(create CreateDisplayFunc) (Server, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		m.Store(addr, disp)
 		return disp, nil
 	}
@@ -53,6 +56,8 @@ func CreateDisplayServer(create CreateDisplayFunc) (Server, error) {
 }
 
 func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
+	single := &singleflight.Group{}
+
 	// power
 	e.GET("/:address/power", func(c echo.Context) error {
 		addr := c.Param("address")
@@ -60,14 +65,21 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do("0"+addr, func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return d.GetPower(c.Request().Context())
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		pow, err := disp.GetPower(c.Request().Context())
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		pow, ok := val.(string)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", pow, val))
 		}
 
 		return c.JSON(http.StatusOK, power{Power: pow})
@@ -83,12 +95,15 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include a power state to set")
 		}
 
-		disp, err := create(c.Request().Context(), addr)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		_, err, _ := single.Do(fmt.Sprintf("1%v%v", addr, pow), func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := disp.SetPower(c.Request().Context(), pow); err != nil {
+			return nil, d.SetPower(c.Request().Context(), pow)
+		})
+		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
@@ -102,14 +117,21 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do("2"+addr, func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return d.GetBlanked(c.Request().Context())
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		blank, err := disp.GetBlanked(c.Request().Context())
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		blank, ok := val.(bool)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", blank, val))
 		}
 
 		return c.JSON(http.StatusOK, blanked{Blanked: blank})
@@ -125,12 +147,15 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		disp, err := create(c.Request().Context(), addr)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		_, err, _ = single.Do(fmt.Sprintf("3%v%v", addr, blank), func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := disp.SetBlanked(c.Request().Context(), blank); err != nil {
+			return nil, d.SetBlanked(c.Request().Context(), blank)
+		})
+		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
@@ -144,14 +169,21 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do("4"+addr, func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return d.GetInput(c.Request().Context())
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		in, err := disp.GetInput(c.Request().Context())
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		in, ok := val.(string)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", in, val))
 		}
 
 		return c.JSON(http.StatusOK, input{Input: in})
@@ -167,12 +199,15 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include a input to set")
 		}
 
-		disp, err := create(c.Request().Context(), addr)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		_, err, _ := single.Do(fmt.Sprintf("5%v%v", addr, in), func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := disp.SetInput(c.Request().Context(), in); err != nil {
+			return nil, d.SetInput(c.Request().Context(), in)
+		})
+		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
@@ -187,16 +222,23 @@ func addDisplayRoutes(e *echo.Echo, create CreateDisplayFunc) {
 			return c.String(http.StatusBadRequest, "must include the address of the display")
 		}
 
-		disp, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do("6"+addr, func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return d.GetActiveSignal(c.Request().Context(), port)
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		asignal, err := disp.GetActiveSignal(c.Request().Context(), port)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		aSignal, ok := val.(bool)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", aSignal, val))
 		}
 
-		return c.JSON(http.StatusOK, activeSignal{ActiveSignal: asignal})
+		return c.JSON(http.StatusOK, activeSignal{ActiveSignal: aSignal})
 	})
 }

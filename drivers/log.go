@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// P is a plain zap logger
+// Log is a plain zap logger
 var Log *zap.SugaredLogger
 
 // Config is the logger config used for P

@@ -7,12 +7,14 @@ import (
 	"sync"
 
 	"github.com/labstack/echo"
+	"golang.org/x/sync/singleflight"
 )
 
 type VideoSwitcher interface {
 	Device
 	// TODO notes about being 1 indexed
 
+	// TODO should we just make an explicit input/output struct that these return in their http calls?
 	GetInputByOutput(ctx context.Context, output string) (string, error)
 	SetInputByOutput(ctx context.Context, output, input string) error
 
@@ -21,7 +23,6 @@ type VideoSwitcher interface {
 
 type CreateVideoSwitcherFunc func(context.Context, string) (VideoSwitcher, error)
 
-// TODO should we just make an explicit input/output struct that these return in their http calls?
 func CreateVideoSwitcherServer(create CreateVideoSwitcherFunc) Server {
 	e := newEchoServer()
 	m := &sync.Map{}
@@ -51,6 +52,8 @@ func CreateVideoSwitcherServer(create CreateVideoSwitcherFunc) Server {
 }
 
 func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
+	single := &singleflight.Group{}
+
 	e.GET("/:address/output/:output/input", func(c echo.Context) error {
 		addr := c.Param("address")
 		out := c.Param("output")
@@ -61,14 +64,21 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 			return c.String(http.StatusBadRequest, "must include an output port for the video switcher")
 		}
 
-		vs, err := create(c.Request().Context(), addr)
+		val, err, _ := single.Do("0"+addr+out, func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return d.GetInputByOutput(c.Request().Context(), out)
+		})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		in, err := vs.GetInputByOutput(c.Request().Context(), out)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+		in, ok := val.(string)
+		if !ok {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("unexpected response: expected %T, got: %T", in, val))
 		}
 
 		return c.JSON(http.StatusOK, input{Input: fmt.Sprintf("%v:%v", in, out)})
@@ -84,15 +94,18 @@ func addVideoSwitcherRoutes(e *echo.Echo, create CreateVideoSwitcherFunc) {
 		case len(out) == 0:
 			return c.String(http.StatusBadRequest, "must include an output port")
 		case len(in) == 0:
-			return c.String(http.StatusBadRequest, "must include an input portr")
+			return c.String(http.StatusBadRequest, "must include an input port")
 		}
 
-		vs, err := create(c.Request().Context(), addr)
+		_, err, _ := single.Do(fmt.Sprintf("1%v%v%v", addr, out, in), func() (interface{}, error) {
+			d, err := create(c.Request().Context(), addr)
+			if err != nil {
+				return nil, err
+			}
+
+			return nil, d.SetInputByOutput(c.Request().Context(), out, in)
+		})
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
-
-		if err := vs.SetInputByOutput(c.Request().Context(), out, in); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
