@@ -3,11 +3,11 @@ package drivers
 import (
 	"context"
 	"fmt"
-	"internal/singleflight"
 	"net/http"
 	"sync"
 
 	"github.com/labstack/echo"
+	"golang.org/x/sync/singleflight"
 )
 
 type VideoSwitcher interface {
