@@ -3,9 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net" "net/http"
+	"net"
+
+	"net/http"
 	"os"
 
+	"github.com/byuoitav/av-control-api/api/handlers"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -29,7 +32,7 @@ func main() {
 	pflag.StringVar(&authToken, "auth-token", "", "authorization token to use when calling the auth server")
 	pflag.BoolVar(&disableAuth, "disable-auth", false, "disables auth checks")
 
-	pflag.StringVarP(&env, "env", "e", "fallback", "The deployment environment for the API")
+	pflag.StringVarP(&env, "env", "e", "default", "The deployment environment for the API")
 	pflag.Parse()
 
 	// build the logger
@@ -65,13 +68,26 @@ func main() {
 	}
 
 	// TODO get a database interface
-	// TODO get the handlers
+
+	handlers := handlers.Handlers{
+		Environment: env,
+	}
 
 	e := echo.New()
+
+	// TODO maybe check the database health check
+	// TODO add log level endpoint
+	// TODO add auth
 
 	e.GET("/healthz", func(c echo.Context) error {
 		return c.String(http.StatusOK, "healthy")
 	})
+
+	e.GET("/room/:room", handlers.GetRoomConfiguration)
+	e.GET("/room/:room/state", handlers.GetRoomState)
+
+	e.GET("/device/:device", handlers.GetDeviceConfiguration)
+	e.GET("/device/:device/state", handlers.GetDeviceState)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
@@ -86,28 +102,12 @@ func main() {
 		logger.Fatal("failed to serve", zap.Error(err))
 	}
 
-	//h := handlers.RoomHandler{
-	//	Environment: env,
-	//}
-
-	//router.GET("/mstatus", databasestatus.Handler)
-	//router.GET("/status", databasestatus.Handler)
-
 	//// PUT requests
 	//router.PUT("/buildings/:building/rooms/:room", h.SetRoomState, auth.AuthorizeRequest("write-state", "room", h.GetRoomResource))
 
 	//// room status
 	//router.GET("/buildings/:building/rooms/:room", h.GetRoomState, auth.AuthorizeRequest("read-state", "room", h.GetRoomResource))
 	//router.GET("/buildings/:building/rooms/:room/configuration", h.GetRoomByNameAndBuilding, auth.AuthorizeRequest("read-config", "room", h.GetRoomResource))
-//router.PUT("/log-level/:level", log.SetLogLevel)
+	//router.PUT("/log-level/:level", log.SetLogLevel)
 	//router.GET("/log-level", log.GetLogLevel)
-
-	//server := http.Server{
-	//	Addr:           port,
-	//	MaxHeaderBytes: 1024 * 10,
-	//}
-
-	//go health.StartupCheckAndReport()
-
-	//router.StartServer(&server)
 }

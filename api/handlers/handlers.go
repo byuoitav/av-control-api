@@ -1,5 +1,5 @@
 package handlers
 
-type Room struct {
+type Handlers struct {
 	Environment string
 }
