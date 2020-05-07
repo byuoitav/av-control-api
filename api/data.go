@@ -8,27 +8,27 @@ type DeviceService interface {
 }
 
 type Device struct {
-	ID      string            `json:"_id"`
-	TypeID  string            `json:"typeID"`
-	Address string            `json:"address"`
-	Proxy   map[string]string `json:"proxy"`
-	Ports   []Port            `json:"ports"`
+	ID      string
+	TypeID  string
+	Address string
+	Proxy   map[string]string
+	Ports   []Port
 }
 
 type DeviceType struct {
-	ID       string             `json:"_id"`
-	Commands map[string]Command `json:"commands"`
+	ID       string
+	Commands map[string]Command
 }
 
 type Command struct {
-	URLs  map[string]string `json:"urls"`
-	Order *int              `json:"order,omitempty"`
+	URLs  map[string]string
+	Order *int
 }
 
 type Port struct {
-	Name     string   `json:"name"`
-	Endpoint DeviceID `json:"endpoint"`
-	Incoming bool     `json:"incoming"`
-	Outgoing bool     `json:"outgoing"`
-	Type     string   `json:"type"`
+	Name     string
+	Endpoint DeviceID
+	Incoming bool
+	Outgoing bool
+	Type     string
 }
