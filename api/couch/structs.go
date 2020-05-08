@@ -29,13 +29,50 @@ type port struct {
 }
 
 func (d device) convert() api.Device {
+	toReturn := api.Device{
+		ID:      d.ID,
+		TypeID:  d.TypeID,
+		Address: d.Address,
+		Proxy:   d.Proxy,
+	}
+
+	for i := range d.Ports {
+		toReturn.Ports = append(toReturn.Ports, d.Ports[i].convert())
+	}
+
+	return toReturn
 }
 
 func (dt deviceType) convert() api.DeviceType {
+	toReturn := api.DeviceType{
+		ID: dt.ID,
+	}
+
+	for key, val := range dt.Commands {
+		toReturn.Commands[key] = val.convert()
+	}
+
+	return toReturn
 }
 
 func (c command) convert() api.Command {
+	toReturn := api.Command{
+		Order: c.Order,
+	}
+
+	for key, val := range c.URLs {
+		toReturn.URLs[key] = val
+	}
+
+	return toReturn
 }
 
 func (p port) convert() api.Port {
+	return api.Port{
+		Name:     p.Name,
+		Endpoint: api.DeviceID(p.Endpoint),
+		Incoming: p.Incoming,
+		Outgoing: p.Outgoing,
+		Type:     p.Type,
+	}
 }
