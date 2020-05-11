@@ -17,7 +17,7 @@ type DataService struct {
 
 // Room gets a room
 func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
-	addr := fmt.Sprintf("http://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+	addr := fmt.Sprintf("http://%s:%s@%s:5984", d.DBUsername, d.DBPassword, d.DBAddress)
 	client, err := kivik.New("couch", addr)
 	if err != nil {
 		return []device{}, fmt.Errorf("unable to connect to couch: %s", err)
@@ -45,14 +45,14 @@ func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
 		if devices.EOQ() {
 			break
 		}
-		var device device
-		err = db.Get(ctx, devices.ID()).ScanDoc(&device)
+		var dev device
+		err = db.Get(ctx, devices.ID()).ScanDoc(&dev)
 		if err != nil {
 			fmt.Printf("error scanning in device doc\n")
 			continue
 		}
 
-		toReturn = append(toReturn, device)
+		toReturn = append(toReturn, dev)
 		added = true
 	}
 
@@ -72,13 +72,13 @@ func (d *DataService) Device(ctx context.Context, id string) (device, error) {
 
 	db := client.DB(ctx, "devices")
 
-	var device device
-	err = db.Get(ctx, id).ScanDoc(&device)
+	var dev device
+	err = db.Get(ctx, id).ScanDoc(&dev)
 	if err != nil {
-		return device, fmt.Errorf("error retrieving device doc: %s", err)
+		return dev, fmt.Errorf("error retrieving device doc: %s", err)
 	}
 
-	return device, nil
+	return dev, nil
 }
 
 // IsHealthy is a healthcheck for the database
