@@ -9,7 +9,7 @@ type DeviceService interface {
 
 type Device struct {
 	ID      string
-	TypeID  string
+	Type    DeviceType
 	Address string
 	Proxy   map[string]string
 	Ports   []Port
