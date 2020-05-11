@@ -17,7 +17,8 @@ type DataService struct {
 
 // Room gets a room
 func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
-	addr := fmt.Sprintf("http://%s:%s@%s:5984", d.DBUsername, d.DBPassword, d.DBAddress)
+	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+	// fmt.Printf("address: %s\n", addr)
 	client, err := kivik.New("couch", addr)
 	if err != nil {
 		return []device{}, fmt.Errorf("unable to connect to couch: %s", err)
@@ -45,9 +46,9 @@ func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
 		if devices.EOQ() {
 			break
 		}
+
 		var dev device
-		err = db.Get(ctx, devices.ID()).ScanDoc(&dev)
-		if err != nil {
+		if err = devices.ScanDoc(&dev); err != nil {
 			fmt.Printf("error scanning in device doc\n")
 			continue
 		}
@@ -64,7 +65,7 @@ func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
 
 // Device gets a device
 func (d *DataService) Device(ctx context.Context, id string) (device, error) {
-	addr := fmt.Sprintf("http://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
 	client, err := kivik.New("couch", addr)
 	if err != nil {
 		return device{}, fmt.Errorf("unable to connect to couch: %s", err)
@@ -73,17 +74,40 @@ func (d *DataService) Device(ctx context.Context, id string) (device, error) {
 	db := client.DB(ctx, "devices")
 
 	var dev device
-	err = db.Get(ctx, id).ScanDoc(&dev)
-	if err != nil {
+	if err = db.Get(ctx, id).ScanDoc(&dev); err != nil {
 		return dev, fmt.Errorf("error retrieving device doc: %s", err)
 	}
+
+	dt, err := d.DeviceType(ctx, dev.TypeID)
+	if err != nil {
+		return dev, fmt.Errorf("error retrieving device type doc: %s", err)
+	}
+
+	dev.Type = dt
 
 	return dev, nil
 }
 
+func (d *DataService) DeviceType(ctx context.Context, id string) (deviceType, error) {
+	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+	client, err := kivik.New("couch", addr)
+	if err != nil {
+		return deviceType{}, fmt.Errorf("unable to connect to couch: %s", err)
+	}
+
+	db := client.DB(ctx, "device-types")
+
+	var dt deviceType
+	if err = db.Get(ctx, id).ScanDoc(&dt); err != nil {
+		return dt, fmt.Errorf("error retrieving device type doc: %s", err)
+	}
+
+	return dt, nil
+}
+
 // IsHealthy is a healthcheck for the database
 func (d *DataService) IsHealthy(ctx context.Context, dbName string) (bool, error) {
-	addr := fmt.Sprintf("http://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+	addr := fmt.Sprintf("http://%s:%s@%s:5984", d.DBUsername, d.DBPassword, d.DBAddress)
 	client, err := kivik.New("couch", addr)
 	if err != nil {
 		return false, fmt.Errorf("unable to connect to couch: %s", err)

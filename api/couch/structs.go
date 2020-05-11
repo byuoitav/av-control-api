@@ -1,6 +1,8 @@
 package couch
 
-import "github.com/byuoitav/av-control-api/api"
+import (
+	"github.com/byuoitav/av-control-api/api"
+)
 
 type device struct {
 	ID      string            `json:"_id"`
@@ -8,6 +10,7 @@ type device struct {
 	Address string            `json:"address"`
 	Proxy   map[string]string `json:"proxy"`
 	Ports   []port            `json:"ports"`
+	Type    deviceType
 }
 
 type deviceType struct {
@@ -31,7 +34,7 @@ type port struct {
 func (d device) convert() api.Device {
 	toReturn := api.Device{
 		ID:      d.ID,
-		TypeID:  d.TypeID,
+		Type:    d.Type.convert(),
 		Address: d.Address,
 		Proxy:   d.Proxy,
 	}
