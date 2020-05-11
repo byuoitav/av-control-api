@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
@@ -68,9 +69,15 @@ func main() {
 	}
 
 	// TODO get a database interface
+	db := couch.DataService{
+		DBAddress:  os.Getenv("DB_ADDRESS"),
+		DBUsername: os.Getenv("DB_USERNAME"),
+		DBPassword: os.Getenv("DB_PASSWORD"),
+	}
 
 	handlers := handlers.Handlers{
 		Environment: env,
+		DataService: &db,
 	}
 
 	e := echo.New()

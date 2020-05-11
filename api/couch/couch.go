@@ -3,7 +3,9 @@ package couch
 import (
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/byuoitav/av-control-api/api"
 	_ "github.com/go-kivik/couchdb/v4"
 	kivik "github.com/go-kivik/kivik/v4"
 	"golang.org/x/net/context"
@@ -16,12 +18,13 @@ type DataService struct {
 }
 
 // Room gets a room
-func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
-	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+func (d *DataService) Room(ctx context.Context, id string) ([]api.Device, error) {
+	a := strings.Trim(d.DBAddress, "https://")
+	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
 	// fmt.Printf("address: %s\n", addr)
 	client, err := kivik.New("couch", addr)
 	if err != nil {
-		return []device{}, fmt.Errorf("unable to connect to couch: %s", err)
+		return []api.Device{}, fmt.Errorf("unable to connect to couch: %s", err)
 	}
 
 	db := client.DB(context.TODO(), "devices")
@@ -36,10 +39,10 @@ func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
 
 	devices, err := db.Find(context.TODO(), roomQuery)
 	if err != nil {
-		return []device{}, fmt.Errorf("unable to find devices in room %s: %s", id, err)
+		return []api.Device{}, fmt.Errorf("unable to find devices in room %s: %s", id, err)
 	}
 
-	var toReturn []device
+	var toReturn []api.Device
 	added := false
 
 	for devices.Next() {
@@ -53,43 +56,60 @@ func (d *DataService) Room(ctx context.Context, id string) ([]device, error) {
 			continue
 		}
 
-		toReturn = append(toReturn, dev)
+		dt, err := d.DeviceType(ctx, dev.TID.ID)
+		if err != nil {
+			return []api.Device{}, fmt.Errorf("error retrieving device type doc: %s", err)
+		}
+
+		dev.Type = dt
+
+		add := dev.convert()
+
+		toReturn = append(toReturn, add)
 		added = true
 	}
 
 	if added {
 		return toReturn, nil
 	}
-	return []device{}, errors.New("unable to get room")
+	return []api.Device{}, errors.New("unable to get room")
 }
 
 // Device gets a device
-func (d *DataService) Device(ctx context.Context, id string) (device, error) {
-	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+func (d *DataService) Device(ctx context.Context, id string) (api.Device, error) {
+	a := strings.Trim(d.DBAddress, "https://")
+	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
+	// fmt.Printf("address: %s\n", addr)
+
 	client, err := kivik.New("couch", addr)
 	if err != nil {
-		return device{}, fmt.Errorf("unable to connect to couch: %s", err)
+		return api.Device{}, fmt.Errorf("unable to connect to couch: %s", err)
 	}
 
 	db := client.DB(ctx, "devices")
 
 	var dev device
 	if err = db.Get(ctx, id).ScanDoc(&dev); err != nil {
-		return dev, fmt.Errorf("error retrieving device doc: %s", err)
+		return api.Device{}, fmt.Errorf("error retrieving device doc: %s", err)
 	}
 
-	dt, err := d.DeviceType(ctx, dev.TypeID)
+	dt, err := d.DeviceType(ctx, dev.TID.ID)
 	if err != nil {
-		return dev, fmt.Errorf("error retrieving device type doc: %s", err)
+		return api.Device{}, fmt.Errorf("error retrieving device type doc: %s", err)
 	}
 
 	dev.Type = dt
 
-	return dev, nil
+	toReturn := dev.convert()
+
+	return toReturn, nil
 }
 
 func (d *DataService) DeviceType(ctx context.Context, id string) (deviceType, error) {
-	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress)
+	a := strings.Trim(d.DBAddress, "https://")
+	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
+	// fmt.Printf("address: %s\n", addr)
+
 	client, err := kivik.New("couch", addr)
 	if err != nil {
 		return deviceType{}, fmt.Errorf("unable to connect to couch: %s", err)
