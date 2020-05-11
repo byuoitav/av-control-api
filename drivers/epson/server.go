@@ -32,11 +32,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	create := func(ctx context.Context, addr string) (drivers.Display, error) {
-		return epson.NewProjector(addr, epson.WithDelay(300*time.Second)), err
+	create := func(ctx context.Context, addr string) (drivers.DisplayDSP, error) {
+		return epson.NewProjector(addr, epson.WithDelay(300*time.Millisecond)), err
 	}
 
-	server, err := drivers.CreateDisplayServer(create)
+	server := drivers.CreateDisplayDSPServer(create)
 
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)
