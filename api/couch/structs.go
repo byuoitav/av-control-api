@@ -1,6 +1,8 @@
 package couch
 
 import (
+	"regexp"
+
 	"github.com/byuoitav/av-control-api/api"
 )
 
@@ -35,19 +37,28 @@ type port struct {
 	Type     string `json:"type"`
 }
 
-func (d device) convert() api.Device {
+func (d device) convert() (api.Device, error) {
 	toReturn := api.Device{
-		ID:      d.ID,
+		ID:      api.DeviceID(d.ID),
 		Type:    d.Type.convert(),
 		Address: d.Address,
-		Proxy:   d.Proxy,
+		Proxy:   make(map[*regexp.Regexp]string),
 	}
 
 	for i := range d.Ports {
 		toReturn.Ports = append(toReturn.Ports, d.Ports[i].convert())
 	}
 
-	return toReturn
+	for k, v := range d.Proxy {
+		exp, err := regexp.Compile(k)
+		if err != nil {
+			return api.Device{}, err
+		}
+
+		toReturn.Proxy[exp] = v
+	}
+
+	return toReturn, nil
 }
 
 func (dt deviceType) convert() api.DeviceType {

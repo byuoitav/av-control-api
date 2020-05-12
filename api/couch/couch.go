@@ -58,20 +58,25 @@ func (d *DataService) Room(ctx context.Context, id string) ([]api.Device, error)
 
 		dt, err := d.DeviceType(ctx, dev.TID.ID)
 		if err != nil {
-			return []api.Device{}, fmt.Errorf("error retrieving device type doc: %s", err)
+			return []api.Device{}, fmt.Errorf("unable to get %s's device type doc: %s", dev.ID, err)
 		}
 
 		dev.Type = dt
 
-		add := dev.convert()
+		add, err := dev.convert()
+		if err != nil {
+			return []api.Device{}, fmt.Errorf("unable to convert %s's doc into api.Device: %w", dev.ID, err)
+		}
 
 		toReturn = append(toReturn, add)
 		added = true
 	}
 
 	if added {
+		// fmt.Printf("toReturn: %+v\n", toReturn)
 		return toReturn, nil
 	}
+
 	return []api.Device{}, errors.New("unable to get room")
 }
 
@@ -100,7 +105,10 @@ func (d *DataService) Device(ctx context.Context, id string) (api.Device, error)
 
 	dev.Type = dt
 
-	toReturn := dev.convert()
+	toReturn, err := dev.convert()
+	if err != nil {
+		return api.Device{}, fmt.Errorf("unable to convert doc into api.Device: %w", err)
+	}
 
 	return toReturn, nil
 }

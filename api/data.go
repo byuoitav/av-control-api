@@ -1,6 +1,10 @@
 package api
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"regexp"
+)
 
 type DeviceService interface {
 	Device(context.Context, string) (Device, error)
@@ -8,27 +12,45 @@ type DeviceService interface {
 }
 
 type Device struct {
-	ID      string
-	Type    DeviceType
-	Address string
-	Proxy   map[string]string
-	Ports   []Port
+	ID      DeviceID                  `json:"id"`
+	Type    DeviceType                `json:"type"`
+	Address string                    `json:"address"`
+	Proxy   map[*regexp.Regexp]string `json:"-"`
+	Ports   []Port                    `json:"ports,omitempty"`
 }
 
 type DeviceType struct {
-	ID       string
-	Commands map[string]Command
+	ID       string             `json:"id"`
+	Commands map[string]Command `json:"commands,omitempty"`
 }
 
 type Command struct {
-	URLs  map[string]string
-	Order *int
+	URLs  map[string]string `json:"urls"`
+	Order *int              `json:"order,omitempty"`
 }
 
 type Port struct {
-	Name     string
-	Endpoint DeviceID
-	Incoming bool
-	Outgoing bool
-	Type     string
+	Name     string   `json:"name"`
+	Endpoint DeviceID `json:"endpoint"`
+	Incoming bool     `json:"incoming"`
+	Outgoing bool     `json:"outgoing"`
+	Type     string   `json:"type"`
+}
+
+func (d Device) MarshalJSON() ([]byte, error) {
+	type Alias Device
+
+	changed := struct {
+		*Alias
+		Proxy map[string]string `json:"proxy,omitempty"`
+	}{
+		Alias: (*Alias)(&d),
+		Proxy: make(map[string]string),
+	}
+
+	for k, v := range d.Proxy {
+		changed.Proxy[k.String()] = v
+	}
+
+	return json.Marshal(changed)
 }

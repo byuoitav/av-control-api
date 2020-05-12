@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -23,7 +24,7 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	resp, err := state.GetDevices(devices)
+	resp, err := state.GetDevices(ctx, devices, h.Environment)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -41,6 +42,11 @@ func (h *Handlers) GetRoomConfiguration(c echo.Context) error {
 	defer cancel()
 
 	devices, err := h.DataService.Room(ctx, roomID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	_, err = json.Marshal(devices)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
