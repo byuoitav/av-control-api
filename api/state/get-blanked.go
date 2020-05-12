@@ -2,8 +2,8 @@ package state
 
 import (
 	"context"
-	"errors"
-	"fmt"
+	"encoding/json"
+	"errors" "fmt"
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api"
@@ -12,19 +12,18 @@ import (
 type getBlanked struct {
 }
 
-func (*getBlanked) GenerateActions(ctx context.Context, room []api.Device, env string) ([]action, []api.DeviceStateError, []DeviceStateUpdate) {
-	var acts []action
-	var errs []api.DeviceStateError
-	var expectedUpdates []DeviceStateUpdate
+func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
+	var resp generateActionsResponse
 
 	// just doing basic get blanked for now
 	for _, dev := range room {
-		url, order, err := getCommand(dev, "GetBlanked", env)
+		// url, order, err := getCommand(dev, "GetBlanked", env)
+		url, order, err := getCommand(dev, "STATUS_Blanked", env)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue
 		case err != nil:
-			errs = append(errs, api.DeviceStateError{
+			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "blanked",
 				Error: err.Error(),
@@ -39,7 +38,7 @@ func (*getBlanked) GenerateActions(ctx context.Context, room []api.Device, env s
 		}
 		url, err = fillURL(url, params)
 		if err != nil {
-			errs = append(errs, api.DeviceStateError{
+			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "blanked",
 				Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
@@ -51,7 +50,7 @@ func (*getBlanked) GenerateActions(ctx context.Context, room []api.Device, env s
 		// build http request
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
-			errs = append(errs, api.DeviceStateError{
+			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "blanked",
 				Error: fmt.Sprintf("unable to build http request: %s", err),
@@ -60,16 +59,56 @@ func (*getBlanked) GenerateActions(ctx context.Context, room []api.Device, env s
 			continue
 		}
 
-		acts = append(acts, action{
-			ID:    dev.ID,
-			Req:   req,
-			Order: order,
-		})
+		act := action{
+			ID:       dev.ID,
+			Req:      req,
+			Order:    order,
+			Response: make(chan actionResponse),
+		}
+		go g.handleResponse(act.Response)
 
-		expectedUpdates = append(expectedUpdates, DeviceStateUpdate{
+		resp.Actions = append(resp.Actions, act)
+		resp.ExpectedUpdates = append(resp.ExpectedUpdates, DeviceStateUpdate{
 			ID: dev.ID,
 		})
 	}
 
-	return acts, errs, expectedUpdates
+	return resp
+}
+
+type blanked struct {
+	Blanked bool `json:"blanked"`
+}
+
+func (g *getBlanked) handleResponse(respChan chan actionResponse) {
+	aResp := <-respChan
+	close(respChan)
+
+	handleErr := func(err error) {
+		aResp.Errors <- api.DeviceStateError{
+			ID:    aResp.Action.ID,
+			Field: "blanked",
+			Error: err.Error(),
+		}
+
+		aResp.Updates <- DeviceStateUpdate{}
+	}
+
+	if aResp.Error != nil {
+		handleErr(fmt.Errorf("unable to make http request: %w", aResp.Error))
+		return
+	}
+
+	var state blanked
+	if err := json.Unmarshal(aResp.Body, &state); err != nil {
+		handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body))
+		return
+	}
+
+	aResp.Updates <- DeviceStateUpdate{
+		ID: aResp.Action.ID,
+		DeviceState: api.DeviceState{
+			Blanked: &state.Blanked,
+		},
+	}
 }

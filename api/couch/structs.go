@@ -25,7 +25,7 @@ type deviceType struct {
 }
 
 type command struct {
-	URLs  map[string]string `json:"urls"`
+	URLs  map[string]string `json:"addresses"`
 	Order *int              `json:"order,omitempty"`
 }
 
@@ -77,6 +77,7 @@ func (dt deviceType) convert() api.DeviceType {
 func (c command) convert() api.Command {
 	toReturn := api.Command{
 		Order: c.Order,
+		URLs:  make(map[string]string),
 	}
 
 	for key, val := range c.URLs {
