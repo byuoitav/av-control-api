@@ -13,25 +13,29 @@ var (
 )
 
 // GetDevices .
-// TODO combine identical actions (?)
 func GetDevices(ctx context.Context, room []api.Device, env string) (api.StateResponse, error) {
 	stateResp := api.StateResponse{
 		Devices: make(map[api.DeviceID]api.DeviceState),
 	}
 
-	var resp generateActionsResponse
+	var actions []action
+	var expectedUpdates int
 
 	for i := range statusEvaluators {
-		r := statusEvaluators[i].GenerateActions(ctx, room, env)
-		resp.Actions = append(resp.Actions, r.Actions...)
-		resp.ExpectedUpdates = append(resp.ExpectedUpdates, r.ExpectedUpdates...)
-		stateResp.Errors = append(stateResp.Errors, r.Errors...)
+		resp := statusEvaluators[i].GenerateActions(ctx, room, env)
+		actions = append(actions, resp.Actions...)
+		stateResp.Errors = append(stateResp.Errors, resp.Errors...)
+		expectedUpdates += resp.ExpectedUpdates
+	}
+
+	if expectedUpdates == 0 {
+		return stateResp, ErrNoStateGettable
 	}
 
 	// split the commands into their lists by id
 	actsByID := make(map[api.DeviceID][]action)
-	for i := range resp.Actions {
-		actsByID[resp.Actions[i].ID] = append(actsByID[resp.Actions[i].ID], resp.Actions[i])
+	for i := range actions {
+		actsByID[actions[i].ID] = append(actsByID[actions[i].ID], actions[i])
 	}
 
 	// order every id's commands
@@ -55,17 +59,12 @@ func GetDevices(ctx context.Context, room []api.Device, env string) (api.StateRe
 	errors := make(chan api.DeviceStateError)
 
 	for id := range actsByID {
-		executeActions(actsByID[id], updates, errors)
+		executeActions(ctx, actsByID[id], updates, errors)
 	}
 
 	updatesReceived := 0
 
-	if len(resp.ExpectedUpdates) == 0 {
-		return stateResp, ErrNoStateGettable
-	}
-
 	for {
-		// TODO ctx.Done()?
 		select {
 		case update := <-updates:
 			updatesReceived++
@@ -75,18 +74,32 @@ func GetDevices(ctx context.Context, room []api.Device, env string) (api.StateRe
 
 			curState := stateResp.Devices[update.ID]
 
+			if update.PoweredOn != nil {
+				curState.PoweredOn = update.PoweredOn
+			}
+
+			if update.Input != nil {
+				curState.Input = update.Input
+			}
+
 			if update.Blanked != nil {
 				curState.Blanked = update.Blanked
 			}
 
-			stateResp.Devices[update.ID] = curState
+			if update.Volume != nil {
+				curState.Volume = update.Volume
+			}
 
-			// TODO add the other ones
+			if update.Muted != nil {
+				curState.Muted = update.Muted
+			}
+
+			stateResp.Devices[update.ID] = curState
 		case err := <-errors:
 			stateResp.Errors = append(stateResp.Errors, err)
 		}
 
-		if len(resp.ExpectedUpdates) == updatesReceived {
+		if updatesReceived == expectedUpdates {
 			break
 		}
 	}

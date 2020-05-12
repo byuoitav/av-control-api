@@ -20,7 +20,7 @@ type DeviceStateUpdate struct {
 type generateActionsResponse struct {
 	Actions         []action
 	Errors          []api.DeviceStateError
-	ExpectedUpdates []DeviceStateUpdate
+	ExpectedUpdates int
 }
 
 type statusEvaluator interface {

@@ -3,7 +3,8 @@ package state
 import (
 	"context"
 	"encoding/json"
-	"errors" "fmt"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api"
@@ -68,9 +69,7 @@ func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 		go g.handleResponse(act.Response)
 
 		resp.Actions = append(resp.Actions, act)
-		resp.ExpectedUpdates = append(resp.ExpectedUpdates, DeviceStateUpdate{
-			ID: dev.ID,
-		})
+		resp.ExpectedUpdates++
 	}
 
 	return resp

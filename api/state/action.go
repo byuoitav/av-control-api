@@ -1,6 +1,7 @@
 package state
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -29,7 +30,7 @@ type actionResponse struct {
 	Updates chan DeviceStateUpdate
 }
 
-func executeActions(actions []action, updates chan DeviceStateUpdate, errors chan api.DeviceStateError) {
+func executeActions(ctx context.Context, actions []action, updates chan DeviceStateUpdate, errors chan api.DeviceStateError) {
 	for i := range actions {
 		go func(action action) {
 			aResp := actionResponse{
@@ -39,6 +40,11 @@ func executeActions(actions []action, updates chan DeviceStateUpdate, errors cha
 			}
 
 			fmt.Printf("sending request to %s\n", action.Req.URL.String())
+
+			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			defer cancel()
+
+			action.Req = action.Req.WithContext(ctx)
 
 			resp, err := http.DefaultClient.Do(action.Req)
 			if err != nil {
