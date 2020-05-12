@@ -12,22 +12,26 @@ import (
 )
 
 type DataService struct {
-	DBAddress  string
-	DBUsername string
-	DBPassword string
+	DBAddress     string
+	DBUsername    string
+	DBPassword    string
+	devicesDB     *kivik.DB
+	deviceTypesDB *kivik.DB
 }
 
-// Room gets a room
+// Room gets a room as an array of devices
 func (d *DataService) Room(ctx context.Context, id string) ([]api.Device, error) {
-	a := strings.Trim(d.DBAddress, "https://")
-	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
-	// fmt.Printf("address: %s\n", addr)
-	client, err := kivik.New("couch", addr)
-	if err != nil {
-		return []api.Device{}, fmt.Errorf("unable to connect to couch: %s", err)
-	}
+	if d.devicesDB == nil {
+		a := strings.Trim(d.DBAddress, "https://")
+		addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
+		// fmt.Printf("address: %s\n", addr)
+		client, err := kivik.New("couch", addr)
+		if err != nil {
+			return []api.Device{}, fmt.Errorf("unable to connect to couch: %s", err)
+		}
 
-	db := client.DB(context.TODO(), "devices")
+		d.devicesDB = client.DB(context.TODO(), "devices")
+	}
 
 	roomQuery := kivik.Options{
 		"selector": map[string]interface{}{
@@ -35,36 +39,37 @@ func (d *DataService) Room(ctx context.Context, id string) ([]api.Device, error)
 				"$regex": id + "-.*",
 			},
 		},
+		"limit": 100,
 	}
 
-	devices, err := db.Find(context.TODO(), roomQuery)
+	devices, err := d.devicesDB.Find(ctx, roomQuery)
 	if err != nil {
 		return []api.Device{}, fmt.Errorf("unable to find devices in room %s: %s", id, err)
+	}
+
+	dt, err := d.AllDeviceTypes(ctx)
+	if err != nil {
+		fmt.Println("error retrieving device types: %s", err)
 	}
 
 	var toReturn []api.Device
 	added := false
 
 	for devices.Next() {
-		if devices.EOQ() {
-			break
-		}
-
 		var dev device
 		if err = devices.ScanDoc(&dev); err != nil {
 			fmt.Printf("error scanning in device doc\n")
 			continue
 		}
 
-		dt, err := d.DeviceType(ctx, dev.TID.ID)
-		if err != nil {
-			return []api.Device{}, fmt.Errorf("error retrieving device type doc: %s", err)
+		for i := range dt {
+			if dev.TID.ID == dt[i].ID {
+				dev.Type = dt[i]
+				break
+			}
 		}
 
-		dev.Type = dt
-
 		add := dev.convert()
-
 		toReturn = append(toReturn, add)
 		added = true
 	}
@@ -77,19 +82,21 @@ func (d *DataService) Room(ctx context.Context, id string) ([]api.Device, error)
 
 // Device gets a device
 func (d *DataService) Device(ctx context.Context, id string) (api.Device, error) {
-	a := strings.Trim(d.DBAddress, "https://")
-	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
-	// fmt.Printf("address: %s\n", addr)
+	if d.devicesDB == nil {
+		a := strings.Trim(d.DBAddress, "https://")
+		addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
+		// fmt.Printf("address: %s\n", addr)
 
-	client, err := kivik.New("couch", addr)
-	if err != nil {
-		return api.Device{}, fmt.Errorf("unable to connect to couch: %s", err)
+		client, err := kivik.New("couch", addr)
+		if err != nil {
+			return api.Device{}, fmt.Errorf("unable to connect to couch: %s", err)
+		}
+
+		d.devicesDB = client.DB(ctx, "devices")
 	}
 
-	db := client.DB(ctx, "devices")
-
 	var dev device
-	if err = db.Get(ctx, id).ScanDoc(&dev); err != nil {
+	if err := d.devicesDB.Get(ctx, id).ScanDoc(&dev); err != nil {
 		return api.Device{}, fmt.Errorf("error retrieving device doc: %s", err)
 	}
 
@@ -105,24 +112,71 @@ func (d *DataService) Device(ctx context.Context, id string) (api.Device, error)
 	return toReturn, nil
 }
 
+// DeviceType is for a single device query because we only need the one device type doc
 func (d *DataService) DeviceType(ctx context.Context, id string) (deviceType, error) {
-	a := strings.Trim(d.DBAddress, "https://")
-	addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
-	// fmt.Printf("address: %s\n", addr)
+	if d.deviceTypesDB == nil {
+		a := strings.Trim(d.DBAddress, "https://")
+		addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
+		// fmt.Printf("address: %s\n", addr)
 
-	client, err := kivik.New("couch", addr)
-	if err != nil {
-		return deviceType{}, fmt.Errorf("unable to connect to couch: %s", err)
+		client, err := kivik.New("couch", addr)
+		if err != nil {
+			return deviceType{}, fmt.Errorf("unable to connect to couch: %s", err)
+		}
+
+		d.deviceTypesDB = client.DB(ctx, "device-types")
 	}
 
-	db := client.DB(ctx, "device-types")
-
 	var dt deviceType
-	if err = db.Get(ctx, id).ScanDoc(&dt); err != nil {
-		return dt, fmt.Errorf("error retrieving device type doc: %s", err)
+	if err := d.deviceTypesDB.Get(ctx, id).ScanDoc(&dt); err != nil {
+		return deviceType{}, fmt.Errorf("error retrieving device type doc: %s", err)
 	}
 
 	return dt, nil
+}
+
+// AllDeviceTypes is for an array of devices, we just get all the device type docs
+func (d *DataService) AllDeviceTypes(ctx context.Context) ([]deviceType, error) {
+	if d.deviceTypesDB == nil {
+		a := strings.Trim(d.DBAddress, "https://")
+		addr := fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, a)
+		// fmt.Printf("address: %s\n", addr)
+
+		client, err := kivik.New("couch", addr)
+		if err != nil {
+			return []deviceType{}, fmt.Errorf("unable to connect to couch: %s", err)
+		}
+
+		d.deviceTypesDB = client.DB(ctx, "device-types")
+	}
+
+	query := kivik.Options{
+		"selector": map[string]interface{}{
+			"_id": map[string]interface{}{
+				"$regex": ".*",
+			},
+		},
+		"limit": 100,
+	}
+
+	types, err := d.deviceTypesDB.Find(ctx, query)
+	if err != nil {
+		return []deviceType{}, fmt.Errorf("error finding all device type docs: %s", err)
+	}
+
+	var toReturn []deviceType
+
+	for types.Next() {
+		var dt deviceType
+		if err = types.ScanDoc(&dt); err != nil {
+			fmt.Println("error scanning in device type: %s", err)
+			continue
+		}
+
+		toReturn = append(toReturn, dt)
+	}
+
+	return toReturn, nil
 }
 
 // IsHealthy is a healthcheck for the database
