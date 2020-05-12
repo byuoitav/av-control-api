@@ -69,7 +69,10 @@ func (d *DataService) Room(ctx context.Context, id string) ([]api.Device, error)
 			}
 		}
 
-		add := dev.convert()
+		add, err := dev.convert()
+		if err != nil {
+			fmt.Println("error converting doc into api.Device: %s", err)
+		}
 		toReturn = append(toReturn, add)
 		added = true
 	}
