@@ -10,6 +10,7 @@ var (
 	statusEvaluators = []statusEvaluator{
 		&getBlanked{},
 		&getInput{},
+		&getPower{},
 	}
 )
 

@@ -10,15 +10,13 @@ import (
 	"github.com/byuoitav/av-control-api/api"
 )
 
-type getPowered struct {
-}
+type getPower struct{}
 
-func (g *getPowered) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
-	fmt.Printf("WE HERE\n")
+func (g *getPower) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
 	var resp generateActionsResponse
 
 	for _, dev := range room {
-		url, order, err := getCommand(dev, "STATUS_Power", env)
+		url, order, err := getCommand(dev, "GetPower", env)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue
@@ -77,7 +75,7 @@ type poweredOn struct {
 	PoweredOn bool `json:"poweredOn"`
 }
 
-func (g *getPowered) handleResponse(respChan chan actionResponse) {
+func (g *getPower) handleResponse(respChan chan actionResponse) {
 	aResp := <-respChan
 	close(respChan)
 
