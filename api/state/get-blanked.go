@@ -10,16 +10,14 @@ import (
 	"github.com/byuoitav/av-control-api/api"
 )
 
-type getBlanked struct {
-}
+type getBlanked struct{}
 
 func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
 	var resp generateActionsResponse
 
 	// just doing basic get blanked for now
 	for _, dev := range room {
-		// url, order, err := getCommand(dev, "GetBlanked", env)
-		url, order, err := getCommand(dev, "STATUS_Blanked", env)
+		url, order, err := getCommand(dev, "GetBlanked", env)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue
