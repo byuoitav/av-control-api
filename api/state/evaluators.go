@@ -9,6 +9,7 @@ import (
 var (
 	statusEvaluators = []statusEvaluator{
 		&getBlanked{},
+		&getInput{},
 	}
 )
 
