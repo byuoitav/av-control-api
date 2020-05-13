@@ -177,7 +177,7 @@ func (d *DataService) AllDeviceTypes(ctx context.Context) ([]deviceType, error) 
 	for types.Next() {
 		var dt deviceType
 		if err = types.ScanDoc(&dt); err != nil {
-			fmt.Println("error scanning in device type: %s", err)
+			fmt.Printf("error scanning in device type for %s: %s\n", types.ID(), err)
 			continue
 		}
 
