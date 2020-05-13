@@ -7,8 +7,8 @@ type StateRequest struct {
 }
 
 type StateResponse struct {
-	Devices map[DeviceID]DeviceState `json:"devices"`
-	Errors  []DeviceStateError       `json:"errors"`
+	Devices map[DeviceID]DeviceState `json:"devices,omitempty"`
+	Errors  []DeviceStateError       `json:"errors,omitempty"`
 }
 
 type DeviceState struct {

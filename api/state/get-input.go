@@ -7,12 +7,19 @@ import (
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api"
+	"gonum.org/v1/gonum/graph/path"
 )
 
 type getInput struct{}
 
 func (g *getInput) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
 	var resp generateActionsResponse
+
+	graph := newDeviceGraph(room, "video")
+	paths := path.DijkstraAllPaths(graph)
+
+	pathEdges := edgesBetween(graph, &paths, "ITB-1108B-HDMI1", "ITB-1108B-D1")
+	fmt.Printf("path: %s\n", pathEdges.String())
 
 	responses := make(chan actionResponse)
 
@@ -136,7 +143,7 @@ func (g *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 }
 
 type input struct {
-	Input string `json:"input"`
+	Input *string `json:"input"`
 }
 
 func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int) {
@@ -150,8 +157,6 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 	for resp := range respChan {
 		received++
 		resps = append(resps, resp)
-
-		fmt.Printf("response: %s\n\terror: %s\n", resp.Body, resp.Error)
 
 		if received == expectedResps {
 			break

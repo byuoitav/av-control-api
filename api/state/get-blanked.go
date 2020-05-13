@@ -74,7 +74,7 @@ func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 }
 
 type blanked struct {
-	Blanked bool `json:"blanked"`
+	Blanked *bool `json:"blanked"`
 }
 
 func (g *getBlanked) handleResponse(respChan chan actionResponse) {
@@ -96,6 +96,11 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 		return
 	}
 
+	if aResp.StatusCode/100 != 2 {
+		handleErr(fmt.Errorf("%v response from driver: %s", aResp.Error, aResp.Body))
+		return
+	}
+
 	var state blanked
 	if err := json.Unmarshal(aResp.Body, &state); err != nil {
 		handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body))
@@ -105,7 +110,7 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 	aResp.Updates <- DeviceStateUpdate{
 		ID: aResp.Action.ID,
 		DeviceState: api.DeviceState{
-			Blanked: &state.Blanked,
+			Blanked: state.Blanked,
 		},
 	}
 }
