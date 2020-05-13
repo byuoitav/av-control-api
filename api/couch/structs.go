@@ -8,16 +8,17 @@ import (
 
 type device struct {
 	ID      string            `json:"_id"`
-	TID     TypeID            `json:"type"`
+	TypeID  string            `json:"typeID"`
 	Address string            `json:"address"`
 	Proxy   map[string]string `json:"proxy"`
 	Ports   []port            `json:"ports"`
 	Type    deviceType
 }
 
-type TypeID struct {
-	ID string `json:"_id"`
-}
+// this is if we ever need to mess with old couch stuff
+// type TypeID struct {
+// 	ID string `json:"_id"`
+// }
 
 type deviceType struct {
 	ID       string             `json:"_id"`
@@ -63,9 +64,9 @@ func (d device) convert() (api.Device, error) {
 
 func (dt deviceType) convert() api.DeviceType {
 	toReturn := api.DeviceType{
-		ID: dt.ID,
+		ID:       dt.ID,
+		Commands: make(map[string]api.Command),
 	}
-	toReturn.Commands = make(map[string]api.Command)
 
 	for key, val := range dt.Commands {
 		toReturn.Commands[key] = val.convert()

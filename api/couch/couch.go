@@ -63,7 +63,7 @@ func (d *DataService) Room(ctx context.Context, id string) ([]api.Device, error)
 		}
 
 		for i := range dt {
-			if dev.TID.ID == dt[i].ID {
+			if dev.TypeID == dt[i].ID {
 				dev.Type = dt[i]
 				break
 			}
@@ -105,7 +105,7 @@ func (d *DataService) Device(ctx context.Context, id string) (api.Device, error)
 		return api.Device{}, fmt.Errorf("error retrieving device doc: %s", err)
 	}
 
-	dt, err := d.DeviceType(ctx, dev.TID.ID)
+	dt, err := d.DeviceType(ctx, dev.TypeID)
 	if err != nil {
 		return api.Device{}, fmt.Errorf("error retrieving device type doc for %s: %s", id, err)
 	}
