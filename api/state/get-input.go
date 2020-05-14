@@ -21,6 +21,8 @@ func (g *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	pathEdges := edgesBetween(graph, &paths, "ITB-1108B-HDMI1", "ITB-1108B-D1")
 	fmt.Printf("path: %s\n", pathEdges.String())
 
+	exportGraphDot(graph, "./graph.gv")
+
 	responses := make(chan actionResponse)
 
 	for _, dev := range room {

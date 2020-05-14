@@ -1,4 +1,4 @@
-package state
+package graph
 
 import (
 	"testing"
@@ -54,10 +54,10 @@ func TestFindPathToNeighbor(t *testing.T) {
 		},
 	}
 
-	g := newDeviceGraph(room, "video")
+	g := NewGraph(room, "video")
 	shortest := path.DijkstraAllPaths(g)
 
-	pathEdges := edgesBetween(g, &shortest, room[0].ID, room[1].ID)
+	pathEdges := PathFromTo(g, &shortest, room[0].ID, room[1].ID)
 	if len(pathEdges) == 0 {
 		t.Fatalf("no path found from %s to %s", room[0].ID, room[1].ID)
 	}
@@ -154,13 +154,13 @@ func TestFindPathThroughOneSwitch(t *testing.T) {
 		},
 	}
 
-	g := newDeviceGraph(room, "video")
+	g := NewGraph(room, "video")
 	shortest := path.DijkstraAllPaths(g)
 
 	//
 	//
 	// HDMI1 -> D1
-	pathEdges := edgesBetween(g, &shortest, room[0].ID, room[3].ID)
+	pathEdges := PathFromTo(g, &shortest, room[0].ID, room[3].ID)
 	if len(pathEdges) == 0 {
 		t.Fatalf("no path found from %s to %s", room[0].ID, room[3].ID)
 	}
@@ -196,7 +196,7 @@ func TestFindPathThroughOneSwitch(t *testing.T) {
 	//
 	//
 	// HDMI2 -> D1
-	pathEdges = edgesBetween(g, &shortest, room[1].ID, room[3].ID)
+	pathEdges = PathFromTo(g, &shortest, room[1].ID, room[3].ID)
 	if len(pathEdges) == 0 {
 		t.Fatalf("no path found from %s to %s", room[1].ID, room[3].ID)
 	}
@@ -232,7 +232,7 @@ func TestFindPathThroughOneSwitch(t *testing.T) {
 	//
 	//
 	// HDMI1 -> D2
-	pathEdges = edgesBetween(g, &shortest, room[0].ID, room[4].ID)
+	pathEdges = PathFromTo(g, &shortest, room[0].ID, room[4].ID)
 	if len(pathEdges) == 0 {
 		t.Fatalf("no path found from %s to %s", room[0].ID, room[4].ID)
 	}
@@ -268,7 +268,7 @@ func TestFindPathThroughOneSwitch(t *testing.T) {
 	//
 	//
 	// HDMI2 -> D2
-	pathEdges = edgesBetween(g, &shortest, room[1].ID, room[4].ID)
+	pathEdges = PathFromTo(g, &shortest, room[1].ID, room[4].ID)
 	if len(pathEdges) == 0 {
 		t.Fatalf("no path found from %s to %s", room[1].ID, room[4].ID)
 	}

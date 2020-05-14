@@ -92,6 +92,7 @@ func main() {
 
 	e.GET("/room/:room", handlers.GetRoomConfiguration)
 	e.GET("/room/:room/state", handlers.GetRoomState)
+	e.GET("/room/:room/graph/:type", handlers.GetRoomGraph)
 
 	e.GET("/device/:device", handlers.GetDeviceConfiguration)
 	e.GET("/device/:device/state", handlers.GetDeviceState)

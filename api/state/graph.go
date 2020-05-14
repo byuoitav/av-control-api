@@ -3,11 +3,14 @@ package state
 import (
 	"crypto/sha1"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 	"strings"
 
 	"github.com/byuoitav/av-control-api/api"
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding"
+	"gonum.org/v1/gonum/graph/encoding/dot"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -21,6 +24,10 @@ func (g graphNode) ID() int64 {
 	return g.id
 }
 
+func (g graphNode) DOTID() string {
+	return string(g.Device.ID)
+}
+
 type graphEdge struct {
 	Src     graphNode
 	Dst     graphNode
@@ -32,7 +39,21 @@ func (e graphEdge) From() graph.Node { return e.Src }
 
 func (e graphEdge) To() graph.Node { return e.Dst }
 
-func (e graphEdge) ReversedEdge() graph.Edge { return graphEdge{Src: e.Dst, Dst: e.Src} }
+func (e graphEdge) ReversedEdge() graph.Edge {
+	return graphEdge{
+		Src:     e.Dst,
+		SrcPort: e.DstPort,
+		Dst:     e.Src,
+		DstPort: e.SrcPort,
+	}
+}
+
+func (g graphEdge) Attributes() []encoding.Attribute {
+	return []encoding.Attribute{
+		encoding.Attribute{Key: "taillabel", Value: g.SrcPort.Name},
+		encoding.Attribute{Key: "headlabel", Value: g.DstPort.Name},
+	}
+}
 
 type graphPath []graphEdge
 
@@ -140,4 +161,13 @@ func edgesBetween(g *simple.DirectedGraph, paths *path.AllShortest, src, dst api
 	}
 
 	return edges
+}
+
+func exportGraphDot(g *simple.DirectedGraph, filePath string) error {
+	b, err := dot.Marshal(g, "", "", "")
+	if err != nil {
+		return fmt.Errorf("unable to marshal graph: %w", err)
+	}
+
+	return ioutil.WriteFile(filePath, b, 0644)
 }
