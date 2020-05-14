@@ -7,21 +7,15 @@ import (
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api"
-	"gonum.org/v1/gonum/graph/path"
 )
 
 type getInput struct{}
 
-func (g *getInput) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
+func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
 	var resp generateActionsResponse
 
-	graph := newDeviceGraph(room, "video")
-	paths := path.DijkstraAllPaths(graph)
-
-	pathEdges := edgesBetween(graph, &paths, "ITB-1108B-HDMI1", "ITB-1108B-D1")
-	fmt.Printf("path: %s\n", pathEdges.String())
-
-	exportGraphDot(graph, "./graph.gv")
+	// g := graph.NewGraph(room, "video")
+	// paths := path.DijkstraAllPaths(g)
 
 	responses := make(chan actionResponse)
 
@@ -138,7 +132,7 @@ func (g *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 
 	if len(resp.Actions) > 0 {
-		go g.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates)
+		go i.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates)
 	}
 
 	return resp
@@ -148,7 +142,7 @@ type input struct {
 	Input *string `json:"input"`
 }
 
-func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int) {
+func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int) {
 	if expectedResps == 0 {
 		return
 	}
