@@ -27,7 +27,7 @@ func PathFromTo(g *simple.DirectedGraph, paths *path.AllShortest, src, dst api.D
 	var path Path
 
 	p, _, _ := paths.Between(NodeID(src), NodeID(dst))
-	if len(path) == 0 {
+	if len(p) == 0 {
 		return nil
 	}
 

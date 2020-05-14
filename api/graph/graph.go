@@ -49,26 +49,25 @@ func NewGraph(devices []api.Device, portType string) *simple.DirectedGraph {
 		}
 	}
 
-	// debugging
+	return g
+}
+
+func printGraph(g *simple.DirectedGraph) {
 	fmt.Printf("\ngraph:\n")
 
-	// print all nodes
 	fmt.Printf("nodes:\n")
-	_nodes := g.Nodes()
-	for _nodes.Next() {
-		gn := _nodes.Node().(Node)
+	nodes := g.Nodes()
+	for nodes.Next() {
+		gn := nodes.Node().(Node)
 		fmt.Printf("\t%s\t%v\n", gn.Device.ID, gn.ID())
 	}
 
-	// print all edges
 	fmt.Printf("edges\n")
-	_edges := g.Edges()
-	for _edges.Next() {
-		ge := _edges.Edge().(Edge)
+	edges := g.Edges()
+	for edges.Next() {
+		ge := edges.Edge().(Edge)
 		fmt.Printf("\t%v|%v -> %v|%v\n", ge.Src.Device.ID, ge.SrcPort.Name, ge.Dst.Device.ID, ge.DstPort.Name)
 	}
 
 	fmt.Printf("\n")
-
-	return g
 }
