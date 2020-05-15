@@ -97,7 +97,7 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 	}
 
 	if aResp.StatusCode/100 != 2 {
-		handleErr(fmt.Errorf("%v response from driver: %s", aResp.Error, aResp.Body))
+		handleErr(fmt.Errorf("%v response from driver: %s", aResp.StatusCode, aResp.Body))
 		return
 	}
 
