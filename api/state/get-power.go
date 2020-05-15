@@ -2,7 +2,6 @@ package state
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,8 +21,7 @@ func (g *getPower) GenerateActions(ctx context.Context, room []api.Device, env s
 			continue
 		case err != nil:
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
-				ID: dev.ID,
-				//double check this
+				ID:    dev.ID,
 				Field: "poweredOn",
 				Error: err.Error(),
 			})
@@ -95,10 +93,21 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 	}
 
 	var state poweredOn
-	if err := json.Unmarshal(aResp.Body, &state); err != nil {
-		handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body))
-		return
+
+	// since we get back {"power": "standby"} we're doing this for now
+	if string(aResp.Body) == "{\"power\":\"on\"}" {
+		state.PoweredOn = true
+	} else if string(aResp.Body) == "{\"power\":\"standby\"}" {
+		state.PoweredOn = false
+	} else {
+		handleErr(fmt.Errorf("unexpected response from driver:\n%s", aResp.Body))
 	}
+
+	// I guess ideally we'd do this but not for now...
+	// if err := json.Unmarshal(aResp.Body, &state); err != nil {
+	// 	handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body))
+	// 	return
+	// }
 
 	aResp.Updates <- DeviceStateUpdate{
 		ID: aResp.Action.ID,

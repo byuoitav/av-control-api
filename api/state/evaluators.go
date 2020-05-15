@@ -11,6 +11,8 @@ var (
 		&getBlanked{},
 		&getInput{},
 		&getPower{},
+		&getVolume{},
+		&getMuted{},
 	}
 )
 

@@ -67,7 +67,9 @@ func GetDevices(ctx context.Context, room []api.Device, env string) (api.StateRe
 	for {
 		select {
 		case update := <-updates:
+
 			updatesReceived++
+
 			if len(update.ID) == 0 {
 				break
 			}
