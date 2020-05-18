@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -32,6 +32,37 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handlers) SetRoomState(c echo.Context) error {
+	roomID := c.Param("room")
+	if len(roomID) == 0 {
+		return c.String(http.StatusBadRequest, "room must be in the format BLDG-ROOM")
+	}
+	var stateReq api.StateRequest
+	err := json.Unmarshal(c.Request().Body, &stateReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "error unmarshaling state request")
+	}
+
+	// gotta get the current room state to compare
+	err = h.GetRoomState(c)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 20*time.Second)
+	defer cancel()
+
+	devices, err := h.DataService.Room(ctx, roomID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	resp, err := state.SetDevices(ctx, devices, env)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 }
 
 func (h *Handlers) GetRoomConfiguration(c echo.Context) error {
@@ -76,16 +107,4 @@ func (h *Handlers) GetRoomGraph(c echo.Context) error {
 	}
 
 	return c.Blob(http.StatusOK, "image/svg+xml", svg)
-}
-
-func test(room []api.Device) {
-	g := graph.NewGraph(room, "audio")
-
-	path := graph.PathToEnd(g, "ITB-1108B-MIC1")
-	if len(path) == 0 {
-		// no path down
-	}
-
-	end := path[len(path)-1]
-	fmt.Printf("%s %s %s\n%v\n", end.Dst.Device.ID, end.DstPort.Name, end.Dst.Address, end.Dst.Type.Commands)
 }

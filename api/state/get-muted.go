@@ -205,7 +205,6 @@ func (g *getMuted) handleResponses(respChan chan actionResponse, expectedResps, 
 	received := 0
 
 	for resp := range respChan {
-		fmt.Printf("resp body: %s\n", resp.Body)
 
 		received++
 		var state muted
