@@ -205,7 +205,6 @@ func (g *getMuted) handleResponses(respChan chan actionResponse, expectedResps, 
 	received := 0
 
 	for resp := range respChan {
-
 		received++
 		var state muted
 		if err := json.Unmarshal(resp.Body, &state); err != nil {

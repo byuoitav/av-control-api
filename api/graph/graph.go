@@ -52,6 +52,17 @@ func NewGraph(devices []api.Device, portType string) *simple.DirectedGraph {
 	return g
 }
 
+func Transpose(g *simple.DirectedGraph) *simple.DirectedGraph {
+	t := simple.NewDirectedGraph()
+
+	edges := g.Edges()
+	for edges.Next() {
+		t.SetEdge(edges.Edge().ReversedEdge())
+	}
+
+	return t
+}
+
 func printGraph(g *simple.DirectedGraph) {
 	fmt.Printf("\ngraph:\n")
 

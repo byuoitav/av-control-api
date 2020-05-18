@@ -15,11 +15,18 @@ type Path []Edge
 
 func (p Path) String() string {
 	var b strings.Builder
-	for _, edge := range p {
-		b.WriteString(fmt.Sprintf("%s|%s -> ", edge.Src.Device.ID, edge.SrcPort.Name))
+	for i := range p {
+		switch i {
+		case 0:
+			b.WriteString(fmt.Sprintf("%s|%s -> ", p[i].Src.Device.ID, p[i].SrcPort.Name))
+		case len(p) - 1:
+			b.WriteString(fmt.Sprintf("%s|%s|%s ->", p[i-1].DstPort.Name, p[i].Src.Device.ID, p[i].SrcPort.Name))
+			b.WriteString(fmt.Sprintf("%s|%s", p[i].DstPort.Name, p[i].Dst.Device.ID))
+		default:
+			b.WriteString(fmt.Sprintf("%s|%s|%s ->", p[i-1].DstPort.Name, p[i].Src.Device.ID, p[i].SrcPort.Name))
+		}
 	}
 
-	b.WriteString(fmt.Sprintf("%s|%s", p[len(p)-1].Dst.Device.ID, p[len(p)-1].DstPort.Name))
 	return b.String()
 }
 
@@ -63,4 +70,48 @@ func PathToEnd(g *simple.DirectedGraph, src api.DeviceID) Path {
 	})
 
 	return path
+}
+
+func LeavesFrom(g *simple.DirectedGraph, src api.DeviceID) []Node {
+	var leaves []Node
+
+	start := g.Node(NodeID(src))
+	if start == nil {
+		return nil
+	}
+
+	search := traverse.DepthFirst{
+		Visit: func(node graph.Node) {
+			if g.From(node.ID()).Len() == 0 {
+				leaves = append(leaves, node.(Node))
+			}
+		},
+	}
+
+	search.Walk(g, start, func(graph.Node) bool {
+		return false
+	})
+
+	return leaves
+}
+
+func Leaves(g *simple.DirectedGraph) []Node {
+	var leaves []Node
+
+	search := traverse.DepthFirst{
+		Visit: func(node graph.Node) {
+			if g.From(node.ID()).Len() == 0 {
+				leaves = append(leaves, node.(Node))
+			}
+		},
+	}
+
+	nodes := g.Nodes()
+	for nodes.Next() {
+		search.Walk(g, nodes.Node(), func(graph.Node) bool {
+			return false
+		})
+	}
+
+	return leaves
 }

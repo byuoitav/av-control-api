@@ -12,11 +12,11 @@ type StateResponse struct {
 }
 
 type DeviceState struct {
-	PoweredOn *bool   `json:"poweredOn,omitempty"`
-	Input     *string `json:"input,omitempty"`
-	Blanked   *bool   `json:"blanked,omitempty"`
-	Volume    *int    `json:"volume,omitempty"`
-	Muted     *bool   `json:"muted,omitempty"`
+	PoweredOn *bool     `json:"poweredOn,omitempty"`
+	Input     *DeviceID `json:"input,omitempty"`
+	Blanked   *bool     `json:"blanked,omitempty"`
+	Volume    *int      `json:"volume,omitempty"`
+	Muted     *bool     `json:"muted,omitempty"`
 }
 
 type DeviceStateError struct {

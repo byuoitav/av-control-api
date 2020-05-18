@@ -18,6 +18,37 @@ type action struct {
 	Response chan actionResponse
 }
 
+func (a *action) Equal(b *action) bool {
+	switch {
+	case a == b:
+		return true
+	case a == nil && b != nil:
+		return false
+	case a != nil && b == nil:
+		return false
+	case a.ID != b.ID:
+		return false
+	case a.Order == nil && b.Order != nil:
+		return false
+	case a.Order != nil && b.Order == nil:
+		return false
+	case a.Order != nil && *a.Order != *b.Order:
+		return false
+	case a.Response != b.Response:
+		return false
+	case a.Req == nil && b.Req != nil:
+		return false
+	case a.Req != nil && b.Req == nil:
+		return false
+	case a.Req != nil && a.Req.Method != b.Req.Method:
+		return false
+	case a.Req != nil && a.Req.URL.String() != b.Req.URL.String():
+		return false
+	}
+
+	return true
+}
+
 type actionResponse struct {
 	Action *action
 	Error  error
@@ -70,4 +101,24 @@ func executeActions(ctx context.Context, actions []action, updates chan DeviceSt
 
 		time.Sleep(50 * time.Millisecond)
 	}
+}
+
+func uniqueActions(actions []action) []action {
+	var unique []action
+
+	for _, action := range actions {
+		add := true
+		for _, u := range unique {
+			if action.Equal(&u) {
+				add = false
+				break
+			}
+		}
+
+		if add {
+			unique = append(unique, action)
+		}
+	}
+
+	return unique
 }
