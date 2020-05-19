@@ -31,13 +31,9 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 					ID:    dev.ID,
 					Error: err.Error(),
 				})
+
 				continue
-
 			default:
-				//idk what to do with params cause it should be
-				//{{address}}/block/{{block}}/volume where {{block}}
-				//should just be like 0, but it's an input down lower...
-
 				params := map[string]string{
 					"address": dev.Address,
 					"input":   string(dev.ID),
@@ -77,55 +73,56 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				continue
 			}
 
-			url, order, err = getCommand(dev, "GetVolume", env)
-			switch {
-			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-				continue
-			case err != nil:
-				resp.Errors = append(resp.Errors, api.DeviceStateError{
-					ID:    dev.ID,
-					Field: "volume",
-					Error: err.Error(),
-				})
+			// it should always be by block
+			// url, order, err = getCommand(dev, "GetVolume", env)
+			// switch {
+			// case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			// 	continue
+			// case err != nil:
+			// 	resp.Errors = append(resp.Errors, api.DeviceStateError{
+			// 		ID:    dev.ID,
+			// 		Field: "volume",
+			// 		Error: err.Error(),
+			// 	})
 
-				continue
-			default:
-				params := map[string]string{
-					"address": dev.Address,
-				}
+			// 	continue
+			// default:
+			// 	params := map[string]string{
+			// 		"address": dev.Address,
+			// 	}
 
-				url, err = fillURL(url, params)
-				if err != nil {
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "volume",
-						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-					})
+			// 	url, err = fillURL(url, params)
+			// 	if err != nil {
+			// 		resp.Errors = append(resp.Errors, api.DeviceStateError{
+			// 			ID:    dev.ID,
+			// 			Field: "volume",
+			// 			Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+			// 		})
 
-					continue
-				}
+			// 		continue
+			// 	}
 
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				if err != nil {
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "volume",
-						Error: fmt.Sprintf("unable to build http request: %s", err),
-					})
+			// 	req, err := http.NewRequest(http.MethodGet, url, nil)
+			// 	if err != nil {
+			// 		resp.Errors = append(resp.Errors, api.DeviceStateError{
+			// 			ID:    dev.ID,
+			// 			Field: "volume",
+			// 			Error: fmt.Sprintf("unable to build http request: %s", err),
+			// 		})
 
-					continue
-				}
+			// 		continue
+			// 	}
 
-				act := action{
-					ID:       dev.ID,
-					Req:      req,
-					Order:    order,
-					Response: responses,
-				}
+			// 	act := action{
+			// 		ID:       dev.ID,
+			// 		Req:      req,
+			// 		Order:    order,
+			// 		Response: responses,
+			// 	}
 
-				resp.Actions = append(resp.Actions, act)
-				resp.ExpectedUpdates++
-			}
+			// 	resp.Actions = append(resp.Actions, act)
+			// 	resp.ExpectedUpdates++
+			// }
 		} else {
 			endDev := path[len(path)-1].Dst
 			url, order, err := getCommand(*endDev.Device, "GetVolumeByBlock", env)
@@ -136,8 +133,9 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "volume",
-					Error: fmt.Sprintf("error aint nil: %s", err.Error()),
+					Error: err.Error(),
 				})
+
 				continue
 			}
 

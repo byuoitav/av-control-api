@@ -6,24 +6,48 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/graph"
 )
 
-type getMuted struct{}
+type setMuted struct{}
 
-func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
+func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generateActionsResponse {
 	var resp generateActionsResponse
 
 	gr := graph.NewGraph(room, "audio")
 
 	responses := make(chan actionResponse)
 
-	for _, dev := range room {
+	var devices []api.Device
+	for k, v := range stateReq.Devices {
+		if v.Muted != nil {
+			for i := range room {
+				if room[i].ID == k {
+					devices = append(devices, room[i])
+					break
+				}
+			}
+		}
+	}
+
+	if len(devices) == 0 {
+		return resp
+	}
+
+	for _, dev := range devices {
 		path := graph.PathToEnd(gr, dev.ID)
+		var cmd string
+		if *stateReq.Devices[dev.ID].Muted == true {
+			cmd = "Mute"
+		} else {
+			cmd = "UnMute"
+		}
+
 		if len(path) == 0 {
-			url, order, err := getCommand(dev, "GetMutedByBlock", env)
+			url, order, err := getCommand(dev, "SetMutedByBlock", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -36,13 +60,14 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 				params := map[string]string{
 					"address": dev.Address,
 					"input":   string(dev.ID),
+					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)
 				if err != nil {
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
-						Field: "muted",
+						Field: "setMuted",
 						Error: fmt.Sprintf("%s (url after fill: %s)", err),
 					})
 
@@ -53,7 +78,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 				if err != nil {
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
-						Field: "muted",
+						Field: "setMuted",
 						Error: fmt.Sprintf("unable to build http request: %s", err),
 					})
 
@@ -72,66 +97,67 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 				continue
 			}
 
-			// it should always be by block
-			// url, order, err = getCommand(dev, "GetMuted", env)
-			// switch {
-			// case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-			// 	continue
-			// case err != nil:
-			// 	resp.Errors = append(resp.Errors, api.DeviceStateError{
-			// 		ID:    dev.ID,
-			// 		Field: "muted",
-			// 		Error: err.Error(),
-			// 	})
-
-			// 	continue
-			// default:
-			// 	params := map[string]string{
-			// 		"address": dev.Address,
-			// 	}
-
-			// 	url, err = fillURL(url, params)
-			// 	if err != nil {
-			// 		resp.Errors = append(resp.Errors, api.DeviceStateError{
-			// 			ID:    dev.ID,
-			// 			Field: "muted",
-			// 			Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-			// 		})
-
-			// 		continue
-			// 	}
-
-			// 	req, err := http.NewRequest(http.MethodGet, url, nil)
-			// 	if err != nil {
-			// 		resp.Errors = append(resp.Errors, api.DeviceStateError{
-			// 			ID:    dev.ID,
-			// 			Field: "muted",
-			// 			Error: fmt.Sprintf("unable to build http request: %s", err),
-			// 		})
-
-			// 		continue
-			// 	}
-
-			// 	act := action{
-			// 		ID:       dev.ID,
-			// 		Req:      req,
-			// 		Order:    order,
-			// 		Response: responses,
-			// 	}
-
-			// 	resp.Actions = append(resp.Actions, act)
-			// 	resp.ExpectedUpdates++
-			// }
-		} else {
-			endDev := path[len(path)-1].Dst
-			url, order, err := getCommand(*endDev.Device, "GetMutedByBlock", env)
+			// it should always be by block so we should remove this later
+			url, order, err = getCommand(dev, cmd, env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
-					Field: "muted",
+					Field: "setMuted",
+					Error: err.Error(),
+				})
+
+				continue
+			default:
+				params := map[string]string{
+					"address": dev.Address,
+					// "muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
+				}
+
+				url, err = fillURL(url, params)
+				if err != nil {
+					resp.Errors = append(resp.Errors, api.DeviceStateError{
+						ID:    dev.ID,
+						Field: "setMuted",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
+
+					continue
+				}
+
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					resp.Errors = append(resp.Errors, api.DeviceStateError{
+						ID:    dev.ID,
+						Field: "setMuted",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
+
+					continue
+				}
+
+				act := action{
+					ID:       dev.ID,
+					Req:      req,
+					Order:    order,
+					Response: responses,
+				}
+
+				resp.Actions = append(resp.Actions, act)
+				resp.ExpectedUpdates++
+			}
+		} else {
+			endDev := path[len(path)-1].Dst
+			url, order, err := getCommand(*endDev.Device, "SetMutedByBlock", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+				continue
+			case err != nil:
+				resp.Errors = append(resp.Errors, api.DeviceStateError{
+					ID:    dev.ID,
+					Field: "setMuted",
 					Error: err.Error(),
 				})
 
@@ -146,13 +172,14 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 				params := map[string]string{
 					"address": endDev.Address,
 					"input":   port.Name,
+					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)
 				if err != nil {
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
-						Field: "muted",
+						Field: "setMuted",
 						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
 					})
 
@@ -163,7 +190,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 				if err != nil {
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
-						Field: "muted",
+						Field: "setMuted",
 						Error: fmt.Sprintf("unable to build http request: %s", err),
 					})
 
@@ -189,17 +216,17 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 
 	if len(resp.Actions) > 0 {
-		go g.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates)
+		go s.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates)
 	}
 
 	return resp
 }
 
-type muted struct {
+type mute struct {
 	Muted bool `json:"muted"`
 }
 
-func (g *getMuted) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int) {
+func (s *setMuted) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int) {
 	if expectedResps == 0 {
 		return
 	}
@@ -212,7 +239,7 @@ func (g *getMuted) handleResponses(respChan chan actionResponse, expectedResps, 
 		if err := json.Unmarshal(resp.Body, &state); err != nil {
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
-				Field: "muted",
+				Field: "setMuted",
 				Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, resp.Body),
 			}
 

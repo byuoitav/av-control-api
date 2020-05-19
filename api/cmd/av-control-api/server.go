@@ -92,7 +92,7 @@ func main() {
 
 	e.GET("/room/:room", handlers.GetRoomConfiguration)
 	e.GET("/room/:room/state", handlers.GetRoomState)
-	e.PUT("/room/:room/state", handlers.PutRoomState)
+	e.PUT("/room/:room/state", handlers.SetRoomState)
 	e.GET("/room/:room/graph/:type", handlers.GetRoomGraph)
 	e.GET("/room/:room/graph/:type/transpose", handlers.GetRoomGraphTranspose)
 
