@@ -20,7 +20,6 @@ type setInput struct{}
 
 func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generateActionsResponse {
 	var resp generateActionsResponse
-	// fmt.Printf("WE HERE \n")
 
 	var devices []api.Device
 	for k, v := range stateReq.Devices {
@@ -58,7 +57,6 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	paths := path.DijkstraAllPaths(t)
 
 	for _, device := range devices {
-		// fmt.Printf("YO\n")
 		var actsForOutput []action
 		var errsForOutput []api.DeviceStateError
 

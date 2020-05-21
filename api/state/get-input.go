@@ -204,6 +204,7 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 
 	close(respChan)
 	status := make(map[api.DeviceID][]input)
+	var emptyChecker []api.DeviceID
 
 	for _, resp := range resps {
 		handleErr := func(err error) {
@@ -231,7 +232,23 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		}
 
 		fmt.Printf("%s input: %s\n", resp.Action.ID, resp.Body)
+
+		// If all devices are off and we can't get any inputs for them we just need to return out
+		if string(resp.Body) == "{}" {
+			emptyChecker = append(emptyChecker, resp.Action.ID)
+			resp.Errors <- api.DeviceStateError{
+				ID:    resp.Action.ID,
+				Field: "input",
+				Error: fmt.Sprintf("unable to get input for %s (probably powered off)", resp.Action.ID),
+			}
+			resp.Updates <- DeviceStateUpdate{}
+			continue
+		}
 		status[resp.Action.ID] = append(status[resp.Action.ID], state)
+	}
+
+	if len(emptyChecker) == len(outputs) {
+		return
 	}
 
 	// now calculate the state of the outputs
