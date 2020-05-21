@@ -20,6 +20,7 @@ var (
 		&setPower{},
 		&setVolume{},
 		&setBlanked{},
+		&setInput{},
 	}
 )
 

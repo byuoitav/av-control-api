@@ -238,6 +238,7 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 	for _, output := range outputs {
 		deepest := output
 
+		var prevEdge graph.Edge
 		search := traverse.DepthFirst{
 			Visit: func(node gonum.Node) {
 				deepest = node.(graph.Node)
@@ -246,6 +247,7 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 				e := edge.(graph.Edge)
 
 				states := status[e.Src.Device.ID]
+
 				for _, state := range states {
 					if state.Input == nil {
 						continue
@@ -257,8 +259,18 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 						inputStr = split[1]
 					}
 
-					if inputStr == e.SrcPort.Name {
-						return true
+					if prevEdge == (graph.Edge{}) {
+						if inputStr == e.SrcPort.Name {
+							prevEdge = e
+							return true
+						}
+					} else {
+						if len(split) > 1 {
+							if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
+								prevEdge = e
+								return true
+							}
+						}
 					}
 				}
 
@@ -292,7 +304,7 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 			resps[0].Errors <- api.DeviceStateError{
 				ID:    output.Device.ID,
 				Field: "input",
-				Error: fmt.Sprintf("unable to traverse input tree back to a valid input. only got to %s|%+v", deepest.Device.ID, states),
+				Error: fmt.Sprintf("unable to traverse input tree back to a valid input. only got to %s|%s", deepest.Device.ID, *states[0].Input),
 			}
 			resps[0].Updates <- DeviceStateUpdate{}
 		}

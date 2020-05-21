@@ -73,55 +73,55 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 			}
 
 			// it should always be by block
-			// url, order, err = getCommand(dev, "GetMuted", env)
-			// switch {
-			// case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-			// 	continue
-			// case err != nil:
-			// 	resp.Errors = append(resp.Errors, api.DeviceStateError{
-			// 		ID:    dev.ID,
-			// 		Field: "muted",
-			// 		Error: err.Error(),
-			// 	})
+			url, order, err = getCommand(dev, "GetMuted", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+				continue
+			case err != nil:
+				resp.Errors = append(resp.Errors, api.DeviceStateError{
+					ID:    dev.ID,
+					Field: "muted",
+					Error: err.Error(),
+				})
 
-			// 	continue
-			// default:
-			// 	params := map[string]string{
-			// 		"address": dev.Address,
-			// 	}
+				continue
+			default:
+				params := map[string]string{
+					"address": dev.Address,
+				}
 
-			// 	url, err = fillURL(url, params)
-			// 	if err != nil {
-			// 		resp.Errors = append(resp.Errors, api.DeviceStateError{
-			// 			ID:    dev.ID,
-			// 			Field: "muted",
-			// 			Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-			// 		})
+				url, err = fillURL(url, params)
+				if err != nil {
+					resp.Errors = append(resp.Errors, api.DeviceStateError{
+						ID:    dev.ID,
+						Field: "muted",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
 
-			// 		continue
-			// 	}
+					continue
+				}
 
-			// 	req, err := http.NewRequest(http.MethodGet, url, nil)
-			// 	if err != nil {
-			// 		resp.Errors = append(resp.Errors, api.DeviceStateError{
-			// 			ID:    dev.ID,
-			// 			Field: "muted",
-			// 			Error: fmt.Sprintf("unable to build http request: %s", err),
-			// 		})
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					resp.Errors = append(resp.Errors, api.DeviceStateError{
+						ID:    dev.ID,
+						Field: "muted",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
 
-			// 		continue
-			// 	}
+					continue
+				}
 
-			// 	act := action{
-			// 		ID:       dev.ID,
-			// 		Req:      req,
-			// 		Order:    order,
-			// 		Response: responses,
-			// 	}
+				act := action{
+					ID:       dev.ID,
+					Req:      req,
+					Order:    order,
+					Response: responses,
+				}
 
-			// 	resp.Actions = append(resp.Actions, act)
-			// 	resp.ExpectedUpdates++
-			// }
+				resp.Actions = append(resp.Actions, act)
+				resp.ExpectedUpdates++
+			}
 		} else {
 			endDev := path[len(path)-1].Dst
 			url, order, err := getCommand(*endDev.Device, "GetMutedByBlock", env)
