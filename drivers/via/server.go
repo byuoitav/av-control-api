@@ -23,7 +23,6 @@ func main() {
 	pflag.IntVarP(&port, "port", "P", 80, "port to run the server on")
 	pflag.StringVarP(&username, "username", "u", "", "username for device")
 	pflag.StringVarP(&password, "password", "p", "", "password for device")
-	// other flags
 
 	pflag.Parse()
 
@@ -34,13 +33,15 @@ func main() {
 		fmt.Printf("failed to start server: %s\n", err)
 		os.Exit(1)
 	}
-
+	// Logger instantiated
+	logger := drivers.Log.Named(addr)
 	// import driver library
 	createDsp := func(ctx context.Context, addr string) (drivers.DSP, error) {
 		return &kramer.Via{
 			Address:  addr,
 			Username: username,
 			Password: password,
+			Logger:   logger,
 		}, nil
 	}
 
