@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/byuoitav/av-control-api/drivers"
-	via "github.com/byuoitav/kramer-driver/via"
+	"github.com/byuoitav/kramer-driver"
 	"github.com/spf13/pflag"
 )
 
@@ -21,8 +21,8 @@ func main() {
 	)
 
 	pflag.IntVarP(&port, "port", "P", 80, "port to run the server on")
-	pflag.StringVarP(&username, "username", "u", "su", "username for device")
-	pflag.StringVarP(&password, "password", "p", "supass", "password for device")
+	pflag.StringVarP(&username, "username", "u", "", "username for device")
+	pflag.StringVarP(&password, "password", "p", "", "password for device")
 	// other flags
 
 	pflag.Parse()
@@ -37,14 +37,14 @@ func main() {
 
 	// import driver library
 	createDsp := func(ctx context.Context, addr string) (drivers.DSP, error) {
-		return &via.VIA{
+		return &kramer.Via{
 			Address:  addr,
 			Username: username,
 			Password: password,
 		}, nil
 	}
 
-	// create server 
+	// create server
 	server, err := drivers.CreateDSPServer(createDsp)
 	if err != nil {
 		fmt.Printf("Error while trying to create DSP Server: %s\n", err)
