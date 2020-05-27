@@ -90,10 +90,10 @@ func (c command) convert() api.Command {
 
 func (p port) convert() api.Port {
 	return api.Port{
-		Name:     p.Name,
-		Endpoint: api.DeviceID(p.Endpoint),
-		Incoming: p.Incoming,
-		Outgoing: p.Outgoing,
-		Type:     p.Type,
+		Name:      p.Name,
+		Endpoints: api.Endpoints{api.DeviceID(p.Endpoint)},
+		Incoming:  p.Incoming,
+		Outgoing:  p.Outgoing,
+		Type:      p.Type,
 	}
 }

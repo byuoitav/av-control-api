@@ -2,6 +2,7 @@ package graph
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/byuoitav/av-control-api/api"
 	"gonum.org/v1/gonum/graph/simple"
@@ -22,19 +23,19 @@ func NewGraph(devices []api.Device, portType string) *simple.DirectedGraph {
 
 	for src := range nodes {
 		for srcP := range nodes[src].Ports {
-			if !nodes[src].Ports[srcP].Outgoing || nodes[src].Ports[srcP].Type != portType {
+			if !nodes[src].Ports[srcP].Outgoing || strings.Contains(nodes[src].Ports[srcP].Type, portType) {
 				continue
 			}
 
 			// find the endpoint of this port
 			for dst := range nodes {
 				for dstP := range nodes[dst].Ports {
-					if !nodes[dst].Ports[dstP].Incoming || nodes[dst].Ports[dstP].Type != portType {
+					if !nodes[dst].Ports[dstP].Incoming || strings.Contains(nodes[dst].Ports[dstP].Type, portType) {
 						continue
 					}
 
 					// make sure they are both pointing to eachother
-					if nodes[src].Ports[srcP].Endpoint != nodes[dst].Device.ID || nodes[dst].Ports[dstP].Endpoint != nodes[src].Device.ID {
+					if nodes[src].Ports[srcP].Endpoints.Contains(nodes[dst].Device.ID) || nodes[dst].Ports[dstP].Endpoints.Contains(nodes[src].Device.ID) {
 						continue
 					}
 

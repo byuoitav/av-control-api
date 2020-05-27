@@ -1,6 +1,9 @@
 package api
 
-import "strings"
+import (
+	"encoding/json"
+	"strings"
+)
 
 type StateRequest struct {
 	Devices map[DeviceID]DeviceState `json:"devices"`
@@ -12,11 +15,26 @@ type StateResponse struct {
 }
 
 type DeviceState struct {
-	PoweredOn *bool     `json:"poweredOn,omitempty"`
-	Input     *DeviceID `json:"input,omitempty"`
-	Blanked   *bool     `json:"blanked,omitempty"`
-	Volume    *int      `json:"volume,omitempty"`
-	Muted     *bool     `json:"muted,omitempty"`
+	PoweredOn *bool  `json:"poweredOn,omitempty"`
+	Input     *Input `json:"input,omitempty"`
+	Blanked   *bool  `json:"blanked,omitempty"`
+	Volume    *int   `json:"volume,omitempty"`
+	Muted     *bool  `json:"muted,omitempty"`
+}
+
+type Input struct {
+	Audio            *DeviceID `json:"audio,omitempty"`
+	Video            *DeviceID `json:"video,omitempty"`
+	CanSetSeparately *bool     `json:"canSetSeparately,omitempty"`
+}
+
+func (i Input) JSONMarshal() ([]byte, error) {
+	if i.Audio != nil && i.Video != nil {
+		return json.Marshal(i)
+	}
+
+	i.CanSetSeparately = nil
+	return json.Marshal(i)
 }
 
 type DeviceStateError struct {

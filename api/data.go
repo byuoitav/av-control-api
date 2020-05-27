@@ -30,11 +30,23 @@ type Command struct {
 }
 
 type Port struct {
-	Name     string   `json:"name"`
-	Endpoint DeviceID `json:"endpoint"`
-	Incoming bool     `json:"incoming"`
-	Outgoing bool     `json:"outgoing"`
-	Type     string   `json:"type"`
+	Name      string    `json:"name"`
+	Endpoints Endpoints `json:"endpoints"`
+	Incoming  bool      `json:"incoming"`
+	Outgoing  bool      `json:"outgoing"`
+	Type      string    `json:"type"`
+}
+
+type Endpoints []DeviceID
+
+func (e Endpoints) Contains(id DeviceID) bool {
+	for i := range e {
+		if e[i] == id {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (d Device) MarshalJSON() ([]byte, error) {
