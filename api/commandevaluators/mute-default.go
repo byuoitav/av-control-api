@@ -8,8 +8,8 @@ import (
 	"github.com/byuoitav/common/log"
 
 	"github.com/byuoitav/av-control-api/api/base"
-	"github.com/byuoitav/common/db"
-	"github.com/byuoitav/common/structs"
+	"github.com/byuoitav/av-control-api/api/db"
+	"github.com/byuoitav/av-control-api/api/rest"
 	"github.com/byuoitav/common/v2/events"
 )
 
@@ -19,7 +19,7 @@ type MuteDefault struct {
 
 /*Evaluate takes a public room struct, scans the struct and builds any needed
 actions based on the contents of the struct.*/
-func (p *MuteDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
+func (p *MuteDefault) Evaluate(dbRoom base.Room, room rest.PublicRoom, requestor string) ([]base.ActionStructure, int, error) {
 
 	log.L.Info("[command_evaluators] Evaluating for Mute command.")
 
@@ -55,7 +55,7 @@ func (p *MuteDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, reques
 
 				destination.Device = device
 
-				if structs.HasRole(device, "VideoOut") {
+				if base.HasRole(device, "VideoOut") {
 					destination.Display = true
 				}
 
@@ -70,7 +70,7 @@ func (p *MuteDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, reques
 
 				////////////////////////
 				///// MIRROR STUFF /////
-				if structs.HasRole(device, "MirrorMaster") {
+				if base.HasRole(device, "MirrorMaster") {
 					for _, port := range device.Ports {
 						if port.ID == "mirror" {
 							DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -78,8 +78,8 @@ func (p *MuteDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, reques
 								return actions, len(actions), err
 							}
 
-							cmd := DX.GetCommandByID("MuteDefault")
-							if len(cmd.ID) < 1 {
+							_, err = DX.GetCommandByID("MuteDefault")
+							if err != nil {
 								continue
 							}
 
@@ -136,7 +136,7 @@ func (p *MuteDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, reques
 
 			////////////////////////
 			///// MIRROR STUFF /////
-			if structs.HasRole(device, "MirrorMaster") {
+			if base.HasRole(device, "MirrorMaster") {
 				for _, port := range device.Ports {
 					if port.ID == "mirror" {
 						DX, err := db.GetDB().GetDevice(port.DestinationDevice)
@@ -144,8 +144,8 @@ func (p *MuteDefault) Evaluate(dbRoom structs.Room, room base.PublicRoom, reques
 							return []base.ActionStructure{}, 0, err
 						}
 
-						cmd := DX.GetCommandByID("MuteDefault")
-						if len(cmd.ID) < 1 {
+						_, err = DX.GetCommandByID("MuteDefault")
+						if err != nil {
 							continue
 						}
 

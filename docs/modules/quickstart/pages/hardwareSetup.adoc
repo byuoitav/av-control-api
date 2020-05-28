@@ -23,15 +23,15 @@ You may also want to have a keyboard and mouse connected to the Pi as well.  It'
 
 ==== Wiring the System
 image::wiring.jpg[Wiring]
-As shown above the wiring for this room is pretty straight forward.
+As shown above the wiring for this room is pretty straight forward.  
 
-- Have network cables running from a nework switch to the raspberry pi and the Sony Flat Panel Display. This will put the Raspberry Pi and the Flat Panel on the same network for them to communicate.
-- Have three devices (shown in the drawing as computers) that can act as video source devices. Connect these three devices to the Flat Panel. 
-. We will be using HDMI 1-3 on the TV for this guide.
+- Make sure the Raspberry Pi and the Sony Flat Panel Display are on the same network (the Pi will need to connect to the TV over the network).
+- The demo will allow you to switch between the three TV inputs.  So you may want to have three devices (shown in the drawing as computers) that can act as video source devices. Connect these three devices to the Flat Panel. 
+. This demo will use HDMI 1-3 on the TV for this guide.
 
 ==== Configuring the flat panel
 
-In order for the pi and the flat panel to cmmunicate with each other, the flat panel needs to first be configured in a particular way. Here are the steps for the configuration.
+In order for the pi to control the TV, the flat panel needs to be configured properly. Here are the steps for the configuration.
 
 . Go to Home -> Settings -> Network -> Home Network
 .. Renderer: On
@@ -45,5 +45,4 @@ In order for the pi and the flat panel to cmmunicate with each other, the flat p
 .. Enter IP Address
 .. Enter Gateway
 .. Enter Network Prefix length
-.. Enter DNS 1 and DNS 2
-
+.. Enter DNS 1 and DNS 2 (not required for this demo to work)

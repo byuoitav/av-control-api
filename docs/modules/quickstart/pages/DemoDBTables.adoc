@@ -12,7 +12,7 @@ Each section below will have all of the DB Documents you need for that table. Ex
 . xref:DemoDB.adoc#_buildings[buildings]
 . xref:DemoDB.adoc#_room_configurations[room_configurations]
 
-Note: *Using the script is the much faster and seamless way of doing this demo*. It is much more time intensive to create each of the tables by hand and then manually copy and paste the documents below.
+NOTE: *Using the script is the much faster and seamless way of doing this demo*. It is much more time intensive to create each of the tables by hand and then manually copy and paste the documents below.
 
 === devices
 Below are the documents required for the devices table.
@@ -375,16 +375,16 @@ SONY XBR device_type document:
       "priority": 10
     },
     {
-      "_id": "UnblankDisplay",
-      "description": "UnblankDisplay",
+      "_id": "UnBlankDisplay",
+      "description": "UnBlankDisplay",
       "microservice": {
         "_id": "sony-control-microservice",
         "description": "",
         "address": "http://localhost:8007"
       },
       "endpoint": {
-        "_id": "UnblankScreen",
-        "description": "Standard UnblankScreen endpoint.",
+        "_id": "UnBlankScreen",
+        "description": "Standard UnBlankScreen endpoint.",
         "path": "/:address/display/unblank"
       },
       "priority": 7

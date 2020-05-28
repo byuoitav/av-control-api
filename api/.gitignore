@@ -3,3 +3,5 @@ debug
 .scratch
 *.swp
 *-bin
+api
+av-api-arm

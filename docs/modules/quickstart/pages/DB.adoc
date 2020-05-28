@@ -2,12 +2,12 @@
 
 Once you have the couch-db container running, you should be able to access your Couch Database by going to `+http://[pi-ip-addr]:5984/_utils+` in a web browser, using the ip address of your pi.
 
-We use CouchDB as the database for our solution. Apache CouchDB is an open-source document-oriented NoSQL database
+This project uses Apache's CouchDB as the database solution. CouchDB is an open-source, document-oriented, NoSQL database
 that uses JSON documents to store data. For more information about CouchDB specifically please refer to their http://docs.couchdb.org/en/stable/intro/index.html[documentation].
 
-This guide will outline each of the tables above, their purpose, what data is being stored, and how it is used within our AV solution.
+This guide will outline each of the required tables/schemas, their purpose, what data is being stored, and how it is used within our AV solution.
 
-*_Please note that the documents below are meant to goi into detail about each of the tables and a illustrate what data is stored in each of the documents. These examples are not meant to be copied and pasted for the quick start demo. To continue with the demo click xref:DemoDBScript.adoc[here]_* 
+NOTE: The links below will drill into detail about each of the tables and will illustrate what data is stored in each of the documents. The examples found in these links are not meant to be copied and pasted for the quick start demo. They are intented to help you explore the DB settings and how they control room behavior. To continue with the quickstart demo and download the demo databases, click xref:DemoDBScript.adoc[here.] 
  
 Within CouchDB there are five important tables that are used throughout our solution:
 
@@ -17,7 +17,7 @@ Within CouchDB there are five important tables that are used throughout our solu
 . xref:buildings.adoc[buildings]
 . xref:room_configurations.adoc[room_configurations]
 
- 
+
 
 ==== Up Next:
 xref:devices.adoc[devices table]
