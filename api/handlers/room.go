@@ -58,22 +58,6 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "no devices found in request")
 	}
 
-	// jk we need everything so we can do stuff like change volume on DSPs
-	// // we only need the devices in the room affected by the request
-	// var devices []api.Device
-	// // this should just be all of the keys which are device IDs
-	// for k := range stateReq {
-	// 	for d := range room {
-	// 		if string(k) == room[d].ID {
-	// 			devices = append(devices, room[d])
-	// 		}
-	// 	}
-	// }
-
-	// if len(devices) == 0 {
-	// 	return c.String(http.StatusBadRequest, "given devices were not found in given room")
-	// }
-
 	resp, err := state.SetDevices(ctx, stateReq, devices, h.Environment)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())

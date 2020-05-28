@@ -16,7 +16,7 @@ type Device struct {
 	Type    DeviceType                `json:"type"`
 	Address string                    `json:"address"`
 	Proxy   map[*regexp.Regexp]string `json:"-"`
-	Ports   []Port                    `json:"ports,omitempty"`
+	Ports   Ports                     `json:"ports,omitempty"`
 }
 
 type DeviceType struct {
@@ -37,6 +37,8 @@ type Port struct {
 	Type     string   `json:"type"`
 }
 
+type Ports []Port
+
 func (d Device) MarshalJSON() ([]byte, error) {
 	type Alias Device
 
@@ -53,4 +55,15 @@ func (d Device) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(changed)
+}
+
+func (p Ports) Outgoing() Ports {
+	var toReturn Ports
+	for _, port := range p {
+		if port.Outgoing {
+			toReturn = append(toReturn, port)
+		}
+	}
+
+	return toReturn
 }

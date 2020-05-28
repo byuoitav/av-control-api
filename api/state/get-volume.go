@@ -21,6 +21,9 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 	responses := make(chan actionResponse)
 
 	for _, dev := range room {
+		if dev.ID == "ITB-1108B-DSP1" || dev.ID == "ITB-1108B-DSP2" || dev.ID == "ITB-1108A-DSP1" {
+			continue
+		}
 		path := graph.PathToEnd(gr, dev.ID)
 		if len(path) == 0 {
 			url, order, err := getCommand(dev, "GetVolumeByBlock", env)
@@ -36,7 +39,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 			default:
 				params := map[string]string{
 					"address": dev.Address,
-					"input":   string(dev.ID),
+					"block":   string(dev.ID),
 				}
 
 				url, err = fillURL(url, params)
@@ -148,7 +151,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 
 				params := map[string]string{
 					"address": endDev.Address,
-					"input":   port.Name,
+					"block":   port.Name,
 				}
 
 				url, err = fillURL(url, params)

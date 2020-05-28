@@ -19,11 +19,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room []api.Device, env s
 	for k, v := range stateReq.Devices {
 		if v.PoweredOn != nil {
 			for i := range room {
-				// fmt.Printf("ID: %s k: %s\n", room[i].ID, k)
-
 				if room[i].ID == k {
-					// fmt.Printf("we here: %d\n", len(stateReq.Devices))
-
 					devices = append(devices, room[i])
 					break
 				}

@@ -13,50 +13,6 @@ var (
 	ErrNoStateSettable = errors.New("can't set the state of any devices in this room")
 )
 
-// func SetPower(ctx context.Context, devices []api.Device, env string) (api.StateResponse, error) {
-// 	device := devices[0]
-// 	stateResp := api.StateResponse{
-// 		Devices: make(map[api.DeviceID]api.DeviceState),
-// 	}
-
-// 	var actions []action
-
-// 	for i := range statusEvaluators {
-// 		_, ok := statusEvaluators[i].(*setPower)
-// 		if !ok {
-// 			continue
-// 		}
-// 		resp := statusEvaluators[i].GenerateActions(ctx, devices, env)
-// 		if len(resp.Errors) > 0 {
-// 			stateResp.Errors = append(stateResp.Errors, resp.Errors...)
-// 			return stateResp, ErrNoPowerSettable
-// 		}
-// 		actions = append(actions, resp.Actions...)
-// 	}
-
-// 	if len(actions) == 0 {
-// 		return stateResp, fmt.Errorf("no actions were generated when attempting to set power on %s", device.ID)
-// 	}
-
-// 	updates := make(chan DeviceStateUpdate)
-// 	errors := make(chan api.DeviceStateError)
-
-// 	executeActions(ctx, actions, updates, errors)
-
-// 	select {
-// 	case update := <-updates:
-// 		curState := stateResp.Devices[update.ID]
-// 		curState.PoweredOn = update.PoweredOn
-// 		stateResp.Devices[update.ID] = curState
-// 		break
-// 	case err := <-errors:
-// 		stateResp.Errors = append(stateResp.Errors, err)
-// 		break
-// 	}
-
-// 	return stateResp, nil
-// }
-
 func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, env string) (api.StateResponse, error) {
 	stateResp := api.StateResponse{
 		Devices: make(map[api.DeviceID]api.DeviceState),
@@ -73,7 +29,10 @@ func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, en
 	}
 
 	if expectedUpdates == 0 {
-		return stateResp, ErrNoStateSettable
+		if len(stateResp.Errors) == 0 {
+			return api.StateResponse{}, ErrNoStateSettable
+		}
+		return stateResp, nil
 	}
 
 	// split the commands into their lists by id

@@ -84,9 +84,9 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 
 	if resp.ExpectedUpdates == 0 {
-		return generateActionsResponse{}
+		return resp
 	}
-
+	fmt.Printf("expected: %d\n", resp.ExpectedUpdates)
 	resp.Actions = uniqueActions(resp.Actions)
 
 	if len(resp.Actions) > 0 {
@@ -99,6 +99,12 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, env string, resps chan actionResponse, stateReq api.StateRequest) ([]action, []api.DeviceStateError) {
 	var acts []action
 	var errs []api.DeviceStateError
+	var transmitterAddr string
+	for i := range path {
+		if strings.Contains(string(path[i].Src.Device.ID), "TX") {
+			transmitterAddr = path[i].Src.Device.Address
+		}
+	}
 
 	for i := range path {
 		url, order, err := getCommand(*path[i].Src.Device, "SetInput", env)
@@ -114,10 +120,12 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			return acts, errs
 
 		default:
-
+			fmt.Printf("src: %s %s %s\n", path[i].Src.Device.ID, path[i].SrcPort.Name, path[i].Src.Device.Address)
+			fmt.Printf("dst: %s %s %s\n", path[i].Dst.Device.ID, path[i].DstPort.Name, path[i].Dst.Device.Address)
 			params := map[string]string{
-				"address": path[i].Src.Address,
-				"port":    path[i].SrcPort.Name,
+				"address":     path[i].Src.Address,
+				"port":        path[i].SrcPort.Name,
+				"transmitter": transmitterAddr,
 			}
 
 			url, err = fillURL(url, params)
@@ -150,12 +158,14 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			}
 
 			acts = append(acts, act)
+
 			continue
 		}
 
 		url, order, err = getCommand(*path[i].Src.Device, "SetInputByOutput", env)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			continue
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
@@ -271,6 +281,7 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		deepest := device
 
 		var prevEdge graph.Edge
+		var prevState i
 		search := traverse.DepthFirst{
 			Visit: func(node gonum.Node) {
 				deepest = node.(graph.Node)
@@ -279,30 +290,78 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 				e := edge.(graph.Edge)
 
 				states := status[e.Src.Device.ID]
-				for _, state := range states {
-					if state.Input == nil {
-						continue
-					}
 
-					inputStr := *state.Input
-					split := strings.Split(inputStr, ":")
-					if len(split) > 1 {
-						inputStr = split[1]
-					}
+				if _, ok := e.Src.Type.Commands["SetInput"]; ok {
+					for _, state := range states {
+						if state.Input == nil {
+							continue
+						}
 
-					if prevEdge == (graph.Edge{}) {
-						if inputStr == e.SrcPort.Name {
+						inputStr := *state.Input
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevState = state
 							prevEdge = e
 							return true
 						}
-					} else {
+
+						if len(e.Src.Device.Ports.Outgoing()) == 1 {
+							prevState = state
+							prevEdge = e
+							return true
+						}
+					}
+					return false
+				}
+
+				if _, ok := e.Src.Type.Commands["SetInputByOutput"]; ok {
+					for _, state := range states {
+						if state.Input == nil {
+							continue
+						}
+
+						inputStr := *state.Input
+						split := strings.Split(inputStr, ":")
 						if len(split) > 1 {
-							if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
+							inputStr = split[1]
+						}
+						if prevEdge == (graph.Edge{}) {
+							if inputStr == e.SrcPort.Name {
+								prevState = state
 								prevEdge = e
 								return true
 							}
+						} else {
+							if len(split) > 1 {
+								if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							} else {
+								if inputStr == e.SrcPort.Name {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							}
 						}
 					}
+					return false
+				}
+
+				if len(e.Src.Device.Ports.Outgoing()) == 1 {
+					prevEdge = e
+					return true
+				}
+
+				if *prevState.Input == e.Dst.Address {
+					prevEdge = e
+					return true
 				}
 
 				return false

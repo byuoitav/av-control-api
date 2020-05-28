@@ -71,7 +71,6 @@ func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, env string, resps chan actionResponse) ([]action, []api.DeviceStateError) {
 	var acts []action
 	var errs []api.DeviceStateError
-
 	for i := range path {
 		switch i {
 		case 0:
@@ -79,7 +78,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			url, order, err := getCommand(*path[i].Src.Device, "GetInput", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-				continue
+
 			case err != nil:
 				errs = append(errs, api.DeviceStateError{
 					ID:    path[i].Src.Device.ID,
@@ -129,6 +128,56 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			url, order, err := getCommand(*path[i].Src.Device, "GetInputByOutput", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: err.Error(),
+				})
+
+				return acts, errs
+			default:
+
+				params := map[string]string{
+					"address": path[i].Src.Address,
+					"output":  path[i-1].DstPort.Name,
+				}
+
+				url, err = fillURL(url, params)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
+
+					return acts, errs
+				}
+
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
+
+					return acts, errs
+				}
+
+				act := action{
+					ID:       path[i].Src.Device.ID,
+					Req:      req,
+					Order:    order,
+					Response: resps,
+				}
+
+				acts = append(acts, act)
+				continue
+			}
+			url, order, err = getCommand(*path[i].Src.Device, "GetInput", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
 				errs = append(errs, api.DeviceStateError{
@@ -142,7 +191,6 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 
 			params := map[string]string{
 				"address": path[i].Src.Address,
-				"output":  path[i-1].DstPort.Name,
 			}
 
 			url, err = fillURL(url, params)
@@ -189,6 +237,9 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 	if expectedResps == 0 {
 		return
 	}
+
+	fmt.Printf("Expected resps: %d\n", expectedResps)
+	fmt.Printf("Expected updates: %d\n", expectedUpdates)
 
 	var resps []actionResponse
 	var received int
@@ -244,6 +295,7 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 			resp.Updates <- DeviceStateUpdate{}
 			continue
 		}
+
 		status[resp.Action.ID] = append(status[resp.Action.ID], state)
 	}
 
@@ -253,9 +305,20 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 
 	// now calculate the state of the outputs
 	for _, output := range outputs {
+		skip := false
+		for i := range emptyChecker {
+			if output.Device.ID == emptyChecker[i] {
+				skip = true
+				break
+			}
+		}
+		if skip {
+			continue
+		}
 		deepest := output
 
 		var prevEdge graph.Edge
+		var prevState input
 		search := traverse.DepthFirst{
 			Visit: func(node gonum.Node) {
 				deepest = node.(graph.Node)
@@ -265,30 +328,85 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 
 				states := status[e.Src.Device.ID]
 
-				for _, state := range states {
-					if state.Input == nil {
-						continue
+				if prevEdge != (graph.Edge{}) && prevState != (input{}) {
+					if len(states) == 0 && *prevState.Input == e.Dst.Device.Address {
+						prevEdge = e
+						return true
 					}
+				}
 
-					inputStr := *state.Input
-					split := strings.Split(inputStr, ":")
-					if len(split) > 1 {
-						inputStr = split[1]
-					}
+				if _, ok := e.Src.Type.Commands["GetInput"]; ok {
+					for _, state := range states {
+						if state.Input == nil {
+							continue
+						}
 
-					if prevEdge == (graph.Edge{}) {
-						if inputStr == e.SrcPort.Name {
+						inputStr := *state.Input
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevEdge = e
+							prevState = state
+							return true
+						}
+
+						if len(e.Src.Device.Ports.Outgoing()) == 1 {
+							prevState = state
 							prevEdge = e
 							return true
 						}
-					} else {
+					}
+
+					return false
+				}
+
+				if _, ok := e.Src.Type.Commands["GetInputByOutput"]; ok {
+					for _, state := range states {
+						if state.Input == nil {
+							continue
+						}
+
+						inputStr := *state.Input
+						split := strings.Split(inputStr, ":")
 						if len(split) > 1 {
-							if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
+							inputStr = split[1]
+						}
+						if prevEdge == (graph.Edge{}) {
+							if inputStr == e.SrcPort.Name {
+								prevState = state
 								prevEdge = e
 								return true
 							}
+						} else {
+							if len(split) > 1 {
+								if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							} else {
+								if inputStr == e.SrcPort.Name {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							}
 						}
 					}
+					return false
+				}
+
+				if len(e.Src.Device.Ports.Outgoing()) == 1 {
+					prevEdge = e
+					return true
+				}
+
+				if *prevState.Input == e.Dst.Address {
+					prevEdge = e
+					return true
 				}
 
 				return false
@@ -307,7 +425,6 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 				break
 			}
 		}
-
 		if valid {
 			resps[0].Updates <- DeviceStateUpdate{
 				ID: output.Device.ID,
@@ -315,13 +432,14 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 					Input: &deepest.Device.ID,
 				},
 			}
+
 		} else {
 			states := status[deepest.Device.ID]
 
 			resps[0].Errors <- api.DeviceStateError{
 				ID:    output.Device.ID,
 				Field: "input",
-				Error: fmt.Sprintf("unable to traverse input tree back to a valid input. only got to %s|%s", deepest.Device.ID, *states[0].Input),
+				Error: fmt.Sprintf("unable to traverse input tree back to a valid input. only got to %s|%+v", deepest.Device.ID, states),
 			}
 			resps[0].Updates <- DeviceStateUpdate{}
 		}
