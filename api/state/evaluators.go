@@ -8,19 +8,19 @@ import (
 
 var (
 	statusEvaluators = []statusEvaluator{
-		// &getBlanked{},
-		// &getInput{},
-		// &getPower{},
-		// &getVolume{},
-		// &getMuted{},
+		&getBlanked{},
+		&getInput{},
+		&getPower{},
+		&getVolume{},
+		&getMuted{},
 	}
 
 	commandEvaluators = []commandEvaluator{
-		// &setMuted{},
-		// &setPower{},
-		// &setVolume{},
-		// &setBlanked{},
-		// &setInput{},
+		&setMuted{},
+		&setPower{},
+		&setVolume{},
+		&setBlanked{},
+		&setInput{},
 	}
 )
 

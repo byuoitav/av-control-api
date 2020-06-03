@@ -14,7 +14,6 @@ type getBlanked struct{}
 
 func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
 	var resp generateActionsResponse
-
 	// just doing basic get blanked for now
 	for _, dev := range room {
 		url, order, err := getCommand(dev, "GetBlanked", env)
@@ -57,7 +56,6 @@ func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 
 			continue
 		}
-
 		act := action{
 			ID:       dev.ID,
 			Req:      req,
