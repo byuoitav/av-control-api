@@ -84,7 +84,7 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 			Error: err.Error(),
 		}
 
-		aResp.Updates <- DeviceStateUpdate{}
+		aResp.Updates <- OutputStateUpdate{}
 	}
 
 	if aResp.Error != nil {
@@ -109,9 +109,9 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 	// 	return
 	// }
 
-	aResp.Updates <- DeviceStateUpdate{
+	aResp.Updates <- OutputStateUpdate{
 		ID: aResp.Action.ID,
-		DeviceState: api.DeviceState{
+		OutputState: api.OutputState{
 			PoweredOn: &state.PoweredOn,
 		},
 	}

@@ -16,7 +16,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room []api.Device, env s
 	responses := make(chan actionResponse)
 
 	var devices []api.Device
-	for k, v := range stateReq.Devices {
+	for k, v := range stateReq.OutputGroups {
 		if v.PoweredOn != nil {
 			for i := range room {
 				if room[i].ID == k {
@@ -29,7 +29,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room []api.Device, env s
 
 	for _, dev := range devices {
 		var cmd string
-		if *stateReq.Devices[dev.ID].PoweredOn == true {
+		if *stateReq.OutputGroups[dev.ID].PoweredOn == true {
 			cmd = "PowerOn"
 		} else {
 			cmd = "Standby"
@@ -119,7 +119,7 @@ func (s *setPower) handleResponses(respChan chan actionResponse, expectedResps, 
 				Error: fmt.Sprintf("unexpected response from driver:\n%s", resp.Body),
 			}
 
-			resp.Updates <- DeviceStateUpdate{}
+			resp.Updates <- OutputStateUpdate{}
 			continue
 		}
 
@@ -131,13 +131,13 @@ func (s *setPower) handleResponses(respChan chan actionResponse, expectedResps, 
 		// 	Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body),
 		// }
 
-		// resp.Updates <- DeviceStateUpdate{}
+		// resp.Updates <- OutputStateUpdate{}
 		// continue
 		// }
 
-		resp.Updates <- DeviceStateUpdate{
+		resp.Updates <- OutputStateUpdate{
 			ID: resp.Action.ID,
-			DeviceState: api.DeviceState{
+			OutputState: api.OutputState{
 				PoweredOn: &state.PoweredOn,
 			},
 		}

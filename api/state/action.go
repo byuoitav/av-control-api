@@ -58,10 +58,10 @@ type actionResponse struct {
 	Body       []byte
 
 	Errors  chan api.DeviceStateError
-	Updates chan DeviceStateUpdate
+	Updates chan OutputStateUpdate
 }
 
-func executeActions(ctx context.Context, actions []action, updates chan DeviceStateUpdate, errors chan api.DeviceStateError) {
+func executeActions(ctx context.Context, actions []action, updates chan OutputStateUpdate, errors chan api.DeviceStateError) {
 	for i := range actions {
 		go func(action action) {
 			aResp := actionResponse{

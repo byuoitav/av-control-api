@@ -54,7 +54,7 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "error decoding state request")
 	}
 
-	if len(stateReq.Devices) == 0 {
+	if len(stateReq.OutputGroups) == 0 {
 		return c.String(http.StatusBadRequest, "no devices found in request")
 	}
 

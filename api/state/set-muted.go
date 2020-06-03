@@ -22,7 +22,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 	responses := make(chan actionResponse)
 
 	var devices []api.Device
-	for k, v := range stateReq.Devices {
+	for k, v := range stateReq.OutputGroups {
 		if v.Muted != nil {
 			for i := range room {
 				if room[i].ID == k {
@@ -40,7 +40,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 	for _, dev := range devices {
 		path := graph.PathToEnd(gr, dev.ID)
 		var cmd string
-		if *stateReq.Devices[dev.ID].Muted == true {
+		if *stateReq.OutputGroups[dev.ID].Muted == true {
 			cmd = "Mute"
 		} else {
 			cmd = "UnMute"
@@ -60,7 +60,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 				params := map[string]string{
 					"address": dev.Address,
 					"input":   string(dev.ID),
-					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
+					"muted":   strconv.FormatBool(*stateReq.OutputGroups[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)
@@ -165,14 +165,14 @@ func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 			}
 
 			for _, port := range endDev.Ports {
-				if port.Endpoint != dev.ID {
+				if !port.Endpoints.Contains(dev.ID) {
 					continue
 				}
 
 				params := map[string]string{
 					"address": endDev.Address,
 					"input":   port.Name,
-					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
+					"muted":   strconv.FormatBool(*stateReq.OutputGroups[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)
@@ -243,13 +243,13 @@ func (s *setMuted) handleResponses(respChan chan actionResponse, expectedResps, 
 				Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, resp.Body),
 			}
 
-			resp.Updates <- DeviceStateUpdate{}
+			resp.Updates <- OutputStateUpdate{}
 			continue
 		}
 
-		resp.Updates <- DeviceStateUpdate{
+		resp.Updates <- OutputStateUpdate{
 			ID: resp.Action.ID,
-			DeviceState: api.DeviceState{
+			OutputState: api.OutputState{
 				Muted: &state.Muted,
 			},
 		}

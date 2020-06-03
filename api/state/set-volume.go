@@ -22,7 +22,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 
 	var devices []api.Device
 
-	for k, v := range stateReq.Devices {
+	for k, v := range stateReq.OutputGroups {
 		if v.Volume != nil {
 			for i := range room {
 				if room[i].ID == k {
@@ -55,7 +55,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				params := map[string]string{
 					"address": dev.Address,
 					"input":   string(dev.ID),
-					"volume":  strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
+					"volume":  strconv.Itoa(*stateReq.OutputGroups[dev.ID].Volume),
 				}
 
 				url, err = fillURL(url, params)
@@ -107,7 +107,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 			default:
 				params := map[string]string{
 					"address": dev.Address,
-					"level":   strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
+					"level":   strconv.Itoa(*stateReq.OutputGroups[dev.ID].Volume),
 				}
 
 				url, err = fillURL(url, params)
@@ -159,14 +159,14 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 			}
 
 			for _, port := range endDev.Ports {
-				if port.Endpoint != dev.ID {
+				if !port.Endpoints.Contains(dev.ID) {
 					continue
 				}
 
 				params := map[string]string{
 					"address": endDev.Address,
 					"input":   port.Name,
-					"volume":  strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
+					"volume":  strconv.Itoa(*stateReq.OutputGroups[dev.ID].Volume),
 				}
 
 				url, err = fillURL(url, params)
@@ -240,13 +240,13 @@ func (s *setVolume) handleResponses(respChan chan actionResponse, expectedResps,
 				Error: fmt.Sprintf("unable to parse response from driver: %w. response\n%s", err, resp.Body),
 			}
 
-			resp.Updates <- DeviceStateUpdate{}
+			resp.Updates <- OutputStateUpdate{}
 			continue
 		}
 
-		resp.Updates <- DeviceStateUpdate{
+		resp.Updates <- OutputStateUpdate{
 			ID: resp.Action.ID,
-			DeviceState: api.DeviceState{
+			OutputState: api.OutputState{
 				Volume: &state.Volume,
 			},
 		}

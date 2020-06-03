@@ -18,7 +18,7 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 	responses := make(chan actionResponse)
 
 	var devices []api.Device
-	for k, v := range stateReq.Devices {
+	for k, v := range stateReq.OutputGroups {
 		if v.Blanked != nil {
 			for i := range room {
 				if room[i].ID == k {
@@ -35,7 +35,7 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 
 	for _, dev := range devices {
 		var cmd string
-		if *stateReq.Devices[dev.ID].Blanked == true {
+		if *stateReq.OutputGroups[dev.ID].Blanked == true {
 			cmd = "BlankDisplay"
 		} else {
 			cmd = "UnblankDisplay"
@@ -123,13 +123,13 @@ func (s *setBlanked) handleResponses(respChan chan actionResponse, expectedResps
 				Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, resp.Body),
 			}
 
-			resp.Updates <- DeviceStateUpdate{}
+			resp.Updates <- OutputStateUpdate{}
 			continue
 		}
 
-		resp.Updates <- DeviceStateUpdate{
+		resp.Updates <- OutputStateUpdate{
 			ID: resp.Action.ID,
-			DeviceState: api.DeviceState{
+			OutputState: api.OutputState{
 				Blanked: &state.Blanked,
 			},
 		}

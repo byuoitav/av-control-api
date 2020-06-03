@@ -22,7 +22,7 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	var resp generateActionsResponse
 
 	var devices []api.Device
-	for k, v := range stateReq.Devices {
+	for k, v := range stateReq.OutputGroups {
 		if v.Input != nil {
 			for i := range room {
 				if room[i].ID == k {
@@ -60,12 +60,12 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 		var actsForOutput []action
 		var errsForOutput []api.DeviceStateError
 
-		path := graph.PathFromTo(t, &paths, device.ID, *stateReq.Devices[device.ID].Input)
+		path := graph.PathFromTo(t, &paths, device.ID, *stateReq.OutputGroups[device.ID].Input.Video)
 		if len(path) == 0 {
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    device.ID,
 				Field: "setInput",
-				Error: fmt.Sprintf("no path from %s to %s", device.ID, *stateReq.Devices[device.ID].Input),
+				Error: fmt.Sprintf("no path from %s to %v", device.ID, *stateReq.OutputGroups[device.ID].Input),
 			})
 
 			continue
@@ -225,7 +225,10 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 }
 
 type i struct {
-	Input *string `json:"input"`
+	Audio            *string  `json:"audio"`
+	Video            *string  `json:"video"`
+	CanSetSeparately *bool    `json:"canSetSeparately"`
+	AvailableInputs  []string `json:"availableInputs"`
 }
 
 func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int, t *simple.DirectedGraph, paths *path.AllShortest, devices, inputs []graph.Node) {
@@ -293,11 +296,11 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 
 				if _, ok := e.Src.Type.Commands["SetInput"]; ok {
 					for _, state := range states {
-						if state.Input == nil {
+						if *state.Video == "" {
 							continue
 						}
 
-						inputStr := *state.Input
+						inputStr := *state.Video
 						split := strings.Split(inputStr, ":")
 						if len(split) > 1 {
 							inputStr = split[1]
@@ -309,22 +312,23 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 							return true
 						}
 
-						if len(e.Src.Device.Ports.Outgoing()) == 1 {
-							prevState = state
-							prevEdge = e
-							return true
-						}
+						// well we took off outgoing so idk how this needs to change yet
+						// if len(e.Src.Device.Ports.Outgoing()) == 1 {
+						// 	prevState = state
+						// 	prevEdge = e
+						// 	return true
+						// }
 					}
 					return false
 				}
 
 				if _, ok := e.Src.Type.Commands["SetInputByOutput"]; ok {
 					for _, state := range states {
-						if state.Input == nil {
+						if *state.Video == "" {
 							continue
 						}
 
-						inputStr := *state.Input
+						inputStr := *state.Video
 						split := strings.Split(inputStr, ":")
 						if len(split) > 1 {
 							inputStr = split[1]
@@ -354,12 +358,13 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 					return false
 				}
 
-				if len(e.Src.Device.Ports.Outgoing()) == 1 {
-					prevEdge = e
-					return true
-				}
+				// well we took off outgoing so idk how this needs to change yet
+				// if len(e.Src.Device.Ports.Outgoing()) == 1 {
+				// 	prevEdge = e
+				// 	return true
+				// }
 
-				if *prevState.Input == e.Dst.Address {
+				if *prevState.Video == e.Dst.Address {
 					prevEdge = e
 					return true
 				}
@@ -381,10 +386,13 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		}
 
 		if valid {
-			resps[0].Updates <- DeviceStateUpdate{
+			in := api.Input{
+				Video: &deepest.Device.ID,
+			}
+			resps[0].Updates <- OutputStateUpdate{
 				ID: device.Device.ID,
-				DeviceState: api.DeviceState{
-					Input: &deepest.Device.ID,
+				OutputState: api.OutputState{
+					Input: &in,
 				},
 			}
 		} else {

@@ -143,7 +143,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 			}
 
 			for _, port := range endDev.Ports {
-				if port.Endpoint != dev.ID {
+				if port.Endpoints.Contains(dev.ID) {
 					continue
 				}
 
@@ -225,13 +225,13 @@ func (g *getVolume) handleResponses(respChan chan actionResponse, expectedResps,
 				Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, resp.Body),
 			}
 
-			resp.Updates <- DeviceStateUpdate{}
+			resp.Updates <- OutputStateUpdate{}
 			continue
 		}
 
-		resp.Updates <- DeviceStateUpdate{
+		resp.Updates <- OutputStateUpdate{
 			ID: resp.Action.ID,
-			DeviceState: api.DeviceState{
+			OutputState: api.OutputState{
 				Volume: &state.Volume,
 			},
 		}

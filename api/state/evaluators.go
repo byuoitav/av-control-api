@@ -8,25 +8,25 @@ import (
 
 var (
 	statusEvaluators = []statusEvaluator{
-		&getBlanked{},
-		&getInput{},
-		&getPower{},
-		&getVolume{},
-		&getMuted{},
+		// &getBlanked{},
+		// &getInput{},
+		// &getPower{},
+		// &getVolume{},
+		// &getMuted{},
 	}
 
 	commandEvaluators = []commandEvaluator{
-		&setMuted{},
-		&setPower{},
-		&setVolume{},
-		&setBlanked{},
-		&setInput{},
+		// &setMuted{},
+		// &setPower{},
+		// &setVolume{},
+		// &setBlanked{},
+		// &setInput{},
 	}
 )
 
-type DeviceStateUpdate struct {
+type OutputStateUpdate struct {
 	ID api.DeviceID
-	api.DeviceState
+	api.OutputState
 }
 
 type generateActionsResponse struct {

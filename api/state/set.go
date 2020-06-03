@@ -15,7 +15,7 @@ var (
 
 func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, env string) (api.StateResponse, error) {
 	stateResp := api.StateResponse{
-		Devices: make(map[api.DeviceID]api.DeviceState),
+		OutputGroups: make(map[api.DeviceID]api.OutputGroupState),
 	}
 
 	var actions []action
@@ -59,7 +59,7 @@ func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, en
 	}
 
 	// execute commands
-	updates := make(chan DeviceStateUpdate)
+	updates := make(chan OutputStateUpdate)
 	errors := make(chan api.DeviceStateError)
 
 	for id := range actsByID {
@@ -78,7 +78,7 @@ func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, en
 				break
 			}
 
-			curState := stateResp.Devices[update.ID]
+			curState := stateResp.OutputGroups[update.ID]
 
 			if update.PoweredOn != nil {
 				curState.PoweredOn = update.PoweredOn
@@ -100,7 +100,12 @@ func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, en
 				curState.Muted = update.Muted
 			}
 
-			stateResp.Devices[update.ID] = curState
+			// this is on a group state so don't need it?
+			// if update.Outputs != nil {
+			// 	curState.Outputs = update.Outputs
+			// }
+
+			stateResp.OutputGroups[update.ID] = curState
 		case err := <-errors:
 			stateResp.Errors = append(stateResp.Errors, err)
 		}

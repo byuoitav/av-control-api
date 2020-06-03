@@ -31,11 +31,10 @@ type command struct {
 }
 
 type port struct {
-	Name     string `json:"name"`
-	Endpoint string `json:"endpoint"`
-	Incoming bool   `json:"incoming"`
-	Outgoing bool   `json:"outgoing"`
-	Type     string `json:"type"`
+	Name      string   `json:"name"`
+	Endpoints []string `json:"endpoints"`
+	Incoming  bool     `json:"incoming"`
+	Type      string   `json:"type"`
 }
 
 func (d device) convert() (api.Device, error) {
@@ -89,11 +88,14 @@ func (c command) convert() api.Command {
 }
 
 func (p port) convert() api.Port {
+	var endpoints api.Endpoints
+	for _, e := range p.Endpoints {
+		endpoints = append(endpoints, api.DeviceID(e))
+	}
 	return api.Port{
-		Name:     p.Name,
-		Endpoint: api.DeviceID(p.Endpoint),
-		Incoming: p.Incoming,
-		Outgoing: p.Outgoing,
-		Type:     p.Type,
+		Name:      p.Name,
+		Endpoints: endpoints,
+		Incoming:  p.Incoming,
+		Type:      p.Type,
 	}
 }
