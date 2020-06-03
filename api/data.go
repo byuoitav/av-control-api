@@ -7,7 +7,7 @@ import (
 )
 
 type DeviceService interface {
-	Device(context.Context, string) (Device, error)
+	// Device(context.Context, string) (Device, error)
 	Room(context.Context, string) ([]Device, error)
 }
 
@@ -40,7 +40,6 @@ type Port struct {
 	Name      string    `json:"name"`
 	Endpoints Endpoints `json:"endpoints"`
 	Incoming  bool      `json:"incoming"`
-	Outgoing  bool      `json:"outgoing"`
 	Type      string    `json:"type"`
 }
 
