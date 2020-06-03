@@ -11,6 +11,13 @@ type DeviceService interface {
 	Room(context.Context, string) ([]Device, error)
 }
 
+type Room struct {
+	ID           string `json:"id"`
+	OutputGroups map[string]struct {
+		Outputs []string `json:"outputs,omitempty"`
+	} `json:"outputGroups,omitempty"`
+}
+
 type Device struct {
 	ID      DeviceID                  `json:"id"`
 	Type    DeviceType                `json:"type"`

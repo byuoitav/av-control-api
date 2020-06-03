@@ -6,15 +6,25 @@ import (
 )
 
 type StateRequest struct {
-	Devices map[DeviceID]DeviceState `json:"devices"`
+	OutputGroups map[DeviceID]OutputGroupState `json:"outputGroups,omitempty"`
 }
 
 type StateResponse struct {
-	Devices map[DeviceID]DeviceState `json:"devices,omitempty"`
-	Errors  []DeviceStateError       `json:"errors,omitempty"`
+	OutputGroups map[DeviceID]OutputGroupState `json:"outputGroups,omitempty"`
+	Errors       []DeviceStateError            `json:"errors,omitempty"`
 }
 
-type DeviceState struct {
+type OutputGroupState struct {
+	PoweredOn *bool  `json:"poweredOn,omitempty"`
+	Input     *Input `json:"input,omitempty"`
+	Blanked   *bool  `json:"blanked,omitempty"`
+	Volume    *int   `json:"volume,omitempty"`
+	Muted     *bool  `json:"muted,omitempty"`
+
+	Outputs map[DeviceID]OutputState `json:"outputs,omitempty"`
+}
+
+type OutputState struct {
 	PoweredOn *bool  `json:"poweredOn,omitempty"`
 	Input     *Input `json:"input,omitempty"`
 	Blanked   *bool  `json:"blanked,omitempty"`
@@ -23,9 +33,10 @@ type DeviceState struct {
 }
 
 type Input struct {
-	Audio            *DeviceID `json:"audio,omitempty"`
-	Video            *DeviceID `json:"video,omitempty"`
-	CanSetSeparately *bool     `json:"canSetSeparately,omitempty"`
+	Audio            *DeviceID  `json:"audio,omitempty"`
+	Video            *DeviceID  `json:"video,omitempty"`
+	CanSetSeparately *bool      `json:"canSetSeparately,omitempty"`
+	AvailableInputs  []DeviceID `json:"availableInputs,omitempty"`
 }
 
 func (i Input) JSONMarshal() ([]byte, error) {
