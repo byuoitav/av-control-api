@@ -78,7 +78,7 @@ func (d Device) MarshalJSON() ([]byte, error) {
 func (p Ports) Outgoing() Ports {
 	var toReturn Ports
 	for _, port := range p {
-		if port.Outgoing {
+		if !port.Incoming {
 			toReturn = append(toReturn, port)
 		}
 	}

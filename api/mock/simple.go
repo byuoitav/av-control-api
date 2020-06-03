@@ -20,28 +20,98 @@ type SimpleRoom struct{}
 func (SimpleRoom) Room(context.Context, string) ([]api.Device, error) {
 	return []api.Device{
 		api.Device{
-			ID: "ITB-1101-D1",
+			ID:      "ITB-1101-D1",
+			Address: "ITB-1101-D1.av",
 			Type: api.DeviceType{
 				ID: "Sony XBR",
 				Commands: map[string]api.Command{
-					"": api.Command{
-						URLs:  map[string]string{},
-						Order: intP(1),
+					"SetPower": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/SetPower/{{power}}",
+						},
+						Order: intP(0),
+					},
+					"GetPower": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/GetPower",
+						},
+					},
+					"SetAVInput": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/SetAVInput/{{port}}",
+						},
+					},
+					"GetAVInput": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/GetAVInput",
+						},
+					},
+					"GetVolume": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/GetVolume",
+						},
+					},
+					"GetMuted": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/GetMuted",
+						},
+					},
+					"SetVolume": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/SetVolume/{{level}}",
+						},
+					},
+					"SetMuted": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/SetMuted/{{muted}}",
+						},
 					},
 				},
 			},
-			Ports: []api.Port{},
+			Ports: []api.Port{
+				api.Port{
+					Name: "hdmi!1",
+					Endpoints: api.Endpoints{
+						"ITB-1101-VIA1",
+					},
+					Type:     "audiovideo",
+					Incoming: true,
+				},
+				api.Port{
+					Name: "hdmi!2",
+					Endpoints: api.Endpoints{
+						"ITB-1101-HDMI1",
+					},
+					Type:     "audiovideo",
+					Incoming: true,
+				},
+			},
 		},
 		api.Device{
-			ID: "ITB-1101-VIA1",
+			ID:      "ITB-1101-VIA1",
+			Address: "ITB-1101-VIA1.av",
 			Type: api.DeviceType{
 				ID: "via-connect-pro",
 				Commands: map[string]api.Command{
 					"GetVolume": api.Command{
 						URLs: map[string]string{
-							"default": "get volume for :address",
+							"default": "http://{{address}}/GetVolume",
 						},
-						Order: intP(1),
+					},
+					"GetMuted": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/GetMuted",
+						},
+					},
+					"SetVolume": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/SetVolume/{{level}}",
+						},
+					},
+					"SetMuted": api.Command{
+						URLs: map[string]string{
+							"default": "http://{{address}}/SetMuted/{{muted}}",
+						},
 					},
 				},
 			},
