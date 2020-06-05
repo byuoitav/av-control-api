@@ -2,7 +2,6 @@ package state
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -55,26 +54,4 @@ func TestGetInput(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Equals(r1, r2 generateActionsResponse) bool {
-	if len(r1.Actions) != len(r2.Actions) || len(r1.Errors) != len(r2.Errors) || r1.ExpectedUpdates != r2.ExpectedUpdates {
-		return false
-	}
-
-	for i := range r1.Actions {
-		if r1.Actions[i].ID != r2.Actions[i].ID {
-			return false
-		}
-		if r1.Actions[i].Req.Method != r2.Actions[i].Req.Method {
-			return false
-		}
-		// urls doesn't work and idk why
-		if r1.Actions[i].Req.URL.String() != r2.Actions[i].Req.URL.String() {
-			fmt.Printf("bad urls: %v %v\n", r1.Actions[i].Req.URL, r2.Actions[i].Req.URL)
-			return false
-		}
-	}
-
-	return true
 }

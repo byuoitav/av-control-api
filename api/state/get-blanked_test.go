@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/byuoitav/av-control-api/api/mock"
+	"github.com/google/go-cmp/cmp"
 )
 
 var getBlankedTest = []stateTest{
@@ -43,8 +44,8 @@ func TestGetBlanked(t *testing.T) {
 			var get getBlanked
 			resp := get.GenerateActions(ctx, room, tt.env)
 
-			if !Equals(resp, tt.resp) {
-				t.Errorf("generated incorrect actions:\n\tgot %+v\n\texpected: %+v", resp, tt.resp)
+			if diff := cmp.Diff(tt.resp, resp); diff != "" {
+				t.Errorf("generated incorrect actions (-want, +got):\n%s", diff)
 			}
 		})
 	}
