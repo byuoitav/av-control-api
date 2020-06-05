@@ -42,7 +42,6 @@ func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 			}
 
 			acts, errs := i.generateActionsForPath(ctx, path, env, responses)
-			fmt.Printf("len acts: %d\n", len(acts))
 			actsForOutput = append(actsForOutput, acts...)
 			errsForOutput = append(errsForOutput, errs...)
 		}
@@ -55,10 +54,7 @@ func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 		resp.Errors = append(resp.Errors, errsForOutput...)
 	}
 
-	fmt.Printf("unexpected: %d\n", resp.ExpectedUpdates)
-
 	if resp.ExpectedUpdates == 0 {
-		fmt.Printf("no expected updates\n")
 		return generateActionsResponse{}
 	}
 

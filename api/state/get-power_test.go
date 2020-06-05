@@ -3,30 +3,11 @@ package state
 import (
 	"context"
 	"net/http"
-	"net/url"
 	"testing"
 	"time"
 
-	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/mock"
 )
-
-func urlParse(rawurl string) *url.URL {
-	url, err := url.Parse(rawurl)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return url
-}
-
-type stateTest struct {
-	name          string
-	room          string
-	deviceService api.DeviceService
-	env           string
-	resp          generateActionsResponse
-}
 
 var getPowerTest = []stateTest{
 	stateTest{
