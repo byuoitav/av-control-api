@@ -18,14 +18,15 @@ type action struct {
 	Response chan actionResponse
 }
 
-func (a *action) Equal(b *action) bool {
+// Equal reports if two actions are equal. Equal is defined as the following:
+// * a.ID == b.ID
+// * a.Order == b.Order
+// * a.Req.Method == b.Req.Method
+// * a.Req.URL.String() == b.Req.URL.String()
+//
+// It does not compare the Response channels of the two structs.
+func (a action) Equal(b action) bool {
 	switch {
-	case a == b:
-		return true
-	case a == nil && b != nil:
-		return false
-	case a != nil && b == nil:
-		return false
 	case a.ID != b.ID:
 		return false
 	case a.Order == nil && b.Order != nil:
@@ -33,8 +34,6 @@ func (a *action) Equal(b *action) bool {
 	case a.Order != nil && b.Order == nil:
 		return false
 	case a.Order != nil && *a.Order != *b.Order:
-		return false
-	case a.Response != b.Response:
 		return false
 	case a.Req == nil && b.Req != nil:
 		return false
@@ -109,7 +108,7 @@ func uniqueActions(actions []action) []action {
 	for _, action := range actions {
 		add := true
 		for _, u := range unique {
-			if action.Equal(&u) {
+			if action.Equal(u) {
 				add = false
 				break
 			}

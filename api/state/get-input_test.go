@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/byuoitav/av-control-api/api/mock"
+	"github.com/google/go-cmp/cmp"
 )
 
 var getInputTest = []stateTest{
@@ -18,25 +19,16 @@ var getInputTest = []stateTest{
 		resp: generateActionsResponse{
 			Actions: []action{
 				action{
-					ID: "ITB-1101-D1",
-					Req: &http.Request{
-						Method: http.MethodGet,
-						URL:    urlParse("http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetAVInput"),
-					},
+					ID:  "ITB-1101-D1",
+					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetAVInput"),
 				},
 				action{
-					ID: "ITB-1101-SW1",
-					Req: &http.Request{
-						Method: http.MethodGet,
-						URL:    urlParse("http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetVideoInput"),
-					},
+					ID:  "ITB-1101-SW1",
+					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetVideoInput"),
 				},
 				action{
-					ID: "ITB-1101-SW1",
-					Req: &http.Request{
-						Method: http.MethodGet,
-						URL:    urlParse("http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetAudioInput"),
-					},
+					ID:  "ITB-1101-SW1",
+					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetAudioInput"),
 				},
 			},
 			ExpectedUpdates: 1,
@@ -58,13 +50,8 @@ func TestGetInput(t *testing.T) {
 			var get getInput
 			resp := get.GenerateActions(ctx, room, tt.env)
 
-			for _, act := range resp.Actions {
-				t.Logf("act: %v\n", act)
-				t.Logf("url: %s", act.Req.URL)
-			}
-
-			if !Equals(resp, tt.resp) {
-				t.Errorf("generated incorrect actions:\n\tgot %+v\n\texpected: %+v", resp, tt.resp)
+			if diff := cmp.Diff(tt.resp, resp); diff != "" {
+				t.Errorf("generated incorrect actions (-want, +got):\n%s", diff)
 			}
 		})
 	}
