@@ -115,7 +115,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setVolume",
-						Error: fmt.Sprintf("% (url after fill: %s)", err, url),
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
 					})
 
 					continue
@@ -237,7 +237,7 @@ func (s *setVolume) handleResponses(respChan chan actionResponse, expectedResps,
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
 				Field: "setVolume",
-				Error: fmt.Sprintf("unable to parse response from driver: %w. response\n%s", err, resp.Body),
+				Error: fmt.Sprintf("unable to parse response from driver: %v. response\n%s", err, resp.Body),
 			}
 
 			resp.Updates <- OutputStateUpdate{}

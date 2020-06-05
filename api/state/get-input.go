@@ -22,8 +22,8 @@ type getInput struct{}
 func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
 	var resp generateActionsResponse
 	responses := make(chan actionResponse)
-
 	g := graph.NewGraph(room, "video")
+
 	outputs := graph.Leaves(g)
 
 	t := graph.Transpose(g)
@@ -75,10 +75,211 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 		switch i {
 		case 0:
 			// the edge leaving the output
-			url, order, err := getCommand(*path[i].Src.Device, "GetInput", env)
+			url, order, err := getCommand(*path[i].Src.Device, "GetAVInput", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: err.Error(),
+				})
 
+				return acts, errs
+
+			default:
+				params := map[string]string{
+					"address": path[i].Src.Address,
+				}
+
+				url, err = fillURL(url, params)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
+
+					return acts, errs
+				}
+
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
+
+					return acts, errs
+				}
+
+				act := action{
+					ID:       path[i].Src.Device.ID,
+					Req:      req,
+					Order:    order,
+					Response: resps,
+				}
+
+				acts = append(acts, act)
+			}
+
+			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInput", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: err.Error(),
+				})
+
+				return acts, errs
+
+			default:
+
+				params := map[string]string{
+					"address": path[i].Src.Address,
+					// "port": ,
+				}
+
+				url, err = fillURL(url, params)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
+
+					return acts, errs
+				}
+
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
+
+					return acts, errs
+				}
+
+				act := action{
+					ID:       path[i].Src.Device.ID,
+					Req:      req,
+					Order:    order,
+					Response: resps,
+				}
+
+				acts = append(acts, act)
+			}
+
+			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInput", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: err.Error(),
+				})
+
+				return acts, errs
+
+			default:
+
+				params := map[string]string{
+					"address": path[i].Src.Address,
+					// "port": ,
+				}
+
+				url, err = fillURL(url, params)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
+
+					return acts, errs
+				}
+
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
+
+					return acts, errs
+				}
+
+				act := action{
+					ID:       path[i].Src.Device.ID,
+					Req:      req,
+					Order:    order,
+					Response: resps,
+				}
+
+				acts = append(acts, act)
+			}
+		default:
+			// the edges between devices that aren't the output
+			url, order, err := getCommand(*path[i].Src.Device, "GetAVInput", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: err.Error(),
+				})
+
+				return acts, errs
+			default:
+
+				params := map[string]string{
+					"address": path[i].Src.Address,
+					// "output":  path[i-1].DstPort.Name,
+				}
+
+				url, err = fillURL(url, params)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
+
+					return acts, errs
+				}
+
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
+
+					return acts, errs
+				}
+
+				act := action{
+					ID:       path[i].Src.Device.ID,
+					Req:      req,
+					Order:    order,
+					Response: resps,
+				}
+
+				acts = append(acts, act)
+				continue
+			}
+			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInput", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
 				errs = append(errs, api.DeviceStateError{
 					ID:    path[i].Src.Device.ID,
@@ -123,74 +324,172 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			}
 
 			acts = append(acts, act)
+		}
+
+		url, order, err := getCommand(*path[i].Src.Device, "GetAudioInput", env)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "input",
+				Error: err.Error(),
+			})
+
+			return acts, errs
 		default:
-			// the edges between devices that aren't the output
-			url, order, err := getCommand(*path[i].Src.Device, "GetInputByOutput", env)
-			switch {
-			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-			case err != nil:
-				errs = append(errs, api.DeviceStateError{
-					ID:    path[i].Src.Device.ID,
-					Field: "input",
-					Error: err.Error(),
-				})
-
-				return acts, errs
-			default:
-
-				params := map[string]string{
-					"address": path[i].Src.Address,
-					"output":  path[i-1].DstPort.Name,
-				}
-
-				url, err = fillURL(url, params)
-				if err != nil {
-					errs = append(errs, api.DeviceStateError{
-						ID:    path[i].Src.Device.ID,
-						Field: "input",
-						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-					})
-
-					return acts, errs
-				}
-
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				if err != nil {
-					errs = append(errs, api.DeviceStateError{
-						ID:    path[i].Src.Device.ID,
-						Field: "input",
-						Error: fmt.Sprintf("unable to build http request: %s", err),
-					})
-
-					return acts, errs
-				}
-
-				act := action{
-					ID:       path[i].Src.Device.ID,
-					Req:      req,
-					Order:    order,
-					Response: resps,
-				}
-
-				acts = append(acts, act)
-				continue
-			}
-			url, order, err = getCommand(*path[i].Src.Device, "GetInput", env)
-			switch {
-			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-				continue
-			case err != nil:
-				errs = append(errs, api.DeviceStateError{
-					ID:    path[i].Src.Device.ID,
-					Field: "input",
-					Error: err.Error(),
-				})
-
-				return acts, errs
-			}
 
 			params := map[string]string{
 				"address": path[i].Src.Address,
+			}
+
+			url, err = fillURL(url, params)
+			if err != nil {
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+				})
+
+				return acts, errs
+			}
+
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			if err != nil {
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: fmt.Sprintf("unable to build http request: %s", err),
+				})
+
+				return acts, errs
+			}
+
+			act := action{
+				ID:       path[i].Src.Device.ID,
+				Req:      req,
+				Order:    order,
+				Response: resps,
+			}
+
+			acts = append(acts, act)
+		}
+
+		url, order, err = getCommand(*path[i].Src.Device, "GetAVInputForOutput", env)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "input",
+				Error: err.Error(),
+			})
+
+			return acts, errs
+
+		default:
+			params := map[string]string{
+				"address": path[i].Src.Address,
+				// "port": ,
+			}
+
+			url, err = fillURL(url, params)
+			if err != nil {
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+				})
+
+				return acts, errs
+			}
+
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			if err != nil {
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: fmt.Sprintf("unable to build http request: %s", err),
+				})
+
+				return acts, errs
+			}
+
+			act := action{
+				ID:       path[i].Src.Device.ID,
+				Req:      req,
+				Order:    order,
+				Response: resps,
+			}
+
+			acts = append(acts, act)
+		}
+
+		url, order, err = getCommand(*path[i].Src.Device, "GetVideoInputForOutput", env)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "input",
+				Error: err.Error(),
+			})
+
+			return acts, errs
+		default:
+			params := map[string]string{
+				"address": path[i].Src.Address,
+				// "port": ,
+			}
+
+			url, err = fillURL(url, params)
+			if err != nil {
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+				})
+
+				return acts, errs
+			}
+
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			if err != nil {
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: fmt.Sprintf("unable to build http request: %s", err),
+				})
+
+				return acts, errs
+			}
+
+			act := action{
+				ID:       path[i].Src.Device.ID,
+				Req:      req,
+				Order:    order,
+				Response: resps,
+			}
+
+			acts = append(acts, act)
+		}
+
+		url, order, err = getCommand(*path[i].Src.Device, "GetAudioInputForOutput", env)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "input",
+				Error: err.Error(),
+			})
+
+			return acts, errs
+		default:
+
+			params := map[string]string{
+				"address": path[i].Src.Address,
+				// "port": ,
 			}
 
 			url, err = fillURL(url, params)
@@ -255,11 +554,9 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 			break
 		}
 	}
-
 	close(respChan)
 	status := make(map[api.DeviceID][]input)
 	var emptyChecker []api.DeviceID
-
 	for _, resp := range resps {
 		handleErr := func(err error) {
 			resp.Errors <- api.DeviceStateError{

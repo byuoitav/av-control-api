@@ -11,16 +11,16 @@ var (
 		&getBlanked{},
 		&getInput{},
 		&getPower{},
-		&getVolume{},
-		&getMuted{},
+		// &getVolume{},
+		// &getMuted{},
 	}
 
 	commandEvaluators = []commandEvaluator{
-		&setMuted{},
+		// &setMuted{},
 		&setPower{},
-		&setVolume{},
+		// &setVolume{},
 		&setBlanked{},
-		&setInput{},
+		// &setInput{},
 	}
 )
 

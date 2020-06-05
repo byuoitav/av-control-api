@@ -53,7 +53,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room []api.Device, env s
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "setPower",
-				Error: fmt.Sprintf("%s (url after fill: %s)", err.Error()),
+				Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
 			})
 
 			continue

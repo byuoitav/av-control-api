@@ -19,6 +19,12 @@ func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 		url, order, err := getCommand(dev, "GetBlanked", env)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			fmt.Printf("we here: %s\n", dev.ID)
+			if dev.ID == "ITB-1108B-D1" {
+				for k := range dev.Type.Commands {
+					fmt.Printf("command: %s\n", k)
+				}
+			}
 			continue
 		case err != nil:
 			resp.Errors = append(resp.Errors, api.DeviceStateError{

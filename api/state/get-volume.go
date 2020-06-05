@@ -222,7 +222,7 @@ func (g *getVolume) handleResponses(respChan chan actionResponse, expectedResps,
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
 				Field: "volume",
-				Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, resp.Body),
+				Error: fmt.Sprintf("unable to parse response from driver: %v. response:\n%s", err, resp.Body),
 			}
 
 			resp.Updates <- OutputStateUpdate{}

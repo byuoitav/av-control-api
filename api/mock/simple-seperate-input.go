@@ -28,34 +28,34 @@ func (SimpleSeparateInput) Room(context.Context, string) ([]api.Device, error) {
 				Commands: map[string]api.Command{
 					"SetPower": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetPower/{{power}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetPower/{{power}}",
 						},
 						Order: intP(0),
 					},
 					"GetPower": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetPower",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetPower",
 						},
 					},
 					"SetBlanked": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetBlanked/{{blanked}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetBlanked/{{blanked}}",
 						},
 						Order: intP(0),
 					},
 					"GetBlanked": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetBlanked",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetBlanked",
 						},
 					},
 					"SetAVInput": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetAVInput/{{port}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetAVInput/{{port}}",
 						},
 					},
 					"GetAVInput": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetAVInput",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetAVInput",
 						},
 					},
 				},
@@ -79,22 +79,22 @@ func (SimpleSeparateInput) Room(context.Context, string) ([]api.Device, error) {
 				Commands: map[string]api.Command{
 					"SetAudioInput": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetAudioInput/{{port}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetAudioInput/{{port}}",
 						},
 					},
 					"GetAudioInput": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetAudioInput",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetAudioInput",
 						},
 					},
 					"SetVideoInput": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetVideoInput/{{port}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetVideoInput/{{port}}",
 						},
 					},
 					"GetVideoInput": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetVideoInput",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetVideoInput",
 						},
 					},
 				},
@@ -107,6 +107,7 @@ func (SimpleSeparateInput) Room(context.Context, string) ([]api.Device, error) {
 						"ITB-1101-AMP1",
 					},
 					Type: "audiovideo",
+					Incoming: false,
 				},
 				api.Port{
 					Name: "1",
@@ -134,22 +135,22 @@ func (SimpleSeparateInput) Room(context.Context, string) ([]api.Device, error) {
 				Commands: map[string]api.Command{
 					"GetVolume": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetVolume",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetVolume",
 						},
 					},
 					"GetMuted": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetMuted",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetMuted",
 						},
 					},
 					"SetVolume": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetVolume/{{level}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetVolume/{{level}}",
 						},
 					},
 					"SetMuted": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetMuted/{{muted}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetMuted/{{muted}}",
 						},
 					},
 				},
@@ -173,22 +174,22 @@ func (SimpleSeparateInput) Room(context.Context, string) ([]api.Device, error) {
 				Commands: map[string]api.Command{
 					"GetVolume": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetVolume",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetVolume",
 						},
 					},
 					"GetMuted": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/GetMuted",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetMuted",
 						},
 					},
 					"SetVolume": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetVolume/{{level}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetVolume/{{level}}",
 						},
 					},
 					"SetMuted": api.Command{
 						URLs: map[string]string{
-							"default": "http://{{address}}/SetMuted/{{muted}}",
+							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetMuted/{{muted}}",
 						},
 					},
 				},

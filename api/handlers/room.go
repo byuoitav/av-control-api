@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -51,7 +52,8 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 	var stateReq api.StateRequest
 	err = json.NewDecoder(c.Request().Body).Decode(&stateReq)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "error decoding state request")
+		er := fmt.Sprintf("error decoding state request: %s", err.Error())
+		return c.String(http.StatusBadRequest, er)
 	}
 
 	if len(stateReq.OutputGroups) == 0 {

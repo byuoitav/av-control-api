@@ -68,7 +68,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setMuted",
-						Error: fmt.Sprintf("%s (url after fill: %s)", err),
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
 					})
 
 					continue
@@ -240,7 +240,7 @@ func (s *setMuted) handleResponses(respChan chan actionResponse, expectedResps, 
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
 				Field: "setMuted",
-				Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, resp.Body),
+				Error: fmt.Sprintf("unable to parse response from driver: %v. response:\n%s", err, resp.Body),
 			}
 
 			resp.Updates <- OutputStateUpdate{}
