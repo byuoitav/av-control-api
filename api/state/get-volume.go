@@ -21,9 +21,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 	responses := make(chan actionResponse)
 
 	for _, dev := range room {
-		if dev.ID == "ITB-1108B-DSP1" || dev.ID == "ITB-1108B-DSP2" || dev.ID == "ITB-1108A-DSP1" {
-			continue
-		}
+
 		path := graph.PathToEnd(gr, dev.ID)
 		if len(path) == 0 {
 			url, order, err := getCommand(dev, "GetVolumeByBlock", env)
@@ -130,7 +128,6 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 			url, order, err := getCommand(*endDev.Device, "GetVolumeByBlock", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-				continue
 			case err != nil:
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
@@ -139,53 +136,111 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				})
 
 				continue
+			default:
+
+				for _, port := range endDev.Ports {
+					if port.Endpoints.Contains(dev.ID) {
+						continue
+					}
+
+					//at this point we have the right port
+
+					params := map[string]string{
+						"address": endDev.Address,
+						"block":   port.Name,
+					}
+
+					url, err = fillURL(url, params)
+					if err != nil {
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "volume",
+							Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+						})
+
+						continue
+					}
+
+					req, err := http.NewRequest(http.MethodGet, url, nil)
+					if err != nil {
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "volume",
+							Error: fmt.Sprintf("unable to build http request: %s", err),
+						})
+
+						continue
+					}
+
+					act := action{
+						ID:       dev.ID,
+						Req:      req,
+						Order:    order,
+						Response: responses,
+					}
+
+					resp.Actions = append(resp.Actions, act)
+					resp.ExpectedUpdates++
+				}
 			}
+			url, order, err = getCommand(*endDev.Device, "GetVolume", env)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				resp.Errors = append(resp.Errors, api.DeviceStateError{
+					ID:    dev.ID,
+					Field: "volume",
+					Error: err.Error(),
+				})
 
-			for _, port := range endDev.Ports {
-				if port.Endpoints.Contains(dev.ID) {
-					continue
-				}
-
-				//at this point we have the right port
-
-				params := map[string]string{
-					"address": endDev.Address,
-					"block":   port.Name,
-				}
-
-				url, err = fillURL(url, params)
-				if err != nil {
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "volume",
-						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-					})
-
-					continue
-				}
-
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				if err != nil {
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "volume",
-						Error: fmt.Sprintf("unable to build http request: %s", err),
-					})
-
-					continue
-				}
-
-				act := action{
-					ID:       dev.ID,
-					Req:      req,
-					Order:    order,
-					Response: responses,
-				}
-
-				resp.Actions = append(resp.Actions, act)
-				resp.ExpectedUpdates++
 				continue
+			default:
+
+				for _, port := range endDev.Ports {
+					if port.Endpoints.Contains(dev.ID) {
+						continue
+					}
+
+					//at this point we have the right port
+
+					params := map[string]string{
+						"address": endDev.Address,
+					}
+
+					url, err = fillURL(url, params)
+					if err != nil {
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "volume",
+							Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+						})
+
+						continue
+					}
+
+					req, err := http.NewRequest(http.MethodGet, url, nil)
+					if err != nil {
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "volume",
+							Error: fmt.Sprintf("unable to build http request: %s", err),
+						})
+
+						continue
+					}
+
+					act := action{
+						ID:       dev.ID,
+						Req:      req,
+						Order:    order,
+						Response: responses,
+					}
+
+					resp.Actions = append(resp.Actions, act)
+					resp.ExpectedUpdates++
+				}
 			}
+
 		}
 	}
 
