@@ -68,6 +68,7 @@ func CreateDSPServer(create CreateDSPFunc) (Server, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		m.Store(addr, dsp)
 		return dsp, nil
 	}

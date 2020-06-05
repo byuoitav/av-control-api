@@ -13,7 +13,7 @@ type DisplayDSP interface {
 
 type CreateDisplayDSPFunc func(context.Context, string) (DisplayDSP, error)
 
-func CreateDisplayDSPServer(create CreateDisplayDSPFunc) Server {
+func CreateDisplayDSPServer(create CreateDisplayDSPFunc) (Server, error) {
 	e := newEchoServer()
 	m := &sync.Map{}
 
@@ -26,6 +26,7 @@ func CreateDisplayDSPServer(create CreateDisplayDSPFunc) Server {
 		if err != nil {
 			return nil, err
 		}
+
 		m.Store(addr, ddsp)
 		return ddsp, nil
 	}
@@ -46,5 +47,5 @@ func CreateDisplayDSPServer(create CreateDisplayDSPFunc) Server {
 	addDisplayRoutes(e, dis)
 	addDSPRoutes(e, dsp)
 
-	return wrapEchoServer(e)
+	return wrapEchoServer(e), nil
 }
