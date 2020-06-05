@@ -76,7 +76,6 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				continue
 			}
 
-			// it should always be by block
 			url, order, err = getCommand(dev, "GetVolume", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):

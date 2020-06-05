@@ -47,7 +47,7 @@ func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 			errsForOutput = append(errsForOutput, errs...)
 		}
 
-		if len(errsForOutput) == 0 && len(actsForOutput) != 0 {
+		if len(errsForOutput) == 0 {
 			resp.ExpectedUpdates++
 			resp.Actions = append(resp.Actions, actsForOutput...)
 		}
@@ -379,7 +379,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetAVInputForOutput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetAVInputByOutput", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -429,7 +429,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInputForOutput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInputByOutput", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -478,7 +478,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInputForOutput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInputByOutput", env)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:

@@ -83,7 +83,7 @@ func Equals(r1, r2 generateActionsResponse) bool {
 			return false
 		}
 		// urls doesn't work and idk why
-		if r1.Actions[i].Req.URL != r2.Actions[i].Req.URL {
+		if r1.Actions[i].Req.URL.String() != r2.Actions[i].Req.URL.String() {
 			fmt.Printf("bad urls: %v %v\n", r1.Actions[i].Req.URL, r2.Actions[i].Req.URL)
 			return false
 		}
