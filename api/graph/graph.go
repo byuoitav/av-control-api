@@ -23,7 +23,7 @@ func NewGraph(devices []api.Device, portType string) *simple.DirectedGraph {
 
 	for src := range nodes {
 		for srcP := range nodes[src].Ports {
-			if strings.Contains(nodes[src].Ports[srcP].Type, portType) {
+			if nodes[src].Ports[srcP].Incoming || strings.Contains(nodes[src].Ports[srcP].Type, portType) {
 				continue
 			}
 
