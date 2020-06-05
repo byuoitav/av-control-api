@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/byuoitav/av-control-api/api/mock"
-	"github.com/google/go-cmp/cmp"
 )
 
 var getVolumeTest = []stateTest{
@@ -21,7 +20,7 @@ var getVolumeTest = []stateTest{
 					ID: "ITB-1101-AMP1",
 					Req: &http.Request{
 						Method: http.MethodGet,
-						URL:    urlParse("http://ITB-1101-AMP1.av/GetVolume"),
+						URL:    urlParse("http://ITB-1101-CP1.byu.edu/ITB-1101-AMP1.av/GetVolume"),
 					},
 				},
 			},
@@ -44,7 +43,12 @@ func TestGetVolume(t *testing.T) {
 			var get getVolume
 			resp := get.GenerateActions(ctx, room, tt.env)
 
-			if !cmp.Equal(resp, tt.resp) {
+			for _, act := range resp.Actions {
+				t.Logf("act: %v\n", act)
+				t.Logf("url: %s", act.Req.URL)
+			}
+
+			if !Equals(resp, tt.resp) {
 				t.Errorf("generated incorrect actions:\n\tgot %+v\n\texpected: %+v", resp, tt.resp)
 			}
 		})

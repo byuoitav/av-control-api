@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -62,14 +63,14 @@ func TestGetInput(t *testing.T) {
 				t.Logf("url: %s", act.Req.URL)
 			}
 
-			if !equals(resp, tt.resp) {
+			if !Equals(resp, tt.resp) {
 				t.Errorf("generated incorrect actions:\n\tgot %+v\n\texpected: %+v", resp, tt.resp)
 			}
 		})
 	}
 }
 
-func equals(r1, r2 generateActionsResponse) bool {
+func Equals(r1, r2 generateActionsResponse) bool {
 	if len(r1.Actions) != len(r2.Actions) || len(r1.Errors) != len(r2.Errors) || r1.ExpectedUpdates != r2.ExpectedUpdates {
 		return false
 	}
@@ -82,10 +83,10 @@ func equals(r1, r2 generateActionsResponse) bool {
 			return false
 		}
 		// urls doesn't work and idk why
-		// if r1.Actions[i].Req.URL != r2.Actions[i].Req.URL {
-		// 	fmt.Printf("bad urls: %v %v\n", r1.Actions[i].Req.URL, r2.Actions[i].Req.URL)
-		// 	return false
-		// }
+		if r1.Actions[i].Req.URL != r2.Actions[i].Req.URL {
+			fmt.Printf("bad urls: %v %v\n", r1.Actions[i].Req.URL, r2.Actions[i].Req.URL)
+			return false
+		}
 	}
 
 	return true

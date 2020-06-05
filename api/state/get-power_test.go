@@ -9,7 +9,6 @@ import (
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/mock"
-	"github.com/google/go-cmp/cmp"
 )
 
 func urlParse(rawurl string) *url.URL {
@@ -40,7 +39,7 @@ var getPowerTest = []stateTest{
 					ID: "ITB-1101-D1",
 					Req: &http.Request{
 						Method: http.MethodGet,
-						URL:    urlParse("http://ITB-1101-D1.av/GetPower"),
+						URL:    urlParse("http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetPower"),
 					},
 				},
 			},
@@ -63,7 +62,7 @@ func TestGetPower(t *testing.T) {
 			var get getPower
 			resp := get.GenerateActions(ctx, room, tt.env)
 
-			if !cmp.Equal(resp, tt.resp) {
+			if !Equals(resp, tt.resp) {
 				t.Errorf("generated incorrect actions:\n\tgot %+v\n\texpected: %+v", resp, tt.resp)
 			}
 		})
