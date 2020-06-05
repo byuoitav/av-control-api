@@ -19,7 +19,7 @@ var getVolumeTest = []stateTest{
 			Actions: []action{
 				action{
 					ID:  "ITB-1101-AMP1",
-					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetVolume"),
+					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-AMP1.av/GetVolume"),
 				},
 			},
 			ExpectedUpdates: 1,
