@@ -10,6 +10,7 @@ import (
 
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
+	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -68,16 +69,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO get a database interface
-	db := couch.DataService{
+	db := &couch.DataService{
+		// TODO use flags
 		DBAddress:  os.Getenv("DB_ADDRESS"),
 		DBUsername: os.Getenv("DB_USERNAME"),
 		DBPassword: os.Getenv("DB_PASSWORD"),
 	}
 
-	handlers := handlers.Handlers{
+	gs := &state.GetSetter{
+		Logger:      logger,
 		Environment: env,
-		DataService: &db,
+	}
+
+	handlers := handlers.Handlers{
+		Logger:      logger,
+		DataService: db,
+		State:       gs,
 	}
 
 	e := echo.New()
@@ -108,13 +115,4 @@ func main() {
 	case err != nil:
 		logger.Fatal("failed to serve", zap.Error(err))
 	}
-
-	//// PUT requests
-	//router.PUT("/buildings/:building/rooms/:room", h.SetRoomState, auth.AuthorizeRequest("write-state", "room", h.GetRoomResource))
-
-	//// room status
-	//router.GET("/buildings/:building/rooms/:room", h.GetRoomState, auth.AuthorizeRequest("read-state", "room", h.GetRoomResource))
-	//router.GET("/buildings/:building/rooms/:room/configuration", h.GetRoomByNameAndBuilding, auth.AuthorizeRequest("read-config", "room", h.GetRoomResource))
-	//router.PUT("/log-level/:level", log.SetLogLevel)
-	//router.GET("/log-level", log.GetLogLevel)
 }

@@ -12,8 +12,8 @@ var (
 	ErrNoStateGettable = errors.New("can't get the state of any devices in this room")
 )
 
-// GetDevices .
-func GetDevices(ctx context.Context, room []api.Device, env string) (api.StateResponse, error) {
+// Get .
+func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateResponse, error) {
 	stateResp := api.StateResponse{
 		OutputGroups: make(map[api.DeviceID]api.OutputGroupState),
 	}
@@ -22,7 +22,7 @@ func GetDevices(ctx context.Context, room []api.Device, env string) (api.StateRe
 	var expectedUpdates int
 
 	for i := range statusEvaluators {
-		resp := statusEvaluators[i].GenerateActions(ctx, room, env)
+		resp := statusEvaluators[i].GenerateActions(ctx, room, gs.Environment)
 		actions = append(actions, resp.Actions...)
 		stateResp.Errors = append(stateResp.Errors, resp.Errors...)
 		expectedUpdates += resp.ExpectedUpdates

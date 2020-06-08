@@ -13,7 +13,7 @@ var (
 	ErrNoStateSettable = errors.New("nothing to do for the given request and room")
 )
 
-func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, env string) (api.StateResponse, error) {
+func (gs *GetSetter) Set(ctx context.Context, room []api.Device, req api.StateRequest) (api.StateResponse, error) {
 	stateResp := api.StateResponse{
 		OutputGroups: make(map[api.DeviceID]api.OutputGroupState),
 	}
@@ -22,7 +22,7 @@ func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, en
 	var expectedUpdates int
 
 	for i := range commandEvaluators {
-		resp := commandEvaluators[i].GenerateActions(ctx, room, env, req)
+		resp := commandEvaluators[i].GenerateActions(ctx, room, gs.Environment, req)
 		actions = append(actions, resp.Actions...)
 		stateResp.Errors = append(stateResp.Errors, resp.Errors...)
 		expectedUpdates += resp.ExpectedUpdates

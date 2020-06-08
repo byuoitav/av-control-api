@@ -9,7 +9,6 @@ import (
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/graph"
-	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 )
 
@@ -27,7 +26,7 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	resp, err := state.GetDevices(ctx, devices, h.Environment)
+	resp, err := h.State.Get(ctx, devices)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -60,7 +59,7 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "no devices found in request")
 	}
 
-	resp, err := state.SetDevices(ctx, stateReq, devices, h.Environment)
+	resp, err := h.State.Set(ctx, devices, stateReq)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}

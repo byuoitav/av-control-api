@@ -75,7 +75,7 @@ func TestSetState(t *testing.T) {
 
 			resp, err := SetDevices(ctx, tt.apiReq, room, tt.env)
 			if err != nil {
-				t.Errorf("unable to get room state: %s", err)
+				t.Errorf("unable to set room state: %s", err)
 			}
 
 			if diff := cmp.Diff(tt.apiResp, resp); diff != "" {
