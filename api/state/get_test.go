@@ -16,11 +16,11 @@ import (
 type getStateTest struct {
 	name          string
 	room          string
+	env           string
 	deviceService interface {
 		api.DeviceService
 		SetBaseURL(string)
 	}
-	env string
 
 	httpResps map[string]string
 	apiResp   api.StateResponse
@@ -28,11 +28,66 @@ type getStateTest struct {
 
 var getTests = []getStateTest{
 	getStateTest{
-		name:          "simple",
+		name:          "Simple",
 		deviceService: &mock.SimpleRoom{},
 		env:           "default",
-		httpResps:     map[string]string{},
-		apiResp:       api.StateResponse{},
+		httpResps: map[string]string{
+			"/ITB-1101-D1.av/GetPower":   `{"power": "on"}`,
+			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!1"}`,
+			"/ITB-1101-D1.av/GetBlanked": `{"blanked": false}`,
+			"/ITB-1101-D1.av/GetMuted":   `{"muted": false}`,
+			"/ITB-1101-D1.av/GetVolume":  `{"volume": 30}`,
+		},
+		apiResp: api.StateResponse{
+			OutputGroups: map[api.DeviceID]api.OutputGroupState{
+				"ITB-1101-D1": api.OutputGroupState{
+					PoweredOn: boolP(true),
+					Blanked:   boolP(false),
+					Input: &api.Input{
+						Audio:            deviceID("ITB-1101-VIA1"),
+						Video:            deviceID("ITB-1101-VIA1"),
+						CanSetSeparately: boolP(false),
+						AvailableInputs: []api.DeviceID{
+							api.DeviceID("ITB-1101-VIA1"),
+							api.DeviceID("ITB-1101-HDMI1"),
+						},
+					},
+					Volume: intP(30),
+					Muted:  boolP(false),
+				},
+			},
+		},
+	},
+	getStateTest{
+		name:          "Simple2",
+		deviceService: &mock.SimpleRoom{},
+		env:           "default",
+		httpResps: map[string]string{
+			"/ITB-1101-D1.av/GetPower":   `{"power": "standby"}`,
+			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!2"}`,
+			"/ITB-1101-D1.av/GetBlanked": `{"blanked": true}`,
+			"/ITB-1101-D1.av/GetMuted":   `{"muted": true}`,
+			"/ITB-1101-D1.av/GetVolume":  `{"volume": 100}`,
+		},
+		apiResp: api.StateResponse{
+			OutputGroups: map[api.DeviceID]api.OutputGroupState{
+				"ITB-1101-D1": api.OutputGroupState{
+					PoweredOn: boolP(false),
+					Blanked:   boolP(true),
+					Input: &api.Input{
+						Audio:            deviceID("ITB-1101-HDMI1"),
+						Video:            deviceID("ITB-1101-HDMI1"),
+						CanSetSeparately: boolP(true),
+						AvailableInputs: []api.DeviceID{
+							api.DeviceID("ITB-1101-HDMI1"),
+							api.DeviceID("ITB-1101-VIA1"),
+						},
+					},
+					Volume: intP(100),
+					Muted:  boolP(true),
+				},
+			},
+		},
 	},
 }
 
@@ -47,7 +102,6 @@ func TestGetState(t *testing.T) {
 				fmt.Fprintln(w, tt.httpResps[r.URL.Path])
 			}))
 			t.Cleanup(func() {
-				fmt.Printf("closing server: %s\n", ts.URL)
 				ts.Close()
 			})
 
@@ -63,8 +117,8 @@ func TestGetState(t *testing.T) {
 				t.Errorf("unable to get room state: %s", err)
 			}
 
-			if !cmp.Equal(resp, tt.apiResp) {
-				t.Errorf("generated incorrect response:\n\tgot %+v\n\texpected: %+v", resp, tt.apiResp)
+			if diff := cmp.Diff(tt.apiResp, resp); diff != "" {
+				t.Errorf("generated incorrect response (-want, +got):\n%s", diff)
 			}
 		})
 	}

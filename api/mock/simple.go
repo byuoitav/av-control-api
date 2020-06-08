@@ -42,6 +42,16 @@ func (s *SimpleRoom) Room(context.Context, string) ([]api.Device, error) {
 							"default": s.BaseURL + "/{{address}}/GetPower",
 						},
 					},
+					"GetBlanked": api.Command{
+						URLs: map[string]string{
+							"default": s.BaseURL + "/{{address}}/GetBlanked",
+						},
+					},
+					"SetBlanked": api.Command{
+						URLs: map[string]string{
+							"default": s.BaseURL + "/{{address}}/SetBlanked",
+						},
+					},
 					"SetAVInput": api.Command{
 						URLs: map[string]string{
 							"default": s.BaseURL + "/{{address}}/SetAVInput/{{port}}",

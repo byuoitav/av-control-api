@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -71,6 +72,9 @@ func (g *getPower) GenerateActions(ctx context.Context, room []api.Device, env s
 
 type poweredOn struct {
 	PoweredOn bool `json:"poweredOn"`
+
+	// TODO we want to get rid of this once drivers support it
+	Power string `json:"power"`
 }
 
 func (g *getPower) handleResponse(respChan chan actionResponse) {
@@ -93,21 +97,14 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 	}
 
 	var state poweredOn
-
-	// since we get back {"power": "standby"} we're doing this for now
-	if string(aResp.Body) == "{\"power\":\"on\"}" {
-		state.PoweredOn = true
-	} else if string(aResp.Body) == "{\"power\":\"standby\"}" {
-		state.PoweredOn = false
-	} else {
-		handleErr(fmt.Errorf("unexpected response from driver:\n%s", aResp.Body))
+	if err := json.Unmarshal(aResp.Body, &state); err != nil {
+		handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body))
+		return
 	}
 
-	// I guess ideally we'd do this but not for now...
-	// if err := json.Unmarshal(aResp.Body, &state); err != nil {
-	// 	handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body))
-	// 	return
-	// }
+	if state.Power != "" {
+		state.PoweredOn = state.Power == "on"
+	}
 
 	aResp.Updates <- OutputStateUpdate{
 		ID: aResp.Action.ID,

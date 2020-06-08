@@ -541,9 +541,6 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		return
 	}
 
-	fmt.Printf("Expected resps: %d\n", expectedResps)
-	fmt.Printf("Expected updates: %d\n", expectedUpdates)
-
 	var resps []actionResponse
 	var received int
 
@@ -654,12 +651,11 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 							return true
 						}
 
-						// well we took off outgoing so idk how this needs to change yet
-						// if len(e.Src.Device.Ports.Outgoing()) == 1 {
-						// 	prevState = state
-						// 	prevEdge = e
-						// 	return true
-						// }
+						if len(e.Src.Device.Ports.Outgoing()) == 1 {
+							prevState = state
+							prevEdge = e
+							return true
+						}
 					}
 
 					return false
@@ -701,11 +697,15 @@ func (i *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 					return false
 				}
 
-				// well we took off outgoing so idk how this needs to change yet
-				// if len(e.Src.Device.Ports.Outgoing()) == 1 {
-				// 	prevEdge = e
-				// 	return true
-				// }
+				if len(e.Src.Device.Ports.Outgoing()) == 1 {
+					prevEdge = e
+					return true
+				}
+
+				// dannyrandall: TODO idk how to handle prevState.Video being nil, i just put something
+				if prevState.Video == nil {
+					return false
+				}
 
 				if *prevState.Video == e.Dst.Address {
 					prevEdge = e

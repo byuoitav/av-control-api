@@ -57,6 +57,17 @@ func (e Endpoints) Contains(id DeviceID) bool {
 
 type Ports []Port
 
+func (p Ports) Outgoing() Ports {
+	var toReturn Ports
+	for _, port := range p {
+		if !port.Incoming {
+			toReturn = append(toReturn, port)
+		}
+	}
+
+	return toReturn
+}
+
 func (d Device) MarshalJSON() ([]byte, error) {
 	type Alias Device
 
