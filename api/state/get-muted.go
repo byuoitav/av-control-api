@@ -11,10 +11,13 @@ import (
 	"github.com/byuoitav/av-control-api/api/graph"
 )
 
-type getMuted struct{}
+type getMuted struct {
+	Logger      api.Logger
+	Environment string
+}
 
-func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
-	var resp generateActionsResponse
+func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+	var resp generatedActions
 
 	gr := graph.NewGraph(room, "audio")
 
@@ -23,7 +26,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 	for _, dev := range room {
 		path := graph.PathToEnd(gr, dev.ID)
 		if len(path) == 0 {
-			url, order, err := getCommand(dev, "GetMutedByBlock", env)
+			url, order, err := getCommand(dev, "GetMutedByBlock", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -73,7 +76,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 			}
 
 			// it should always be by block
-			url, order, err = getCommand(dev, "GetMuted", env)
+			url, order, err = getCommand(dev, "GetMuted", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
@@ -124,7 +127,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 			}
 		} else {
 			endDev := path[len(path)-1].Dst
-			url, order, err := getCommand(*endDev.Device, "GetMutedByBlock", env)
+			url, order, err := getCommand(*endDev.Device, "GetMutedByBlock", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
@@ -185,7 +188,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 
 	if resp.ExpectedUpdates == 0 {
-		return generateActionsResponse{}
+		return generatedActions{}
 	}
 
 	if len(resp.Actions) > 0 {

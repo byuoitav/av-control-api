@@ -14,8 +14,8 @@ import (
 
 type setVolume struct{}
 
-func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generateActionsResponse {
-	var resp generateActionsResponse
+func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generatedActions {
+	var resp generatedActions
 	gr := graph.NewGraph(room, "audio")
 
 	responses := make(chan actionResponse)
@@ -206,7 +206,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 	}
 
 	if resp.ExpectedUpdates == 0 {
-		return generateActionsResponse{}
+		return generatedActions{}
 	}
 
 	if len(resp.Actions) > 0 {

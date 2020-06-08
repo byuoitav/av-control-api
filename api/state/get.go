@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/byuoitav/av-control-api/api"
+	"go.uber.org/zap"
 )
 
 var (
@@ -18,15 +19,44 @@ func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateRespo
 		OutputGroups: make(map[api.DeviceID]api.OutputGroupState),
 	}
 
+	id := api.RequestID(ctx)
+	log := gs.Logger.With(zap.String("requestID", id))
+
+	evaluators := []statusEvaluator{
+		&getPower{
+			Environment: gs.Environment,
+			Logger:      log.With(zap.String("evaluator", "getPower")),
+		},
+		&getBlanked{
+			Environment: gs.Environment,
+			Logger:      log.With(zap.String("evaluator", "getBlanked")),
+		},
+		&getInput{
+			Environment: gs.Environment,
+			Logger:      log.With(zap.String("evaluator", "getInput")),
+		},
+		&getVolume{
+			Environment: gs.Environment,
+			Logger:      log.With(zap.String("evaluator", "getVolume")),
+		},
+		&getMuted{
+			Environment: gs.Environment,
+			Logger:      log.With(zap.String("evaluator", "getMuted")),
+		},
+	}
+
 	var actions []action
 	var expectedUpdates int
 
-	for i := range statusEvaluators {
-		resp := statusEvaluators[i].GenerateActions(ctx, room, gs.Environment)
+	log.Info("Generating actions")
+	for i := range evaluators {
+		resp := evaluators[i].GenerateActions(ctx, room)
 		actions = append(actions, resp.Actions...)
 		stateResp.Errors = append(stateResp.Errors, resp.Errors...)
 		expectedUpdates += resp.ExpectedUpdates
 	}
+
+	log.Info("Done generating actions", zap.Int("actions", len(actions)), zap.Int("errors", len(stateResp.Errors)), zap.Int("expectedUpdates", expectedUpdates))
 
 	if expectedUpdates == 0 {
 		return stateResp, ErrNoStateGettable
@@ -37,6 +67,8 @@ func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateRespo
 	for i := range actions {
 		actsByID[actions[i].ID] = append(actsByID[actions[i].ID], actions[i])
 	}
+
+	log.Info("Ordering commands for each device")
 
 	// order every id's commands
 	for id := range actsByID {
@@ -54,12 +86,14 @@ func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateRespo
 		})
 	}
 
+	log.Info("Done ordering commands")
+
 	// execute commands
 	updates := make(chan OutputStateUpdate)
 	errors := make(chan api.DeviceStateError)
 
 	for id := range actsByID {
-		executeActions(ctx, actsByID[id], updates, errors)
+		gs.executeActions(ctx, actsByID[id], updates, errors)
 	}
 
 	updatesReceived := 0
@@ -67,7 +101,6 @@ func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateRespo
 	for {
 		select {
 		case update := <-updates:
-
 			updatesReceived++
 
 			if len(update.ID) == 0 {

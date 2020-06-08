@@ -7,14 +7,6 @@ import (
 )
 
 var (
-	statusEvaluators = []statusEvaluator{
-		&getBlanked{},
-		&getInput{},
-		&getPower{},
-		// &getVolume{},
-		// &getMuted{},
-	}
-
 	commandEvaluators = []commandEvaluator{
 		// &setMuted{},
 		&setPower{},
@@ -29,16 +21,16 @@ type OutputStateUpdate struct {
 	api.OutputState
 }
 
-type generateActionsResponse struct {
+type generatedActions struct {
 	Actions         []action
 	Errors          []api.DeviceStateError
 	ExpectedUpdates int
 }
 
 type statusEvaluator interface {
-	GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse
+	GenerateActions(ctx context.Context, room []api.Device) generatedActions
 }
 
 type commandEvaluator interface {
-	GenerateActions(ctx context.Context, room []api.Device, env string, state api.StateRequest) generateActionsResponse
+	GenerateActions(ctx context.Context, room []api.Device, env string, state api.StateRequest) generatedActions
 }

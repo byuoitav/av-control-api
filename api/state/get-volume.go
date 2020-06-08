@@ -11,10 +11,13 @@ import (
 	"github.com/byuoitav/av-control-api/api/graph"
 )
 
-type getVolume struct{}
+type getVolume struct {
+	Logger      api.Logger
+	Environment string
+}
 
-func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
-	var resp generateActionsResponse
+func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+	var resp generatedActions
 
 	gr := graph.NewGraph(room, "audio")
 
@@ -24,7 +27,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 
 		path := graph.PathToEnd(gr, dev.ID)
 		if len(path) == 0 {
-			url, order, err := getCommand(dev, "GetVolumeByBlock", env)
+			url, order, err := getCommand(dev, "GetVolumeByBlock", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -74,7 +77,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				continue
 			}
 
-			url, order, err = getCommand(dev, "GetVolume", env)
+			url, order, err = getCommand(dev, "GetVolume", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
@@ -125,7 +128,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 			}
 		} else {
 			endDev := path[len(path)-1].Dst
-			url, order, err := getCommand(*endDev.Device, "GetVolumeByBlock", env)
+			url, order, err := getCommand(*endDev.Device, "GetVolumeByBlock", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -183,7 +186,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 					resp.ExpectedUpdates++
 				}
 			}
-			url, order, err = getCommand(*endDev.Device, "GetVolume", env)
+			url, order, err = getCommand(*endDev.Device, "GetVolume", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -245,7 +248,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 	}
 
 	if resp.ExpectedUpdates == 0 {
-		return generateActionsResponse{}
+		return generatedActions{}
 	}
 
 	if len(resp.Actions) > 0 {

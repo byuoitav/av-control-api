@@ -18,8 +18,8 @@ import (
 
 type setInput struct{}
 
-func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generateActionsResponse {
-	var resp generateActionsResponse
+func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generatedActions {
+	var resp generatedActions
 
 	var devices []api.Device
 	for k, v := range stateReq.OutputGroups {

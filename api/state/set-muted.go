@@ -14,8 +14,8 @@ import (
 
 type setMuted struct{}
 
-func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generateActionsResponse {
-	var resp generateActionsResponse
+func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generatedActions {
+	var resp generatedActions
 
 	gr := graph.NewGraph(room, "audio")
 
@@ -212,7 +212,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 
 	if resp.ExpectedUpdates == 0 {
-		return generateActionsResponse{}
+		return generatedActions{}
 	}
 
 	if len(resp.Actions) > 0 {

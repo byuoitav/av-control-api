@@ -10,13 +10,16 @@ import (
 	"github.com/byuoitav/av-control-api/api"
 )
 
-type getPower struct{}
+type getPower struct {
+	Logger      api.Logger
+	Environment string
+}
 
-func (g *getPower) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
-	var resp generateActionsResponse
+func (g *getPower) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+	var resp generatedActions
 
 	for _, dev := range room {
-		url, order, err := getCommand(dev, "GetPower", env)
+		url, order, err := getCommand(dev, "GetPower", g.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue

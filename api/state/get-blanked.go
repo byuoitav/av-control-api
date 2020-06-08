@@ -8,24 +8,24 @@ import (
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api"
+	"go.uber.org/zap"
 )
 
-type getBlanked struct{}
+type getBlanked struct {
+	Logger      api.Logger
+	Environment string
+}
 
-func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
-	var resp generateActionsResponse
-	// just doing basic get blanked for now
+func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+	var resp generatedActions
+
 	for _, dev := range room {
-		url, order, err := getCommand(dev, "GetBlanked", env)
+		url, order, err := getCommand(dev, "GetBlanked", g.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-			if dev.ID == "ITB-1108B-D1" {
-				for k := range dev.Type.Commands {
-					fmt.Printf("command: %s\n", k)
-				}
-			}
 			continue
 		case err != nil:
+			g.Logger.Warn("unable to get command", zap.String("command", "GetBlanked"), zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "blanked",
@@ -41,6 +41,7 @@ func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 		}
 		url, err = fillURL(url, params)
 		if err != nil {
+			g.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "blanked",
@@ -53,6 +54,7 @@ func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 		// build http request
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
+			g.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "blanked",
@@ -61,12 +63,15 @@ func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 
 			continue
 		}
+
 		act := action{
 			ID:       dev.ID,
 			Req:      req,
 			Order:    order,
 			Response: make(chan actionResponse),
 		}
+
+		g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 		go g.handleResponse(act.Response)
 
 		resp.Actions = append(resp.Actions, act)
@@ -85,6 +90,7 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 	close(respChan)
 
 	handleErr := func(err error) {
+		g.Logger.Warn("error handling response", zap.Any("device", aResp.Action.ID), zap.Error(err))
 		aResp.Errors <- api.DeviceStateError{
 			ID:    aResp.Action.ID,
 			Field: "blanked",
@@ -110,6 +116,7 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 		return
 	}
 
+	g.Logger.Info("Successfully got blanked state", zap.Any("device", aResp.Action.ID), zap.Boolp("blanked", state.Blanked))
 	aResp.Updates <- OutputStateUpdate{
 		ID: aResp.Action.ID,
 		OutputState: api.OutputState{

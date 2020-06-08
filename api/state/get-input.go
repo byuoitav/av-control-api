@@ -16,11 +16,14 @@ import (
 	"gonum.org/v1/gonum/graph/traverse"
 )
 
-type getInput struct{}
+type getInput struct {
+	Logger      api.Logger
+	Environment string
+}
 
 // GenerateActions makes an assumption that GetInput and GetInputByBlock will not ever be on the same device
-func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env string) generateActionsResponse {
-	var resp generateActionsResponse
+func (i *getInput) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+	var resp generatedActions
 	responses := make(chan actionResponse)
 	g := graph.NewGraph(room, "video")
 
@@ -41,7 +44,7 @@ func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 				continue
 			}
 
-			acts, errs := i.generateActionsForPath(ctx, path, env, responses)
+			acts, errs := i.generateActionsForPath(ctx, path, responses)
 			actsForOutput = append(actsForOutput, acts...)
 			errsForOutput = append(errsForOutput, errs...)
 		}
@@ -55,7 +58,7 @@ func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 
 	if resp.ExpectedUpdates == 0 {
-		return generateActionsResponse{}
+		return generatedActions{}
 	}
 
 	// combine identical actions
@@ -68,14 +71,14 @@ func (i *getInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	return resp
 }
 
-func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, env string, resps chan actionResponse) ([]action, []api.DeviceStateError) {
+func (g *getInput) generateActionsForPath(ctx context.Context, path graph.Path, resps chan actionResponse) ([]action, []api.DeviceStateError) {
 	var acts []action
 	var errs []api.DeviceStateError
 	for i := range path {
 		switch i {
 		case 0:
 			// the edge leaving the output
-			url, order, err := getCommand(*path[i].Src.Device, "GetAVInput", env)
+			url, order, err := getCommand(*path[i].Src.Device, "GetAVInput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -124,7 +127,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -175,7 +178,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -227,7 +230,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			}
 		default:
 			// the edges between devices that aren't the output
-			url, order, err := getCommand(*path[i].Src.Device, "GetAVInput", env)
+			url, order, err := getCommand(*path[i].Src.Device, "GetAVInput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -277,7 +280,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 				continue
 			}
-			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -326,7 +329,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -375,7 +378,7 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetAVInputByOutput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetAVInputByOutput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -387,55 +390,6 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 
 				return acts, errs
 
-			default:
-				params := map[string]string{
-					"address": path[i].Src.Address,
-					// "port": ,
-				}
-
-				url, err = fillURL(url, params)
-				if err != nil {
-					errs = append(errs, api.DeviceStateError{
-						ID:    path[i].Src.Device.ID,
-						Field: "input",
-						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-					})
-
-					return acts, errs
-				}
-
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				if err != nil {
-					errs = append(errs, api.DeviceStateError{
-						ID:    path[i].Src.Device.ID,
-						Field: "input",
-						Error: fmt.Sprintf("unable to build http request: %s", err),
-					})
-
-					return acts, errs
-				}
-
-				act := action{
-					ID:       path[i].Src.Device.ID,
-					Req:      req,
-					Order:    order,
-					Response: resps,
-				}
-
-				acts = append(acts, act)
-			}
-
-			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInputByOutput", env)
-			switch {
-			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-			case err != nil:
-				errs = append(errs, api.DeviceStateError{
-					ID:    path[i].Src.Device.ID,
-					Field: "input",
-					Error: err.Error(),
-				})
-
-				return acts, errs
 			default:
 				params := map[string]string{
 					"address": path[i].Src.Address,
@@ -474,7 +428,56 @@ func (i *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				acts = append(acts, act)
 			}
 
-			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInputByOutput", env)
+			url, order, err = getCommand(*path[i].Src.Device, "GetVideoInputByOutput", g.Environment)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				errs = append(errs, api.DeviceStateError{
+					ID:    path[i].Src.Device.ID,
+					Field: "input",
+					Error: err.Error(),
+				})
+
+				return acts, errs
+			default:
+				params := map[string]string{
+					"address": path[i].Src.Address,
+					// "port": ,
+				}
+
+				url, err = fillURL(url, params)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+					})
+
+					return acts, errs
+				}
+
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				if err != nil {
+					errs = append(errs, api.DeviceStateError{
+						ID:    path[i].Src.Device.ID,
+						Field: "input",
+						Error: fmt.Sprintf("unable to build http request: %s", err),
+					})
+
+					return acts, errs
+				}
+
+				act := action{
+					ID:       path[i].Src.Device.ID,
+					Req:      req,
+					Order:    order,
+					Response: resps,
+				}
+
+				acts = append(acts, act)
+			}
+
+			url, order, err = getCommand(*path[i].Src.Device, "GetAudioInputByOutput", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:

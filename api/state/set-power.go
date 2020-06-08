@@ -10,8 +10,8 @@ import (
 
 type setPower struct{}
 
-func (s *setPower) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generateActionsResponse {
-	var resp generateActionsResponse
+func (s *setPower) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generatedActions {
+	var resp generatedActions
 
 	responses := make(chan actionResponse)
 
@@ -82,7 +82,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 
 	if resp.ExpectedUpdates == 0 {
-		return generateActionsResponse{}
+		return generatedActions{}
 	}
 
 	if len(resp.Actions) > 0 {

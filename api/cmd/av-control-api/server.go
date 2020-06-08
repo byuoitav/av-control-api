@@ -10,6 +10,7 @@ import (
 
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
+	"github.com/byuoitav/av-control-api/api/log"
 	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
@@ -37,7 +38,6 @@ func main() {
 	pflag.StringVarP(&env, "env", "e", "default", "The deployment environment for the API")
 	pflag.Parse()
 
-	// build the logger
 	config := zap.Config{
 		Level:       zap.NewAtomicLevelAt(zapcore.Level(logLevel)),
 		Development: false,
@@ -68,6 +68,9 @@ func main() {
 		fmt.Printf("unable to build logger: %s", err)
 		os.Exit(1)
 	}
+	defer logger.Sync()
+
+	log := log.Wrap(logger)
 
 	db := &couch.DataService{
 		// TODO use flags
@@ -77,12 +80,14 @@ func main() {
 	}
 
 	gs := &state.GetSetter{
-		Logger:      logger,
+		Logger:      log,
 		Environment: env,
 	}
 
+	middleware := handlers.Middleware{}
+
 	handlers := handlers.Handlers{
-		Logger:      logger,
+		Logger:      log,
 		DataService: db,
 		State:       gs,
 	}
@@ -97,9 +102,12 @@ func main() {
 		return c.String(http.StatusOK, "healthy")
 	})
 
-	e.GET("/room/:room", handlers.GetRoomConfiguration)
-	e.GET("/room/:room/state", handlers.GetRoomState)
-	e.PUT("/room/:room/state", handlers.SetRoomState)
+	api := e.Group("/v1", middleware.RequestID)
+
+	// e.GET("/room/:room", handlers.GetRoomConfiguration)
+	api.GET("/room/:room/state", handlers.GetRoomState)
+	api.PUT("/room/:room/state", handlers.SetRoomState)
+
 	e.GET("/room/:room/graph/:type", handlers.GetRoomGraph)
 	e.GET("/room/:room/graph/:type/transpose", handlers.GetRoomGraphTranspose)
 
@@ -108,7 +116,7 @@ func main() {
 		logger.Fatal("unable to bind listener", zap.Error(err))
 	}
 
-	logger.Info("Starting server", zap.String("on", lis.Addr().String()))
+	log.Info("Starting server", zap.String("on", lis.Addr().String()))
 	err = e.Server.Serve(lis)
 	switch {
 	case errors.Is(err, http.ErrServerClosed):

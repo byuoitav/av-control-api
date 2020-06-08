@@ -64,7 +64,7 @@ func (gs *GetSetter) Set(ctx context.Context, room []api.Device, req api.StateRe
 	errors := make(chan api.DeviceStateError)
 
 	for id := range actsByID {
-		executeActions(ctx, actsByID[id], updates, errors)
+		gs.executeActions(ctx, actsByID[id], updates, errors)
 	}
 
 	updatesReceived := 0

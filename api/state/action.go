@@ -2,12 +2,12 @@ package state
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/byuoitav/av-control-api/api"
+	"go.uber.org/zap"
 )
 
 type action struct {
@@ -60,7 +60,7 @@ type actionResponse struct {
 	Updates chan OutputStateUpdate
 }
 
-func executeActions(ctx context.Context, actions []action, updates chan OutputStateUpdate, errors chan api.DeviceStateError) {
+func (gs *GetSetter) executeActions(ctx context.Context, actions []action, updates chan OutputStateUpdate, errors chan api.DeviceStateError) {
 	for i := range actions {
 		go func(action action) {
 			aResp := actionResponse{
@@ -69,7 +69,8 @@ func executeActions(ctx context.Context, actions []action, updates chan OutputSt
 				Updates: updates,
 			}
 
-			fmt.Printf("sending request to %s\n", action.Req.URL.String())
+			log := gs.Logger.With(zap.Any("device", action.ID), zap.String("method", action.Req.Method), zap.String("url", action.Req.URL.String()))
+			log.Info("Sending request")
 
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
@@ -78,6 +79,7 @@ func executeActions(ctx context.Context, actions []action, updates chan OutputSt
 
 			resp, err := http.DefaultClient.Do(action.Req)
 			if err != nil {
+				log.Warn("unable to make request", zap.Error(err))
 				aResp.Error = err
 				action.Response <- aResp
 				return
@@ -89,10 +91,13 @@ func executeActions(ctx context.Context, actions []action, updates chan OutputSt
 
 			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
+				log.Warn("unable to read response", zap.Error(err))
 				aResp.Error = err
 				action.Response <- aResp
 				return
 			}
+
+			log.Debug("response", zap.Int("statusCode", resp.StatusCode), zap.ByteString("body", body))
 
 			aResp.Body = body
 			action.Response <- aResp
