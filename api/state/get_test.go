@@ -22,8 +22,8 @@ type getStateTest struct {
 		SetBaseURL(string)
 	}
 
-	httpResps map[string]string
-	apiResp   api.StateResponse
+	driverResps map[string]string
+	apiResp     api.StateResponse
 }
 
 var getTests = []getStateTest{
@@ -31,7 +31,7 @@ var getTests = []getStateTest{
 		name:          "Simple",
 		deviceService: &mock.SimpleRoom{},
 		env:           "default",
-		httpResps: map[string]string{
+		driverResps: map[string]string{
 			"/ITB-1101-D1.av/GetPower":   `{"power": "on"}`,
 			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!1"}`,
 			"/ITB-1101-D1.av/GetBlanked": `{"blanked": false}`,
@@ -62,7 +62,7 @@ var getTests = []getStateTest{
 		name:          "Simple2",
 		deviceService: &mock.SimpleRoom{},
 		env:           "default",
-		httpResps: map[string]string{
+		driverResps: map[string]string{
 			"/ITB-1101-D1.av/GetPower":   `{"power": "standby"}`,
 			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!2"}`,
 			"/ITB-1101-D1.av/GetBlanked": `{"blanked": true}`,
@@ -99,7 +99,7 @@ func TestGetState(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// start http server
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintln(w, tt.httpResps[r.URL.Path])
+				fmt.Fprintln(w, tt.driverResps[r.URL.Path])
 			}))
 			t.Cleanup(func() {
 				ts.Close()

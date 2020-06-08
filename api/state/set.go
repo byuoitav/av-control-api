@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrNoPowerSettable = errors.New("can't set power of given device")
-	ErrNoStateSettable = errors.New("can't set the state of any devices in this room")
+	// ErrNoPowerSettable = errors.New("can't set power of given device")
+	ErrNoStateSettable = errors.New("nothing to do for the given request and room")
 )
 
 func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, env string) (api.StateResponse, error) {
@@ -32,6 +32,7 @@ func SetDevices(ctx context.Context, req api.StateRequest, room []api.Device, en
 		if len(stateResp.Errors) == 0 {
 			return api.StateResponse{}, ErrNoStateSettable
 		}
+
 		return stateResp, nil
 	}
 
