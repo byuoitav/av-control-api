@@ -17,7 +17,7 @@ var getPowerTest = []stateTest{
 			BaseURL: "http://host",
 		},
 		env: "default",
-		resp: generateActionsResponse{
+		resp: generatedActions{
 			Actions: []action{
 				action{
 					ID:  "ITB-1101-D1",
@@ -41,7 +41,8 @@ func TestGetPower(t *testing.T) {
 			}
 
 			var get getPower
-			resp := get.GenerateActions(ctx, room, tt.env)
+			get.Environment = "default"
+			resp := get.GenerateActions(ctx, room)
 
 			if diff := cmp.Diff(tt.resp, resp); diff != "" {
 				t.Errorf("generated incorrect actions (-want, +got):\n%s", diff)

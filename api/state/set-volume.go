@@ -14,19 +14,19 @@ import (
 
 type setVolume struct{}
 
-func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generatedActions {
+func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env string, stateReq api.StateRequest) generatedActions {
 	var resp generatedActions
-	gr := graph.NewGraph(room, "audio")
+	gr := graph.NewGraph(room.Devices, "audio")
 
 	responses := make(chan actionResponse)
 
 	var devices []api.Device
 
-	for k, v := range stateReq.OutputGroups {
+	for k, v := range stateReq.Devices {
 		if v.Volume != nil {
-			for i := range room {
-				if room[i].ID == k {
-					devices = append(devices, room[i])
+			for i := range room.Devices {
+				if room.Devices[i].ID == k {
+					devices = append(devices, room.Devices[i])
 					break
 				}
 			}
@@ -55,7 +55,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				params := map[string]string{
 					"address": dev.Address,
 					"input":   string(dev.ID),
-					"volume":  strconv.Itoa(*stateReq.OutputGroups[dev.ID].Volume),
+					"volume":  strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
 				}
 
 				url, err = fillURL(url, params)
@@ -107,7 +107,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 			default:
 				params := map[string]string{
 					"address": dev.Address,
-					"level":   strconv.Itoa(*stateReq.OutputGroups[dev.ID].Volume),
+					"level":   strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
 				}
 
 				url, err = fillURL(url, params)
@@ -166,7 +166,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room []api.Device, env 
 				params := map[string]string{
 					"address": endDev.Address,
 					"input":   port.Name,
-					"volume":  strconv.Itoa(*stateReq.OutputGroups[dev.ID].Volume),
+					"volume":  strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
 				}
 
 				url, err = fillURL(url, params)
@@ -240,13 +240,13 @@ func (s *setVolume) handleResponses(respChan chan actionResponse, expectedResps,
 				Error: fmt.Sprintf("unable to parse response from driver: %v. response\n%s", err, resp.Body),
 			}
 
-			resp.Updates <- OutputStateUpdate{}
+			resp.Updates <- DeviceStateUpdate{}
 			continue
 		}
 
-		resp.Updates <- OutputStateUpdate{
+		resp.Updates <- DeviceStateUpdate{
 			ID: resp.Action.ID,
-			OutputState: api.OutputState{
+			DeviceState: api.DeviceState{
 				Volume: &state.Volume,
 			},
 		}

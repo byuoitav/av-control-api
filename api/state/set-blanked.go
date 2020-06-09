@@ -8,21 +8,25 @@ import (
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api"
+	"go.uber.org/zap"
 )
 
-type setBlanked struct{}
+type setBlanked struct {
+	Logger      api.Logger
+	Environment string
+}
 
-func (s *setBlanked) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generatedActions {
+func (s *setBlanked) GenerateActions(ctx context.Context, room api.Room, stateReq api.StateRequest) generatedActions {
 	var resp generatedActions
 
 	responses := make(chan actionResponse)
 
 	var devices []api.Device
-	for k, v := range stateReq.OutputGroups {
+	for k, v := range stateReq.Devices {
 		if v.Blanked != nil {
-			for i := range room {
-				if room[i].ID == k {
-					devices = append(devices, room[i])
+			for i := range room.Devices {
+				if room.Devices[i].ID == k {
+					devices = append(devices, room.Devices[i])
 					break
 				}
 			}
@@ -35,17 +39,18 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 
 	for _, dev := range devices {
 		var cmd string
-		if *stateReq.OutputGroups[dev.ID].Blanked == true {
+		if *stateReq.Devices[dev.ID].Blanked == true {
 			cmd = "BlankDisplay"
 		} else {
 			cmd = "UnblankDisplay"
 		}
 
-		url, order, err := getCommand(dev, cmd, env)
+		url, order, err := getCommand(dev, cmd, s.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue
 		case err != nil:
+			s.Logger.Warn("unable to get command", zap.String("command", "SetBlanked"), zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "setBlanked",
@@ -60,6 +65,7 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 		}
 		url, err = fillURL(url, params)
 		if err != nil {
+			s.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "setBlanked",
@@ -71,6 +77,7 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
+			s.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "setBlanked",
@@ -86,6 +93,8 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room []api.Device, env
 			Order:    order,
 			Response: responses,
 		}
+
+		s.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 
 		resp.Actions = append(resp.Actions, act)
 		resp.ExpectedUpdates++
@@ -114,22 +123,38 @@ func (s *setBlanked) handleResponses(respChan chan actionResponse, expectedResps
 	received := 0
 
 	for resp := range respChan {
-		received++
-		var state blank
-		if err := json.Unmarshal(resp.Body, &state); err != nil {
+		handleErr := func(err error) {
+			s.Logger.Warn("error handling response", zap.Any("device", resp.Action.ID), zap.Error(err))
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
 				Field: "setBlanked",
-				Error: fmt.Sprintf("unable to parse response from driver: %v. response:\n%s", err, resp.Body),
+				Error: err.Error(),
 			}
 
-			resp.Updates <- OutputStateUpdate{}
+			resp.Updates <- DeviceStateUpdate{}
+		}
+		received++
+
+		if resp.Error != nil {
+			handleErr(fmt.Errorf("unable to make http request: %w", resp.Error))
 			continue
 		}
 
-		resp.Updates <- OutputStateUpdate{
+		if resp.StatusCode/100 != 2 {
+			handleErr(fmt.Errorf("%v response from driver: %s", resp.StatusCode, resp.Body))
+			continue
+		}
+
+		var state blank
+		if err := json.Unmarshal(resp.Body, &state); err != nil {
+			handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
+			continue
+		}
+
+		s.Logger.Info("Successfully set blanked state", zap.Any("device", resp.Action.ID), zap.Bool("blanked", state.Blanked))
+		resp.Updates <- DeviceStateUpdate{
 			ID: resp.Action.ID,
-			OutputState: api.OutputState{
+			DeviceState: api.DeviceState{
 				Blanked: &state.Blanked,
 			},
 		}

@@ -12,7 +12,7 @@ type stateTest struct {
 	room          string
 	deviceService api.DeviceService
 	env           string
-	resp          generateActionsResponse
+	resp          generatedActions
 }
 
 func urlParse(rawurl string) *url.URL {

@@ -16,9 +16,9 @@ var (
 	}
 )
 
-type OutputStateUpdate struct {
+type DeviceStateUpdate struct {
 	ID api.DeviceID
-	api.OutputState
+	api.DeviceState
 }
 
 type generatedActions struct {
@@ -28,7 +28,7 @@ type generatedActions struct {
 }
 
 type statusEvaluator interface {
-	GenerateActions(ctx context.Context, room []api.Device) generatedActions
+	GenerateActions(ctx context.Context, room api.Room) generatedActions
 }
 
 type commandEvaluator interface {

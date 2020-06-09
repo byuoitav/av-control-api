@@ -39,8 +39,8 @@ var getTests = []getStateTest{
 			"/ITB-1101-D1.av/GetVolume":  `{"volume": 30}`,
 		},
 		apiResp: api.StateResponse{
-			OutputGroups: map[api.DeviceID]api.OutputGroupState{
-				"ITB-1101-D1": api.OutputGroupState{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
 					Input: &api.Input{
@@ -70,8 +70,8 @@ var getTests = []getStateTest{
 			"/ITB-1101-D1.av/GetVolume":  `{"volume": 100}`,
 		},
 		apiResp: api.StateResponse{
-			OutputGroups: map[api.DeviceID]api.OutputGroupState{
-				"ITB-1101-D1": api.OutputGroupState{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(false),
 					Blanked:   boolP(true),
 					Input: &api.Input{

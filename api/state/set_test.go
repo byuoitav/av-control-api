@@ -33,8 +33,8 @@ var setTests = []setStateTest{
 		env:           "default",
 		deviceService: &mock.SimpleRoom{},
 		apiReq: api.StateRequest{
-			OutputGroups: map[api.DeviceID]api.OutputGroupState{
-				"ITB-1101-D1": api.OutputGroupState{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(true),
 				},
 			},
@@ -43,8 +43,8 @@ var setTests = []setStateTest{
 			"/ITB-1101-D1.av/SetPower/on": `{"power": "on"}`,
 		},
 		apiResp: api.StateResponse{
-			OutputGroups: map[api.DeviceID]api.OutputGroupState{
-				"ITB-1101-D1": api.OutputGroupState{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(true),
 				},
 			},
@@ -73,7 +73,12 @@ func TestSetState(t *testing.T) {
 				t.Errorf("unable to get room: %s", err)
 			}
 
-			resp, err := SetDevices(ctx, tt.apiReq, room, tt.env)
+			gs := &GetSetter{
+				Environment: tt.env,
+				Logger:      nil,
+			}
+
+			resp, err := gs.Set(ctx, room, tt.apiReq)
 			if err != nil {
 				t.Errorf("unable to set room state: %s", err)
 			}

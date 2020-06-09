@@ -10,23 +10,27 @@ import (
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/graph"
+	"go.uber.org/zap"
 	gonum "gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/traverse"
 )
 
-type setInput struct{}
+type setInput struct {
+	Logger      api.Logger
+	Environment string
+}
 
-func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env string, stateReq api.StateRequest) generatedActions {
+func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq api.StateRequest) generatedActions {
 	var resp generatedActions
 
 	var devices []api.Device
-	for k, v := range stateReq.OutputGroups {
+	for k, v := range stateReq.Devices {
 		if v.Input != nil {
-			for i := range room {
-				if room[i].ID == k {
-					devices = append(devices, room[i])
+			for i := range room.Devices {
+				if room.Devices[i].ID == k {
+					devices = append(devices, room.Devices[i])
 					break
 				}
 			}
@@ -38,7 +42,7 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	}
 	responses := make(chan actionResponse)
 
-	g := graph.NewGraph(room, "video")
+	g := graph.NewGraph(room.Devices, "video")
 	tmpOutputs := graph.Leaves(g)
 	var outputs []graph.Node
 
@@ -60,18 +64,19 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 		var actsForOutput []action
 		var errsForOutput []api.DeviceStateError
 
-		path := graph.PathFromTo(t, &paths, device.ID, *stateReq.OutputGroups[device.ID].Input.Video)
+		path := graph.PathFromTo(t, &paths, device.ID, *stateReq.Devices[device.ID].Input.Video)
 		if len(path) == 0 {
+			s.Logger.Warn(fmt.Sprintf("unable to find a path from %s to %v", device.ID, *stateReq.Devices[device.ID].Input), zap.Any("device", device.ID))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    device.ID,
 				Field: "setInput",
-				Error: fmt.Sprintf("no path from %s to %v", device.ID, *stateReq.OutputGroups[device.ID].Input),
+				Error: fmt.Sprintf("no path from %s to %v", device.ID, *stateReq.Devices[device.ID].Input),
 			})
 
 			continue
 		}
 
-		acts, errs := s.generateActionsForPath(ctx, path, env, responses, stateReq)
+		acts, errs := s.generateActionsForPath(ctx, path, s.Environment, responses, stateReq)
 		actsForOutput = append(actsForOutput, acts...)
 		errsForOutput = append(errsForOutput, errs...)
 
@@ -86,7 +91,7 @@ func (s *setInput) GenerateActions(ctx context.Context, room []api.Device, env s
 	if resp.ExpectedUpdates == 0 {
 		return resp
 	}
-	fmt.Printf("expected: %d\n", resp.ExpectedUpdates)
+
 	resp.Actions = uniqueActions(resp.Actions)
 
 	if len(resp.Actions) > 0 {
@@ -107,10 +112,11 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 	}
 
 	for i := range path {
-		url, order, err := getCommand(*path[i].Src.Device, "SetInput", env)
+		url, order, err := getCommand(*path[i].Src.Device, "SetInput", s.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 		case err != nil:
+			s.Logger.Warn("unable to get command", zap.String("command", "SetInput"), zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
@@ -120,8 +126,6 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			return acts, errs
 
 		default:
-			fmt.Printf("src: %s %s %s\n", path[i].Src.Device.ID, path[i].SrcPort.Name, path[i].Src.Device.Address)
-			fmt.Printf("dst: %s %s %s\n", path[i].Dst.Device.ID, path[i].DstPort.Name, path[i].Dst.Device.Address)
 			params := map[string]string{
 				"address":     path[i].Src.Address,
 				"port":        path[i].SrcPort.Name,
@@ -130,6 +134,7 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 
 			url, err = fillURL(url, params)
 			if err != nil {
+				s.Logger.Warn("unable to fill url", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
 				errs = append(errs, api.DeviceStateError{
 					ID:    path[i].Src.Device.ID,
 					Field: "setInput",
@@ -141,6 +146,7 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			if err != nil {
+				s.Logger.Warn("unable to build request", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
 				errs = append(errs, api.DeviceStateError{
 					ID:    path[i].Src.Device.ID,
 					Field: "setInput",
@@ -157,6 +163,8 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 				Response: resps,
 			}
 
+			s.Logger.Info("Successfully built action", zap.Any("device", path[i].Src.Device.ID))
+
 			acts = append(acts, act)
 
 			continue
@@ -166,14 +174,8 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue
-			errs = append(errs, api.DeviceStateError{
-				ID:    path[i].Src.Device.ID,
-				Field: "setInput",
-				Error: fmt.Sprintf("unable to find command to set input on %s", path[i].Src.Device.ID),
-			})
-
-			return acts, errs
 		case err != nil:
+			s.Logger.Warn("unable to get command", zap.String("command", "SetInputByOutput"), zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
@@ -191,6 +193,7 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 
 		url, err = fillURL(url, params)
 		if err != nil {
+			s.Logger.Warn("unable to fill url", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
@@ -202,6 +205,7 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
+			s.Logger.Warn("unable to build request", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
@@ -217,6 +221,8 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			Order:    order,
 			Response: resps,
 		}
+
+		s.Logger.Info("Successfully built action", zap.Any("device", path[i].Src.Device.ID))
 
 		acts = append(acts, act)
 	}
@@ -253,11 +259,14 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 
 	for _, resp := range resps {
 		handleErr := func(err error) {
+			s.Logger.Warn("error handling response", zap.Any("device", resp.Action.ID), zap.Error(err))
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
 				Field: "setInput",
 				Error: err.Error(),
 			}
+
+			resp.Updates <- DeviceStateUpdate{}
 		}
 
 		if resp.Error != nil {
@@ -276,7 +285,6 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 			continue
 		}
 
-		fmt.Printf("%s input: %s\n", resp.Action.ID, resp.Body)
 		status[resp.Action.ID] = append(status[resp.Action.ID], state)
 	}
 
@@ -389,15 +397,17 @@ func (s *setInput) handleResponses(respChan chan actionResponse, expectedResps, 
 			in := api.Input{
 				Video: &deepest.Device.ID,
 			}
-			resps[0].Updates <- OutputStateUpdate{
+			// yeah i feel like i can't just always give it resps[0]...
+			s.Logger.Info("successfully set input", zap.Any("device", resps[0].Action.ID), zap.Any("input", in))
+			resps[0].Updates <- DeviceStateUpdate{
 				ID: device.Device.ID,
-				OutputState: api.OutputState{
+				DeviceState: api.DeviceState{
 					Input: &in,
 				},
 			}
 		} else {
 			states := status[deepest.Device.ID]
-
+			s.Logger.Warn("unable to traverse back to valid input")
 			resps[0].Errors <- api.DeviceStateError{
 				ID:    device.Device.ID,
 				Field: "input",

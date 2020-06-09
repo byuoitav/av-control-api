@@ -9,6 +9,7 @@ import (
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/graph"
+	"go.uber.org/zap"
 )
 
 type getMuted struct {
@@ -16,20 +17,21 @@ type getMuted struct {
 	Environment string
 }
 
-func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generatedActions {
 	var resp generatedActions
 
-	gr := graph.NewGraph(room, "audio")
+	gr := graph.NewGraph(room.Devices, "audio")
 
 	responses := make(chan actionResponse)
 
-	for _, dev := range room {
+	for _, dev := range room.Devices {
 		path := graph.PathToEnd(gr, dev.ID)
 		if len(path) == 0 {
 			url, order, err := getCommand(dev, "GetMutedByBlock", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
+				g.Logger.Warn("unable to get command", zap.String("command", "GetMutedByBlock"), zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Error: err.Error(),
@@ -43,6 +45,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 
 				url, err = fillURL(url, params)
 				if err != nil {
+					g.Logger.Warn("unable to fill url", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -54,6 +57,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
+					g.Logger.Warn("unable to build request", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -70,6 +74,8 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 					Response: responses,
 				}
 
+				g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
 				continue
@@ -81,6 +87,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
+				g.Logger.Warn("unable to get command", zap.String("command", "GetMuted"), zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "muted",
@@ -95,6 +102,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 
 				url, err = fillURL(url, params)
 				if err != nil {
+					g.Logger.Warn("unable to fill url", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -106,6 +114,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
+					g.Logger.Warn("unable to build request", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -122,6 +131,8 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 					Response: responses,
 				}
 
+				g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
 			}
@@ -132,6 +143,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
+				g.Logger.Warn("unable to get command", zap.String("command", "GetMutedByBlock"), zap.Any("device", endDev.Device.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "muted",
@@ -153,6 +165,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 
 				url, err = fillURL(url, params)
 				if err != nil {
+					g.Logger.Warn("unable to fill url", zap.Any("device", endDev.Device.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -164,6 +177,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
+					g.Logger.Warn("unable to build request", zap.Any("device", endDev.Device.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -179,6 +193,8 @@ func (g *getMuted) GenerateActions(ctx context.Context, room []api.Device) gener
 					Order:    order,
 					Response: responses,
 				}
+
+				g.Logger.Info("Successfully built action", zap.Any("device", endDev.Device.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
@@ -210,22 +226,37 @@ func (g *getMuted) handleResponses(respChan chan actionResponse, expectedResps, 
 	received := 0
 
 	for resp := range respChan {
-		received++
-		var state muted
-		if err := json.Unmarshal(resp.Body, &state); err != nil {
+		handleErr := func(err error) {
+			g.Logger.Warn("error handling response", zap.Any("device", resp.Action.ID), zap.Error(err))
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
 				Field: "muted",
-				Error: fmt.Sprintf("unable to parse response from driver: %v. response:\n%s", err, resp.Body),
+				Error: err.Error(),
 			}
 
-			resp.Updates <- OutputStateUpdate{}
+			resp.Updates <- DeviceStateUpdate{}
+		}
+		received++
+		if resp.Error != nil {
+			handleErr(fmt.Errorf("unable to make http request: %w", resp.Error))
 			continue
 		}
 
-		resp.Updates <- OutputStateUpdate{
+		if resp.StatusCode/100 != 2 {
+			handleErr(fmt.Errorf("%v response from driver: %s", resp.StatusCode, resp.Body))
+			continue
+		}
+
+		var state muted
+		if err := json.Unmarshal(resp.Body, &state); err != nil {
+			handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
+			continue
+		}
+
+		g.Logger.Info("Successfully got muted state", zap.Any("device", resp.Action.ID), zap.Boolp("muted", &state.Muted))
+		resp.Updates <- DeviceStateUpdate{
 			ID: resp.Action.ID,
-			OutputState: api.OutputState{
+			DeviceState: api.DeviceState{
 				Muted: &state.Muted,
 			},
 		}

@@ -14,9 +14,9 @@ var (
 )
 
 // Get .
-func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateResponse, error) {
+func (gs *GetSetter) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
 	stateResp := api.StateResponse{
-		OutputGroups: make(map[api.DeviceID]api.OutputGroupState),
+		Devices: make(map[api.DeviceID]api.DeviceState),
 	}
 
 	id := api.RequestID(ctx)
@@ -89,7 +89,7 @@ func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateRespo
 	log.Info("Done ordering commands")
 
 	// execute commands
-	updates := make(chan OutputStateUpdate)
+	updates := make(chan DeviceStateUpdate)
 	errors := make(chan api.DeviceStateError)
 
 	for id := range actsByID {
@@ -107,7 +107,7 @@ func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateRespo
 				break
 			}
 
-			curState := stateResp.OutputGroups[update.ID]
+			curState := stateResp.Devices[update.ID]
 
 			if update.PoweredOn != nil {
 				curState.PoweredOn = update.PoweredOn
@@ -134,7 +134,7 @@ func (gs *GetSetter) Get(ctx context.Context, room []api.Device) (api.StateRespo
 			// 	curState.Outputs = update.Outputs
 			// }
 
-			stateResp.OutputGroups[update.ID] = curState
+			stateResp.Devices[update.ID] = curState
 		case err := <-errors:
 			stateResp.Errors = append(stateResp.Errors, err)
 		}

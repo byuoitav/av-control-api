@@ -16,10 +16,10 @@ type getBlanked struct {
 	Environment string
 }
 
-func (g *getBlanked) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+func (g *getBlanked) GenerateActions(ctx context.Context, room api.Room) generatedActions {
 	var resp generatedActions
 
-	for _, dev := range room {
+	for _, dev := range room.Devices {
 		url, order, err := getCommand(dev, "GetBlanked", g.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
@@ -97,7 +97,7 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 			Error: err.Error(),
 		}
 
-		aResp.Updates <- OutputStateUpdate{}
+		aResp.Updates <- DeviceStateUpdate{}
 	}
 
 	if aResp.Error != nil {
@@ -117,9 +117,9 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 	}
 
 	g.Logger.Info("Successfully got blanked state", zap.Any("device", aResp.Action.ID), zap.Boolp("blanked", state.Blanked))
-	aResp.Updates <- OutputStateUpdate{
+	aResp.Updates <- DeviceStateUpdate{
 		ID: aResp.Action.ID,
-		OutputState: api.OutputState{
+		DeviceState: api.DeviceState{
 			Blanked: state.Blanked,
 		},
 	}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/byuoitav/av-control-api/api"
+	"go.uber.org/zap"
 )
 
 type getPower struct {
@@ -15,15 +16,16 @@ type getPower struct {
 	Environment string
 }
 
-func (g *getPower) GenerateActions(ctx context.Context, room []api.Device) generatedActions {
+func (g *getPower) GenerateActions(ctx context.Context, room api.Room) generatedActions {
 	var resp generatedActions
 
-	for _, dev := range room {
+	for _, dev := range room.Devices {
 		url, order, err := getCommand(dev, "GetPower", g.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue
 		case err != nil:
+			g.Logger.Warn("unable to get command", zap.String("command", "GetPower"), zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "poweredOn",
@@ -38,6 +40,7 @@ func (g *getPower) GenerateActions(ctx context.Context, room []api.Device) gener
 		}
 		url, err = fillURL(url, params)
 		if err != nil {
+			g.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "poweredOn",
@@ -50,6 +53,7 @@ func (g *getPower) GenerateActions(ctx context.Context, room []api.Device) gener
 		// build http request
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
+			g.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "poweredOn",
@@ -64,6 +68,7 @@ func (g *getPower) GenerateActions(ctx context.Context, room []api.Device) gener
 			Order:    order,
 			Response: make(chan actionResponse),
 		}
+		g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 		go g.handleResponse(act.Response)
 
 		resp.Actions = append(resp.Actions, act)
@@ -85,13 +90,14 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 	close(respChan)
 
 	handleErr := func(err error) {
+		g.Logger.Warn("error handling response", zap.Any("device", aResp.Action.ID), zap.Error(err))
 		aResp.Errors <- api.DeviceStateError{
 			ID:    aResp.Action.ID,
 			Field: "poweredOn",
 			Error: err.Error(),
 		}
 
-		aResp.Updates <- OutputStateUpdate{}
+		aResp.Updates <- DeviceStateUpdate{}
 	}
 
 	if aResp.Error != nil {
@@ -109,9 +115,10 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 		state.PoweredOn = state.Power == "on"
 	}
 
-	aResp.Updates <- OutputStateUpdate{
+	g.Logger.Info("Successfully got power state", zap.Any("device", aResp.Action.ID), zap.Boolp("blanked", &state.PoweredOn))
+	aResp.Updates <- DeviceStateUpdate{
 		ID: aResp.Action.ID,
-		OutputState: api.OutputState{
+		DeviceState: api.DeviceState{
 			PoweredOn: &state.PoweredOn,
 		},
 	}
