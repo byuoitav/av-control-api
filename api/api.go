@@ -6,25 +6,15 @@ import (
 )
 
 type StateRequest struct {
-	OutputGroups map[DeviceID]OutputGroupState `json:"outputGroups,omitempty"`
+	Devices map[DeviceID]DeviceState `json:"devices,omitempty"`
 }
 
 type StateResponse struct {
-	OutputGroups map[DeviceID]OutputGroupState `json:"outputGroups,omitempty"`
-	Errors       []DeviceStateError            `json:"errors,omitempty"`
+	Devices map[DeviceID]DeviceState `json:"devices,omitempty"`
+	Errors  []DeviceStateError       `json:"errors,omitempty"`
 }
 
-type OutputGroupState struct {
-	PoweredOn *bool  `json:"poweredOn,omitempty"`
-	Input     *Input `json:"input,omitempty"`
-	Blanked   *bool  `json:"blanked,omitempty"`
-	Volume    *int   `json:"volume,omitempty"`
-	Muted     *bool  `json:"muted,omitempty"`
-
-	Outputs map[DeviceID]OutputState `json:"outputs,omitempty"`
-}
-
-type OutputState struct {
+type DeviceState struct {
 	PoweredOn *bool  `json:"poweredOn,omitempty"`
 	Input     *Input `json:"input,omitempty"`
 	Blanked   *bool  `json:"blanked,omitempty"`

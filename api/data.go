@@ -7,15 +7,12 @@ import (
 )
 
 type DeviceService interface {
-	// Device(context.Context, string) (Device, error)
-	Room(context.Context, string) ([]Device, error)
+	Room(context.Context, string) (Room, error)
 }
 
 type Room struct {
-	ID           string `json:"id"`
-	OutputGroups map[string]struct {
-		Outputs []string `json:"outputs,omitempty"`
-	} `json:"outputGroups,omitempty"`
+	ID      string   `json:"id"`
+	Devices []Device `json:"devices"`
 }
 
 type Device struct {
