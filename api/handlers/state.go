@@ -33,7 +33,7 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 
 	log.Info("Got room. Getting state", zap.Int("numDevices", len(room.Devices)))
 
-	resp, err := h.State.Get(ctx, room.Devices)
+	resp, err := h.State.Get(ctx, room)
 	if err != nil {
 		log.Warn("failed to get state", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -76,7 +76,7 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 
 	log.Info("Got room. Setting state", zap.Int("numDevices", len(room.Devices)))
 
-	resp, err := h.State.Set(ctx, room.Devices, stateReq)
+	resp, err := h.State.Set(ctx, room, stateReq)
 	if err != nil {
 		log.Warn("failed to set state", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())

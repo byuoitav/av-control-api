@@ -9,7 +9,7 @@ import (
 var (
 	commandEvaluators = []commandEvaluator{
 		// &setMuted{},
-		&setPower{},
+		// &setPower{},
 		// &setVolume{},
 		&setBlanked{},
 		// &setInput{},
@@ -32,5 +32,5 @@ type statusEvaluator interface {
 }
 
 type commandEvaluator interface {
-	GenerateActions(ctx context.Context, room []api.Device, env string, state api.StateRequest) generatedActions
+	GenerateActions(ctx context.Context, room api.Room, state api.StateRequest) generatedActions
 }

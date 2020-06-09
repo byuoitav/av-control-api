@@ -12,6 +12,7 @@ import (
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
 	"github.com/byuoitav/av-control-api/api/log"
+	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -80,6 +81,7 @@ func main() {
 
 	log := log.Wrap(logger)
 
+	// build the data service
 	var dsOpts []couch.Option
 	if len(dbUsername) > 0 {
 		dsOpts = append(dsOpts, couch.WithBasicAuth(dbUsername, dbPassword))
@@ -94,17 +96,18 @@ func main() {
 		logger.Fatal("unable to connect to dataservice", zap.Error(err))
 	}
 
-	//gs := &state.GetSetter{
-	//	Logger:      log,
-	//	Environment: env,
-	//}
+	// build the getsetter
+	gs := &state.GetSetter{
+		Logger:      log,
+		Environment: env,
+	}
 
+	// build http stuff
 	middleware := handlers.Middleware{}
-
 	handlers := handlers.Handlers{
 		Logger:      log,
 		DataService: ds,
-		//State:       gs,
+		State:       gs,
 	}
 
 	e := echo.New()
@@ -120,8 +123,8 @@ func main() {
 	api := e.Group("/v1", middleware.RequestID)
 
 	api.GET("/room/:room", handlers.GetRoomConfiguration)
-	//api.GET("/room/:room/state", handlers.GetRoomState)
-	//api.PUT("/room/:room/state", handlers.SetRoomState)
+	api.GET("/room/:room/state", handlers.GetRoomState)
+	api.PUT("/room/:room/state", handlers.SetRoomState)
 
 	//e.GET("/room/:room/graph/:type", handlers.GetRoomGraph)
 	//e.GET("/room/:room/graph/:type/transpose", handlers.GetRoomGraphTranspose)
