@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -11,7 +12,6 @@ import (
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
 	"github.com/byuoitav/av-control-api/api/log"
-	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -27,6 +27,11 @@ func main() {
 		authAddr    string
 		authToken   string
 		disableAuth bool
+
+		dbAddr     string
+		dbUsername string
+		dbPassword string
+		dbInsecure bool
 	)
 
 	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
@@ -34,7 +39,10 @@ func main() {
 	pflag.StringVar(&authAddr, "auth-addr", "", "address of the auth server")
 	pflag.StringVar(&authToken, "auth-token", "", "authorization token to use when calling the auth server")
 	pflag.BoolVar(&disableAuth, "disable-auth", false, "disables auth checks")
-
+	pflag.StringVar(&dbAddr, "db-address", "", "database address")
+	pflag.StringVar(&dbUsername, "db-username", "", "database username")
+	pflag.StringVar(&dbPassword, "db-password", "", "database password")
+	pflag.BoolVar(&dbInsecure, "db-insecure", false, "don't use SSL in database connection")
 	pflag.StringVarP(&env, "env", "e", "default", "The deployment environment for the API")
 	pflag.Parse()
 
@@ -72,24 +80,31 @@ func main() {
 
 	log := log.Wrap(logger)
 
-	db := &couch.DataService{
-		// TODO use flags
-		DBAddress:  os.Getenv("DB_ADDRESS"),
-		DBUsername: os.Getenv("DB_USERNAME"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
+	var dsOpts []couch.Option
+	if len(dbUsername) > 0 {
+		dsOpts = append(dsOpts, couch.WithBasicAuth(dbUsername, dbPassword))
 	}
 
-	gs := &state.GetSetter{
-		Logger:      log,
-		Environment: env,
+	if dbInsecure {
+		dsOpts = append(dsOpts, couch.WithInsecure())
 	}
+
+	ds, err := couch.New(context.TODO(), dbAddr, dsOpts...)
+	if err != nil {
+		logger.Fatal("unable to connect to dataservice", zap.Error(err))
+	}
+
+	//gs := &state.GetSetter{
+	//	Logger:      log,
+	//	Environment: env,
+	//}
 
 	middleware := handlers.Middleware{}
 
 	handlers := handlers.Handlers{
 		Logger:      log,
-		DataService: db,
-		State:       gs,
+		DataService: ds,
+		//State:       gs,
 	}
 
 	e := echo.New()
@@ -104,12 +119,12 @@ func main() {
 
 	api := e.Group("/v1", middleware.RequestID)
 
-	// e.GET("/room/:room", handlers.GetRoomConfiguration)
-	api.GET("/room/:room/state", handlers.GetRoomState)
-	api.PUT("/room/:room/state", handlers.SetRoomState)
+	api.GET("/room/:room", handlers.GetRoomConfiguration)
+	//api.GET("/room/:room/state", handlers.GetRoomState)
+	//api.PUT("/room/:room/state", handlers.SetRoomState)
 
-	e.GET("/room/:room/graph/:type", handlers.GetRoomGraph)
-	e.GET("/room/:room/graph/:type/transpose", handlers.GetRoomGraphTranspose)
+	//e.GET("/room/:room/graph/:type", handlers.GetRoomGraph)
+	//e.GET("/room/:room/graph/:type/transpose", handlers.GetRoomGraphTranspose)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {

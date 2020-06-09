@@ -18,12 +18,12 @@ func (h *Handlers) GetRoomConfiguration(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
-	devices, err := h.DataService.Room(ctx, roomID)
+	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, devices)
+	return c.JSON(http.StatusOK, room)
 }
 
 func (h *Handlers) GetRoomGraph(c echo.Context) error {
@@ -44,7 +44,7 @@ func (h *Handlers) GetRoomGraph(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	g := graph.NewGraph(room, portType)
+	g := graph.NewGraph(room.Devices, portType)
 	svg, err := graph.GraphToSvg(g)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -71,7 +71,7 @@ func (h *Handlers) GetRoomGraphTranspose(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	g := graph.NewGraph(room, portType)
+	g := graph.NewGraph(room.Devices, portType)
 	t := graph.Transpose(g)
 
 	svg, err := graph.GraphToSvg(t)

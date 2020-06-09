@@ -25,15 +25,15 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 	ctx = api.WithRequestID(ctx, id)
 	log.Info("Getting room to *get* state", zap.String("room", roomID))
 
-	devices, err := h.DataService.Room(ctx, roomID)
+	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {
 		log.Warn("failed to get devices", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	log.Info("Got devices. Getting state", zap.Int("numDevices", len(devices)))
+	log.Info("Got room. Getting state", zap.Int("numDevices", len(room.Devices)))
 
-	resp, err := h.State.Get(ctx, devices)
+	resp, err := h.State.Get(ctx, room.Devices)
 	if err != nil {
 		log.Warn("failed to get state", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -58,7 +58,7 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	if len(stateReq.OutputGroups) == 0 {
+	if len(stateReq.Devices) == 0 {
 		return c.String(http.StatusBadRequest, "no devices found in request")
 	}
 
@@ -68,15 +68,15 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 	ctx = api.WithRequestID(ctx, id)
 	log.Info("Getting room to *set* state", zap.String("room", roomID))
 
-	devices, err := h.DataService.Room(ctx, roomID)
+	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {
 		log.Warn("failed to get room", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	log.Info("Got devices. Setting state", zap.Int("numDevices", len(devices)))
+	log.Info("Got room. Setting state", zap.Int("numDevices", len(room.Devices)))
 
-	resp, err := h.State.Set(ctx, devices, stateReq)
+	resp, err := h.State.Set(ctx, room.Devices, stateReq)
 	if err != nil {
 		log.Warn("failed to set state", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())

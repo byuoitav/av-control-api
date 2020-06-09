@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-type DeviceService interface {
+type DataService interface {
 	Room(context.Context, string) (Room, error)
 }
 

@@ -17,5 +17,6 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	go.uber.org/zap v1.14.0
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	gonum.org/v1/gonum v0.7.0
 )

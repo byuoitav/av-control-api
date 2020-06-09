@@ -15,11 +15,6 @@ type device struct {
 	Type    deviceType
 }
 
-// this is if we ever need to mess with old couch stuff
-// type TypeID struct {
-// 	ID string `json:"_id"`
-// }
-
 type deviceType struct {
 	ID       string             `json:"_id"`
 	Commands map[string]command `json:"commands"`
