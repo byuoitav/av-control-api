@@ -112,7 +112,12 @@ func TestGetState(t *testing.T) {
 				t.Errorf("unable to get room: %s", err)
 			}
 
-			resp, err := GetDevices(ctx, room, tt.env)
+			gs := &GetSetter{
+				Environment: tt.env,
+				Logger:      nil,
+			}
+
+			resp, err := gs.Get(ctx, room)
 			if err != nil {
 				t.Errorf("unable to get room state: %s", err)
 			}
