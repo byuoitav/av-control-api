@@ -10,9 +10,13 @@ import (
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/graph"
+	"go.uber.org/zap"
 )
 
-type setVolume struct{}
+type setVolume struct {
+	Logger      api.Logger
+	Environment string
+}
 
 func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env string, stateReq api.StateRequest) generatedActions {
 	var resp generatedActions
@@ -44,6 +48,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
+				s.Logger.Warn("unable to get command", zap.String("command", "SetVolumeByBlock"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Error: err.Error(),
@@ -60,6 +65,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				url, err = fillURL(url, params)
 				if err != nil {
+					s.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setVolume",
@@ -71,6 +77,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
+					s.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setVolume",
@@ -87,6 +94,8 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 					Response: responses,
 				}
 
+				s.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
+
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
 				continue
@@ -97,6 +106,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
+				s.Logger.Warn("unable to get command", zap.String("command", "SetVolume"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "setVolume",
@@ -112,6 +122,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				url, err = fillURL(url, params)
 				if err != nil {
+					s.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setVolume",
@@ -123,6 +134,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
+					s.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setVolume",
@@ -139,6 +151,8 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 					Response: responses,
 				}
 
+				s.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
+
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
 			}
@@ -149,6 +163,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
+				s.Logger.Warn("unable to get command", zap.String("command", "SetVolumeByBlock"), zap.Any("device", endDev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "setVolume",
@@ -171,6 +186,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				url, err = fillURL(url, params)
 				if err != nil {
+					s.Logger.Warn("unable to fill url", zap.Any("device", endDev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setVolume",
@@ -182,6 +198,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
+					s.Logger.Warn("unable to build request", zap.Any("device", endDev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "setVolume",
@@ -197,6 +214,8 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 					Order:    order,
 					Response: responses,
 				}
+
+				s.Logger.Info("Successfully built action", zap.Any("device", endDev.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
@@ -226,24 +245,37 @@ func (s *setVolume) handleResponses(respChan chan actionResponse, expectedResps,
 	}
 
 	received := 0
-	var resps []actionResponse
 
 	for resp := range respChan {
-		received++
-		resps = append(resps, resp)
-
-		var state v
-		if err := json.Unmarshal(resp.Body, &state); err != nil {
+		handleErr := func(err error) {
+			s.Logger.Warn("error handling response", zap.Any("device", resp.Action.ID), zap.Error(err))
 			resp.Errors <- api.DeviceStateError{
 				ID:    resp.Action.ID,
 				Field: "setVolume",
-				Error: fmt.Sprintf("unable to parse response from driver: %v. response\n%s", err, resp.Body),
+				Error: err.Error(),
 			}
 
 			resp.Updates <- DeviceStateUpdate{}
+		}
+		received++
+
+		if resp.Error != nil {
+			handleErr(fmt.Errorf("unable to make http request: %w", resp.Error))
 			continue
 		}
 
+		if resp.StatusCode/100 != 2 {
+			handleErr(fmt.Errorf("%v response from driver: %s", resp.StatusCode, resp.Body))
+			continue
+		}
+
+		var state v
+		if err := json.Unmarshal(resp.Body, &state); err != nil {
+			handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
+			continue
+		}
+
+		s.Logger.Info("Successfully set blanked state", zap.Any("device", resp.Action.ID), zap.Int("volume", state.Volume))
 		resp.Updates <- DeviceStateUpdate{
 			ID: resp.Action.ID,
 			DeviceState: api.DeviceState{
