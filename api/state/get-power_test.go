@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/byuoitav/av-control-api/api/log"
 	"github.com/byuoitav/av-control-api/api/mock"
 	"github.com/google/go-cmp/cmp"
 )
@@ -40,8 +41,11 @@ func TestGetPower(t *testing.T) {
 				t.Errorf("unable to get room: %s", err)
 			}
 
-			var get getPower
-			get.Environment = "default"
+			get := getPower{
+				Logger:      log.Logger{},
+				Environment: tt.env,
+			}
+
 			resp := get.GenerateActions(ctx, room)
 
 			if diff := cmp.Diff(tt.resp, resp); diff != "" {
