@@ -421,7 +421,7 @@ func (g *getInput) checkCommand(dev api.Device, cmd string, resps chan actionRes
 			Response: resps,
 		}
 
-		// g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
+		g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 		return act, nil
 	}
 }

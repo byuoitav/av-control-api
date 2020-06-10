@@ -32,7 +32,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
-				g.Logger.Warn("unable to get command", zap.String("command", "GetVolumeByBlock"), zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+				g.Logger.Warn("unable to get command", zap.String("command", "GetVolumeByBlock"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Error: err.Error(),
@@ -47,7 +47,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 
 				url, err = fillURL(url, params)
 				if err != nil {
-					g.Logger.Warn("unable to fill url", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "volume",
@@ -59,7 +59,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
-					g.Logger.Warn("unable to build request", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "volume",
@@ -76,7 +76,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 					Response: responses,
 				}
 
-				g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+				g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
@@ -88,7 +88,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
-				g.Logger.Warn("unable to get command", zap.String("command", "GetVolume"), zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+				g.Logger.Warn("unable to get command", zap.String("command", "GetVolume"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "volume",
@@ -103,7 +103,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 
 				url, err = fillURL(url, params)
 				if err != nil {
-					g.Logger.Warn("unable to fill url", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "volume",
@@ -115,7 +115,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
-					g.Logger.Warn("unable to build request", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "volume",
@@ -132,7 +132,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 					Response: responses,
 				}
 
-				// g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+				g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
@@ -258,7 +258,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 						Response: responses,
 					}
 
-					// g.Logger.Info("Successfully built action", zap.Any("device", endDev.ID))
+					g.Logger.Info("Successfully built action", zap.Any("device", endDev.ID))
 
 					resp.Actions = append(resp.Actions, act)
 					resp.ExpectedUpdates++
