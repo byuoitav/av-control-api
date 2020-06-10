@@ -13,7 +13,7 @@ import (
 
 var getPowerTest = []stateTest{
 	{
-		name: "simple",
+		name: "Simple",
 		dataService: &mock.SimpleRoom{
 			BaseURL: "http://host",
 		},
@@ -26,6 +26,42 @@ var getPowerTest = []stateTest{
 				},
 			},
 			ExpectedUpdates: 1,
+		},
+	},
+	{
+		name: "SimpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{
+			BaseURL: "http://host",
+		},
+		env: "default",
+		resp: generatedActions{
+			Actions: []action{
+				{
+					ID:  "ITB-1101-D1",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetPower"),
+				},
+			},
+			ExpectedUpdates: 1,
+		},
+	},
+	{
+		name: "SixByTwoSeparateInput",
+		dataService: &mock.SixTwoSeparateInput{
+			BaseURL: "http://host",
+		},
+		env: "default",
+		resp: generatedActions{
+			Actions: []action{
+				{
+					ID:  "ITB-1101-D1",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetPower"),
+				},
+				{
+					ID:  "ITB-1101-D2",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D2.av/GetPower"),
+				},
+			},
+			ExpectedUpdates: 2,
 		},
 	},
 }
