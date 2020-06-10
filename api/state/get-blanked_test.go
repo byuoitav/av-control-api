@@ -13,16 +13,18 @@ import (
 
 var getBlankedTest = []stateTest{
 	{
-		name:        "simpleSeparateInput",
-		dataService: &mock.SimpleSeparateInput{},
-		env:         "default",
+		name: "simpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{
+			BaseURL: "http://host",
+		},
+		env: "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
 					ID: "ITB-1101-D1",
 					Req: &http.Request{
 						Method: http.MethodGet,
-						URL:    urlParse("/ITB-1101-D1.av/GetBlanked"),
+						URL:    urlParse("http://host/ITB-1101-D1.av/GetBlanked"),
 					},
 				},
 			},

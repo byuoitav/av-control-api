@@ -13,18 +13,20 @@ import (
 
 var getVolumeTest = []stateTest{
 	{
-		name:        "simpleSeparateInput",
-		dataService: &mock.SimpleSeparateInput{},
-		env:         "default",
+		name: "simpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{
+			BaseURL: "http://host",
+		},
+		env: "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
 					ID:  "ITB-1101-AMP1",
-					Req: newRequest(http.MethodGet, "/ITB-1101-AMP1.av/GetVolume"),
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-AMP1.av/GetVolume"),
 				},
 				{
 					ID:  "ITB-1101-VIA1",
-					Req: newRequest(http.MethodGet, "/ITB-1101-VIA1/GetVolume"),
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-VIA1/GetVolume"),
 				},
 			},
 			ExpectedUpdates: 2,
