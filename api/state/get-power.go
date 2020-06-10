@@ -68,7 +68,8 @@ func (g *getPower) GenerateActions(ctx context.Context, room api.Room) generated
 			Order:    order,
 			Response: make(chan actionResponse),
 		}
-		// g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
+
+		g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 		go g.handleResponse(act.Response)
 
 		resp.Actions = append(resp.Actions, act)
