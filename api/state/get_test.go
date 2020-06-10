@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/byuoitav/av-control-api/api"
+	"github.com/byuoitav/av-control-api/api/log"
 	"github.com/byuoitav/av-control-api/api/mock"
 	"github.com/google/go-cmp/cmp"
 )
@@ -28,7 +29,7 @@ type getStateTest struct {
 
 var getTests = []getStateTest{
 	{
-		name:        "Simple",
+		name:        "Simple/1",
 		dataService: &mock.SimpleRoom{},
 		env:         "default",
 		driverResps: map[string]string{
@@ -59,11 +60,11 @@ var getTests = []getStateTest{
 		},
 	},
 	{
-		name:        "Simple2",
+		name:        "Simple/2",
 		dataService: &mock.SimpleRoom{},
 		env:         "default",
 		driverResps: map[string]string{
-			"/ITB-1101-D1.av/GetPower":   `{"power": "standby"}`,
+			"/ITB-1101-D1.av/GetPower":   `{"poweredOn": false}`,
 			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!2"}`,
 			"/ITB-1101-D1.av/GetBlanked": `{"blanked": true}`,
 			"/ITB-1101-D1.av/GetMuted":   `{"muted": true}`,
@@ -77,13 +78,54 @@ var getTests = []getStateTest{
 					Input: &api.Input{
 						Audio:            deviceID("ITB-1101-HDMI1"),
 						Video:            deviceID("ITB-1101-HDMI1"),
-						CanSetSeparately: boolP(true),
+						CanSetSeparately: boolP(false),
 						AvailableInputs: []api.DeviceID{
 							api.DeviceID("ITB-1101-HDMI1"),
 							api.DeviceID("ITB-1101-VIA1"),
 						},
 					},
 					Volume: intP(100),
+					Muted:  boolP(true),
+				},
+			},
+		},
+	},
+	{
+		name:        "SimpleSeparateInput/1",
+		dataService: &mock.SimpleRoom{},
+		env:         "default",
+		driverResps: map[string]string{
+			"/ITB-1101-D1.av/GetPower":       `{"poweredOn": true}`,
+			"/ITB-1101-D1.av/GetAVInput":     `{"input": "hdmi!2"}`,
+			"/ITB-1101-D1.av/GetBlanked":     `{"blanked": false}`,
+			"/ITB-1101-SW1.av/GetVideoInput": `{"1": "1"}`,
+			"/ITB-1101-SW1.av/GetAudioInput": `{"2": "1"}`,
+			"/ITB-1101-AMP1.av/GetVolume":    `{"volume": 30}`,
+			"/ITB-1101-AMP1.av/GetMuted":     `{"muted": false}`,
+			"/ITB-1101-VIA1.av/GetVolume":    `{"volume": 50}`,
+			"/ITB-1101-VIA1.av/GetMuted":     `{"muted": true}`,
+		},
+		apiResp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {
+					PoweredOn: boolP(true),
+					Blanked:   boolP(false),
+					Input: &api.Input{
+						Audio:            deviceID("ITB-1101-HDMI1"),
+						Video:            deviceID("ITB-1101-VIA1"),
+						CanSetSeparately: boolP(true),
+						AvailableInputs: []api.DeviceID{
+							api.DeviceID("ITB-1101-HDMI1"),
+							api.DeviceID("ITB-1101-VIA1"),
+						},
+					},
+				},
+				"ITB-1101-AMP1": {
+					Volume: intP(30),
+					Muted:  boolP(false),
+				},
+				"ITB-1101-VIA1": {
+					Volume: intP(50),
 					Muted:  boolP(true),
 				},
 			},
@@ -114,7 +156,7 @@ func TestGetState(t *testing.T) {
 
 			gs := &GetSetter{
 				Environment: tt.env,
-				Logger:      nil,
+				Logger:      log.Logger{},
 			}
 
 			resp, err := gs.Get(ctx, room)

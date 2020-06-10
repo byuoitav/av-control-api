@@ -32,7 +32,7 @@ func (s *SimpleSeparateInput) Room(context.Context, string) (api.Room, error) {
 				ID:      "ITB-1101-D1",
 				Address: "ITB-1101-D1.av",
 				Type: api.DeviceType{
-					ID: "Sony XBR",
+					ID: "TV No Audio",
 					Commands: map[string]api.Command{
 						"SetPower": {
 							URLs: map[string]string{
@@ -178,7 +178,7 @@ func (s *SimpleSeparateInput) Room(context.Context, string) (api.Room, error) {
 				ID:      "ITB-1101-VIA1",
 				Address: "ITB-1101-VIA1.av",
 				Type: api.DeviceType{
-					ID: "via-connect-pro",
+					ID: "via",
 					Commands: map[string]api.Command{
 						"GetVolume": {
 							URLs: map[string]string{
