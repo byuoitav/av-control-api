@@ -21,7 +21,7 @@ var getPowerTest = []stateTest{
 			Actions: []action{
 				{
 					ID:  "ITB-1101-D1",
-					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetPower"),
+					Req: newRequest(http.MethodGet, "/ITB-1101-D1.av/GetPower"),
 				},
 			},
 			ExpectedUpdates: 1,

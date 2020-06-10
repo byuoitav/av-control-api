@@ -131,7 +131,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 					Response: responses,
 				}
 
-				g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+				// g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++

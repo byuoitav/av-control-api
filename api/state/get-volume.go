@@ -132,7 +132,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 					Response: responses,
 				}
 
-				g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+				// g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
@@ -258,7 +258,7 @@ func (g *getVolume) GenerateActions(ctx context.Context, room api.Room) generate
 						Response: responses,
 					}
 
-					g.Logger.Info("Successfully built action", zap.Any("device", endDev.ID))
+					// g.Logger.Info("Successfully built action", zap.Any("device", endDev.ID))
 
 					resp.Actions = append(resp.Actions, act)
 					resp.ExpectedUpdates++

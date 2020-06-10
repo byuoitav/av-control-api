@@ -21,7 +21,7 @@ var getBlankedTest = []stateTest{
 					ID: "ITB-1101-D1",
 					Req: &http.Request{
 						Method: http.MethodGet,
-						URL:    urlParse("http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetBlanked"),
+						URL:    urlParse("/ITB-1101-D1.av/GetBlanked"),
 					},
 				},
 			},
