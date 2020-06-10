@@ -13,20 +13,55 @@ import (
 
 var getBlankedTest = []stateTest{
 	{
-		name:        "simpleSeparateInput",
-		dataService: &mock.SimpleSeparateInput{},
-		env:         "default",
+		name: "Simple",
+		dataService: &mock.SimpleRoom{
+			BaseURL: "http://host",
+		},
+		env: "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
-					ID: "ITB-1101-D1",
-					Req: &http.Request{
-						Method: http.MethodGet,
-						URL:    urlParse("http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetBlanked"),
-					},
+					ID:  "ITB-1101-D1",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetBlanked"),
 				},
 			},
 			ExpectedUpdates: 1,
+		},
+	},
+	{
+		name: "SimpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{
+			BaseURL: "http://host",
+		},
+		env: "default",
+		resp: generatedActions{
+			Actions: []action{
+				{
+					ID:  "ITB-1101-D1",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetBlanked"),
+				},
+			},
+			ExpectedUpdates: 1,
+		},
+	},
+	{
+		name: "SixByTwoSeparateInput",
+		dataService: &mock.SixTwoSeparateInput{
+			BaseURL: "http://host",
+		},
+		env: "default",
+		resp: generatedActions{
+			Actions: []action{
+				{
+					ID:  "ITB-1101-D1",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetBlanked"),
+				},
+				{
+					ID:  "ITB-1101-D2",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D2.av/GetBlanked"),
+				},
+			},
+			ExpectedUpdates: 2,
 		},
 	},
 }

@@ -33,10 +33,6 @@ func newRequest(method string, url string) *http.Request {
 	return req
 }
 
-func boolP(b bool) *bool {
-	return &b
-}
-
 func intP(i int) *int {
 	return &i
 }

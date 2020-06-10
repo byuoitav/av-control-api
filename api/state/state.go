@@ -6,3 +6,7 @@ type GetSetter struct {
 	Environment string
 	Logger      api.Logger
 }
+
+func boolP(b bool) *bool {
+	return &b
+}

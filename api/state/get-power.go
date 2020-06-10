@@ -53,7 +53,6 @@ func (g *getPower) GenerateActions(ctx context.Context, room api.Room) generated
 			continue
 		}
 
-		// build http request
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
 			log.Warn("unable to build request", zap.Error(err))
@@ -84,7 +83,7 @@ func (g *getPower) GenerateActions(ctx context.Context, room api.Room) generated
 }
 
 type poweredOn struct {
-	PoweredOn bool `json:"poweredOn"`
+	PoweredOn *bool `json:"poweredOn"`
 
 	// TODO we want to get rid of this once drivers support it
 	Power string `json:"power"`
@@ -112,6 +111,11 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 		return
 	}
 
+	if aResp.StatusCode/100 != 2 {
+		handleErr(fmt.Errorf("%v response from driver: %s", aResp.StatusCode, aResp.Body))
+		return
+	}
+
 	var state poweredOn
 	if err := json.Unmarshal(aResp.Body, &state); err != nil {
 		handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body))
@@ -119,15 +123,15 @@ func (g *getPower) handleResponse(respChan chan actionResponse) {
 	}
 
 	if state.Power != "" {
-		state.PoweredOn = state.Power == "on"
+		state.PoweredOn = boolP(state.Power == "on")
 	}
 
-	log.Info("Successfully got power state", zap.Boolp("poweredOn", &state.PoweredOn))
+	log.Info("Successfully got power state", zap.Boolp("poweredOn", state.PoweredOn))
 
 	aResp.Updates <- DeviceStateUpdate{
 		ID: aResp.Action.ID,
 		DeviceState: api.DeviceState{
-			PoweredOn: &state.PoweredOn,
+			PoweredOn: state.PoweredOn,
 		},
 	}
 }
