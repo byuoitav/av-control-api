@@ -42,8 +42,8 @@ func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq 
 	}
 	responses := make(chan actionResponse)
 
-	g := graph.NewGraph(room.Devices, "video")
-	tmpOutputs := graph.Leaves(g)
+	video := graph.NewGraph(room.Devices, "video")
+	tmpOutputs := graph.Leaves(video)
 	var outputs []graph.Node
 
 	for _, node := range tmpOutputs {
@@ -55,7 +55,7 @@ func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq 
 		}
 	}
 
-	t := graph.Transpose(g)
+	t := graph.Transpose(video)
 	inputs := graph.Leaves(t)
 
 	paths := path.DijkstraAllPaths(t)
@@ -76,7 +76,52 @@ func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq 
 			continue
 		}
 
-		acts, errs := s.generateActionsForPath(ctx, path, s.Environment, responses, stateReq)
+		acts, errs := s.generateActionsForVideoPath(ctx, path, responses, stateReq)
+		actsForOutput = append(actsForOutput, acts...)
+		errsForOutput = append(errsForOutput, errs...)
+
+		if len(errsForOutput) == 0 {
+			resp.ExpectedUpdates++
+			resp.Actions = append(resp.Actions, actsForOutput...)
+		}
+
+		resp.Errors = append(resp.Errors, errsForOutput...)
+	}
+
+	audio := graph.NewGraph(room.Devices, "audio")
+	tmpOutputs = graph.Leaves(audio)
+
+	for _, node := range tmpOutputs {
+		for _, dev := range devices {
+			if node.Device.ID == dev.ID {
+				outputs = append(outputs, node)
+				break
+			}
+		}
+	}
+
+	t = graph.Transpose(audio)
+	inputs = graph.Leaves(t)
+
+	paths = path.DijkstraAllPaths(t)
+
+	for _, device := range devices {
+		var actsForOutput []action
+		var errsForOutput []api.DeviceStateError
+
+		path := graph.PathFromTo(t, &paths, device.ID, *stateReq.Devices[device.ID].Input.Audio)
+		if len(path) == 0 {
+			s.Logger.Warn(fmt.Sprintf("unable to find a path from %s to %v", device.ID, *stateReq.Devices[device.ID].Input), zap.Any("device", device.ID))
+			resp.Errors = append(resp.Errors, api.DeviceStateError{
+				ID:    device.ID,
+				Field: "setInput",
+				Error: fmt.Sprintf("no path from %s to %v", device.ID, *stateReq.Devices[device.ID].Input),
+			})
+
+			continue
+		}
+
+		acts, errs := s.generateActionsForAudioPath(ctx, path, responses, stateReq)
 		actsForOutput = append(actsForOutput, acts...)
 		errsForOutput = append(errsForOutput, errs...)
 
@@ -101,7 +146,47 @@ func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq 
 	return resp
 }
 
-func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, env string, resps chan actionResponse, stateReq api.StateRequest) ([]action, []api.DeviceStateError) {
+func (s *setInput) checkCommand(dev api.Device, cmd string, resps chan actionResponse, port string, transmitterAddr string) (action, error) {
+	url, order, err := getCommand(dev, cmd, s.Environment)
+	switch {
+	case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		return action{}, err
+	case err != nil:
+		s.Logger.Warn("unable to get command", zap.String("command", cmd), zap.Any("device", dev.ID), zap.Error(err))
+		return action{}, err
+	default:
+		params := map[string]string{
+			"address":     dev.Address,
+			"port":        port,
+			"transmitter": transmitterAddr,
+		}
+
+		url, err = fillURL(url, params)
+		if err != nil {
+			s.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
+			return action{}, fmt.Errorf("%s (url after fill: %s)", err, url)
+		}
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			s.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
+			return action{}, fmt.Errorf("unable to build http request: %s", err)
+		}
+
+		act := action{
+			ID:       dev.ID,
+			Req:      req,
+			Order:    order,
+			Response: resps,
+		}
+
+		s.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
+
+		return act, nil
+	}
+}
+
+func (s *setInput) generateActionsForVideoPath(ctx context.Context, path graph.Path, resps chan actionResponse, stateReq api.StateRequest) ([]action, []api.DeviceStateError) {
 	var acts []action
 	var errs []api.DeviceStateError
 	var transmitterAddr string
@@ -112,11 +197,10 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 	}
 
 	for i := range path {
-		url, order, err := getCommand(*path[i].Src.Device, "SetInput", s.Environment)
+		act, err := s.checkCommand(*path[i].Src.Device, "SetAVInput", resps, path[i].SrcPort.Name, transmitterAddr)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 		case err != nil:
-			s.Logger.Warn("unable to get command", zap.String("command", "SetInput"), zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
@@ -124,58 +208,74 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			})
 
 			return acts, errs
-
 		default:
-			params := map[string]string{
-				"address":     path[i].Src.Address,
-				"port":        path[i].SrcPort.Name,
-				"transmitter": transmitterAddr,
-			}
-
-			url, err = fillURL(url, params)
-			if err != nil {
-				s.Logger.Warn("unable to fill url", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
-				errs = append(errs, api.DeviceStateError{
-					ID:    path[i].Src.Device.ID,
-					Field: "setInput",
-					Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-				})
-
-				return acts, errs
-			}
-
-			req, err := http.NewRequest(http.MethodGet, url, nil)
-			if err != nil {
-				s.Logger.Warn("unable to build request", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
-				errs = append(errs, api.DeviceStateError{
-					ID:    path[i].Src.Device.ID,
-					Field: "setInput",
-					Error: fmt.Sprintf("unable to build http request: %s", err),
-				})
-
-				return acts, errs
-			}
-
-			act := action{
-				ID:       path[i].Src.Device.ID,
-				Req:      req,
-				Order:    order,
-				Response: resps,
-			}
-
-			s.Logger.Info("Successfully built action", zap.Any("device", path[i].Src.Device.ID))
-
 			acts = append(acts, act)
-
-			continue
+			// maybe continue here?
 		}
 
-		url, order, err = getCommand(*path[i].Src.Device, "SetInputByOutput", env)
+		act, err = s.checkCommand(*path[i].Src.Device, "SetAVInputByOutput", resps, path[i].SrcPort.Name, transmitterAddr)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-			continue
 		case err != nil:
-			s.Logger.Warn("unable to get command", zap.String("command", "SetInputByOutput"), zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "setInput",
+				Error: err.Error(),
+			})
+			return acts, errs
+		default:
+			acts = append(acts, act)
+			// maybe continue here?
+		}
+
+		act, err = s.checkCommand(*path[i].Src.Device, "SetVideoInput", resps, path[i].SrcPort.Name, transmitterAddr)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "setInput",
+				Error: err.Error(),
+			})
+			return acts, errs
+		default:
+			acts = append(acts, act)
+			// continue?
+		}
+
+		act, err = s.checkCommand(*path[i].Src.Device, "SetVideoInputByOutput", resps, path[i].SrcPort.Name, transmitterAddr)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "setInput",
+				Error: err.Error(),
+			})
+			return acts, errs
+		default:
+			acts = append(acts, act)
+		}
+	}
+
+	return acts, errs
+}
+
+func (s *setInput) generateActionsForAudioPath(ctx context.Context, path graph.Path, resps chan actionResponse, stateReq api.StateRequest) ([]action, []api.DeviceStateError) {
+	var acts []action
+	var errs []api.DeviceStateError
+	var transmitterAddr string
+	for i := range path {
+		if strings.Contains(string(path[i].Src.Device.ID), "TX") {
+			transmitterAddr = path[i].Src.Device.Address
+		}
+	}
+
+	for i := range path {
+		act, err := s.checkCommand(*path[i].Src.Device, "SetAVInput", resps, path[i].SrcPort.Name, transmitterAddr)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
@@ -183,48 +283,57 @@ func (s *setInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 			})
 
 			return acts, errs
+		default:
+			acts = append(acts, act)
+			// continue?
 		}
 
-		params := map[string]string{
-			"address": path[i].Src.Address,
-			"input":   path[i].SrcPort.Name,
-			"output":  path[i-1].DstPort.Name,
-		}
-
-		url, err = fillURL(url, params)
-		if err != nil {
-			s.Logger.Warn("unable to fill url", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
+		act, err = s.checkCommand(*path[i].Src.Device, "SetAVInputByOutput", resps, path[i].SrcPort.Name, transmitterAddr)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
-				Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+				Error: err.Error(),
 			})
 
 			return acts, errs
+		default:
+			acts = append(acts, act)
+			// continue?
 		}
 
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		if err != nil {
-			s.Logger.Warn("unable to build request", zap.Any("device", path[i].Src.Device.ID), zap.Error(err))
+		act, err = s.checkCommand(*path[i].Src.Device, "SetAudioInput", resps, path[i].SrcPort.Name, transmitterAddr)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
 			errs = append(errs, api.DeviceStateError{
 				ID:    path[i].Src.Device.ID,
 				Field: "setInput",
-				Error: fmt.Sprintf("unable to build http request: %s", err),
+				Error: err.Error(),
 			})
 
 			return acts, errs
+		default:
+			acts = append(acts, act)
+			// continue?
 		}
 
-		act := action{
-			ID:       path[i].Src.Device.ID,
-			Req:      req,
-			Order:    order,
-			Response: resps,
+		act, err = s.checkCommand(*path[i].Src.Device, "SetAudioInputByOutput", resps, path[i].SrcPort.Name, transmitterAddr)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+		case err != nil:
+			errs = append(errs, api.DeviceStateError{
+				ID:    path[i].Src.Device.ID,
+				Field: "setInput",
+				Error: err.Error(),
+			})
+
+			return acts, errs
+		default:
+			acts = append(acts, act)
 		}
-
-		s.Logger.Info("Successfully built action", zap.Any("device", path[i].Src.Device.ID))
-
-		acts = append(acts, act)
 	}
 
 	return acts, errs

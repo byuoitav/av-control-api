@@ -18,7 +18,7 @@ type setVolume struct {
 	Environment string
 }
 
-func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env string, stateReq api.StateRequest) generatedActions {
+func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, stateReq api.StateRequest) generatedActions {
 	var resp generatedActions
 	gr := graph.NewGraph(room.Devices, "audio")
 
@@ -44,7 +44,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 	for _, dev := range devices {
 		path := graph.PathToEnd(gr, dev.ID)
 		if len(path) == 0 {
-			url, order, err := getCommand(dev, "SetVolumeByBlock", env)
+			url, order, err := getCommand(dev, "SetVolumeByBlock", s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
@@ -101,7 +101,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 				continue
 			}
 			// it should always be by block so we should remove this later
-			url, order, err = getCommand(dev, "SetVolume", env)
+			url, order, err = getCommand(dev, "SetVolume", s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
@@ -158,7 +158,69 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 			}
 		} else {
 			endDev := path[len(path)-1].Dst
-			url, order, err := getCommand(*endDev.Device, "GetVolumeByBlock", env)
+			url, order, err := getCommand(*endDev.Device, "GetVolumeByBlock", s.Environment)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				s.Logger.Warn("unable to get command", zap.String("command", "SetVolumeByBlock"), zap.Any("device", endDev.ID), zap.Error(err))
+				resp.Errors = append(resp.Errors, api.DeviceStateError{
+					ID:    dev.ID,
+					Field: "setVolume",
+					Error: err.Error(),
+				})
+
+				continue
+			default:
+				for _, port := range endDev.Ports {
+					if !port.Endpoints.Contains(dev.ID) {
+						continue
+					}
+
+					params := map[string]string{
+						"address": endDev.Address,
+						"input":   port.Name,
+						"volume":  strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
+					}
+
+					url, err = fillURL(url, params)
+					if err != nil {
+						s.Logger.Warn("unable to fill url", zap.Any("device", endDev.ID), zap.Error(err))
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "setVolume",
+							Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+						})
+
+						continue
+					}
+
+					req, err := http.NewRequest(http.MethodGet, url, nil)
+					if err != nil {
+						s.Logger.Warn("unable to build request", zap.Any("device", endDev.ID), zap.Error(err))
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "setVolume",
+							Error: fmt.Sprintf("unable to build http request: %s", err),
+						})
+
+						continue
+					}
+
+					act := action{
+						ID:       dev.ID,
+						Req:      req,
+						Order:    order,
+						Response: responses,
+					}
+
+					s.Logger.Info("Successfully built action", zap.Any("device", endDev.ID))
+
+					resp.Actions = append(resp.Actions, act)
+					resp.ExpectedUpdates++
+				}
+			}
+
+			url, order, err = getCommand(*endDev.Device, "GetVolume", s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
@@ -180,8 +242,7 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				params := map[string]string{
 					"address": endDev.Address,
-					"input":   port.Name,
-					"volume":  strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
+					"level":   strconv.Itoa(*stateReq.Devices[dev.ID].Volume),
 				}
 
 				url, err = fillURL(url, params)
@@ -219,7 +280,6 @@ func (s *setVolume) GenerateActions(ctx context.Context, room api.Room, env stri
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
-				continue
 			}
 		}
 	}

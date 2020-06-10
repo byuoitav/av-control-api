@@ -106,7 +106,6 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 				continue
 			}
 
-			// it should always be by block so we should remove this later
 			url, order, err = getCommand(dev, cmd, s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
@@ -167,6 +166,69 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 			url, order, err := getCommand(*endDev.Device, "SetMutedByBlock", s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+			case err != nil:
+				s.Logger.Warn("unable to get command", zap.String("command", "SetMutedByBlock"), zap.Any("device", endDev.ID), zap.Error(err))
+				resp.Errors = append(resp.Errors, api.DeviceStateError{
+					ID:    dev.ID,
+					Field: "setMuted",
+					Error: err.Error(),
+				})
+
+				continue
+
+			default:
+				for _, port := range endDev.Ports {
+					if !port.Endpoints.Contains(dev.ID) {
+						continue
+					}
+
+					params := map[string]string{
+						"address": endDev.Address,
+						"input":   port.Name,
+						"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
+					}
+
+					url, err = fillURL(url, params)
+					if err != nil {
+						s.Logger.Warn("unable to fill url", zap.Any("device", endDev.ID), zap.Error(err))
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "setMuted",
+							Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
+						})
+
+						continue
+					}
+
+					req, err := http.NewRequest(http.MethodGet, url, nil)
+					if err != nil {
+						s.Logger.Warn("unable to build request", zap.Any("device", endDev.ID), zap.Error(err))
+						resp.Errors = append(resp.Errors, api.DeviceStateError{
+							ID:    dev.ID,
+							Field: "setMuted",
+							Error: fmt.Sprintf("unable to build http request: %s", err),
+						})
+
+						continue
+					}
+
+					act := action{
+						ID:       dev.ID,
+						Req:      req,
+						Order:    order,
+						Response: responses,
+					}
+
+					s.Logger.Info("Successfully built action", zap.Any("device", endDev.ID))
+
+					resp.Actions = append(resp.Actions, act)
+					resp.ExpectedUpdates++
+				}
+			}
+
+			url, order, err = getCommand(*endDev.Device, cmd, s.Environment)
+			switch {
+			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
 				s.Logger.Warn("unable to get command", zap.String("command", "SetMutedByBlock"), zap.Any("device", endDev.ID), zap.Error(err))
@@ -186,8 +248,6 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 
 				params := map[string]string{
 					"address": endDev.Address,
-					"input":   port.Name,
-					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)
@@ -225,7 +285,6 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
-				continue
 			}
 		}
 	}
