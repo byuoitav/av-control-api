@@ -8,11 +8,11 @@ import (
 )
 
 type stateTest struct {
-	name          string
-	room          string
-	deviceService api.DeviceService
-	env           string
-	resp          generatedActions
+	name        string
+	room        string
+	dataService api.DataService
+	env         string
+	resp        generatedActions
 }
 
 func urlParse(rawurl string) *url.URL {

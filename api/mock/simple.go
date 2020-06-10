@@ -23,136 +23,139 @@ func (s *SimpleRoom) SetBaseURL(baseURL string) {
 	s.BaseURL = baseURL
 }
 
-func (s *SimpleRoom) Room(context.Context, string) ([]api.Device, error) {
-	return []api.Device{
-		api.Device{
-			ID:      "ITB-1101-D1",
-			Address: "ITB-1101-D1.av",
-			Type: api.DeviceType{
-				ID: "Sony XBR",
-				Commands: map[string]api.Command{
-					"SetPower": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/SetPower/{{power}}",
+func (s *SimpleRoom) Room(context.Context, string) (api.Room, error) {
+	return api.Room{
+		ID: "ITB-1101",
+		Devices: []api.Device{
+			{
+				ID:      "ITB-1101-D1",
+				Address: "ITB-1101-D1.av",
+				Type: api.DeviceType{
+					ID: "Sony XBR",
+					Commands: map[string]api.Command{
+						"SetPower": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetPower/{{power}}",
+							},
+							Order: intP(0),
 						},
-						Order: intP(0),
-					},
-					"GetPower": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/GetPower",
+						"GetPower": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetPower",
+							},
 						},
-					},
-					"GetBlanked": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/GetBlanked",
+						"GetBlanked": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetBlanked",
+							},
 						},
-					},
-					"SetBlanked": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/SetBlanked",
+						"SetBlanked": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetBlanked",
+							},
 						},
-					},
-					"SetAVInput": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/SetAVInput/{{port}}",
+						"SetAVInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetAVInput/{{port}}",
+							},
 						},
-					},
-					"GetAVInput": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/GetAVInput",
+						"GetAVInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetAVInput",
+							},
 						},
-					},
-					"GetVolume": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/GetVolume",
+						"GetVolume": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetVolume",
+							},
 						},
-					},
-					"GetMuted": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/GetMuted",
+						"GetMuted": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetMuted",
+							},
 						},
-					},
-					"SetVolume": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/SetVolume/{{level}}",
+						"SetVolume": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetVolume/{{level}}",
+							},
 						},
-					},
-					"SetMuted": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/SetMuted/{{muted}}",
-						},
-					},
-				},
-			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "hdmi!1",
-					Endpoints: api.Endpoints{
-						"ITB-1101-VIA1",
-					},
-					Type:     "audiovideo",
-					Incoming: true,
-				},
-				api.Port{
-					Name: "hdmi!2",
-					Endpoints: api.Endpoints{
-						"ITB-1101-HDMI1",
-					},
-					Type:     "audiovideo",
-					Incoming: true,
-				},
-			},
-		},
-		api.Device{
-			ID:      "ITB-1101-VIA1",
-			Address: "ITB-1101-VIA1.av",
-			Type: api.DeviceType{
-				ID: "via-connect-pro",
-				Commands: map[string]api.Command{
-					"GetVolume": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/GetVolume",
-						},
-					},
-					"GetMuted": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/GetMuted",
-						},
-					},
-					"SetVolume": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/SetVolume/{{level}}",
-						},
-					},
-					"SetMuted": api.Command{
-						URLs: map[string]string{
-							"default": s.BaseURL + "/{{address}}/SetMuted/{{muted}}",
+						"SetMuted": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetMuted/{{muted}}",
+							},
 						},
 					},
 				},
-			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "",
-					Endpoints: api.Endpoints{
-						"ITB-1101-D1",
+				Ports: []api.Port{
+					{
+						Name: "hdmi!1",
+						Endpoints: api.Endpoints{
+							"ITB-1101-VIA1",
+						},
+						Type:     "audiovideo",
+						Incoming: true,
 					},
-					Type: "audiovideo",
+					{
+						Name: "hdmi!2",
+						Endpoints: api.Endpoints{
+							"ITB-1101-HDMI1",
+						},
+						Type:     "audiovideo",
+						Incoming: true,
+					},
 				},
 			},
-		},
-		api.Device{
-			ID: "ITB-1101-HDMI1",
-			Type: api.DeviceType{
-				ID: "hdmi-input",
-			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "",
-					Endpoints: api.Endpoints{
-						"ITB-1101-D1",
+			{
+				ID:      "ITB-1101-VIA1",
+				Address: "ITB-1101-VIA1.av",
+				Type: api.DeviceType{
+					ID: "via-connect-pro",
+					Commands: map[string]api.Command{
+						"GetVolume": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetVolume",
+							},
+						},
+						"GetMuted": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetMuted",
+							},
+						},
+						"SetVolume": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetVolume/{{level}}",
+							},
+						},
+						"SetMuted": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetMuted/{{muted}}",
+							},
+						},
 					},
-					Type: "audiovideo",
+				},
+				Ports: []api.Port{
+					{
+						Name: "",
+						Endpoints: api.Endpoints{
+							"ITB-1101-D1",
+						},
+						Type: "audiovideo",
+					},
+				},
+			},
+			{
+				ID: "ITB-1101-HDMI1",
+				Type: api.DeviceType{
+					ID: "hdmi-input",
+				},
+				Ports: []api.Port{
+					{
+						Name: "",
+						Endpoints: api.Endpoints{
+							"ITB-1101-D1",
+						},
+						Type: "audiovideo",
+					},
 				},
 			},
 		},

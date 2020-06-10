@@ -11,13 +11,13 @@ import (
 )
 
 var getMutedTest = []stateTest{
-	stateTest{
-		name:          "simpleSeparateInput",
-		deviceService: mock.SimpleSeparateInput{},
-		env:           "default",
+	{
+		name:        "simpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
-				action{
+				{
 					ID:  "ITB-1101-AMP1",
 					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-AMP1.av/GetMuted"),
 				},
@@ -33,7 +33,7 @@ func TestGetMuted(t *testing.T) {
 
 	for _, tt := range getMutedTest {
 		t.Run(tt.name, func(t *testing.T) {
-			room, err := tt.deviceService.Room(ctx, tt.room)
+			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {
 				t.Errorf("unable to get room: %s", err)
 			}

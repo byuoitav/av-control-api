@@ -14,11 +14,11 @@ import (
 )
 
 type setStateTest struct {
-	name          string
-	room          string
-	env           string
-	deviceService interface {
-		api.DeviceService
+	name        string
+	room        string
+	env         string
+	dataService interface {
+		api.DataService
 		SetBaseURL(string)
 	}
 
@@ -28,13 +28,13 @@ type setStateTest struct {
 }
 
 var setTests = []setStateTest{
-	setStateTest{
-		name:          "Simple/Power",
-		env:           "default",
-		deviceService: &mock.SimpleRoom{},
+	{
+		name:        "Simple/Power",
+		env:         "default",
+		dataService: &mock.SimpleRoom{},
 		apiReq: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 				},
 			},
@@ -44,7 +44,7 @@ var setTests = []setStateTest{
 		},
 		apiResp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 				},
 			},
@@ -66,9 +66,9 @@ func TestSetState(t *testing.T) {
 				ts.Close()
 			})
 
-			tt.deviceService.SetBaseURL(ts.URL)
+			tt.dataService.SetBaseURL(ts.URL)
 
-			room, err := tt.deviceService.Room(ctx, tt.room)
+			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {
 				t.Errorf("unable to get room: %s", err)
 			}

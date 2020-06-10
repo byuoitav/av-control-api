@@ -11,21 +11,21 @@ import (
 )
 
 var getInputTest = []stateTest{
-	stateTest{
-		name:          "simpleSeparateInput",
-		deviceService: mock.SimpleSeparateInput{},
-		env:           "default",
+	{
+		name:        "simpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
-				action{
+				{
 					ID:  "ITB-1101-D1",
 					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetAVInput"),
 				},
-				action{
+				{
 					ID:  "ITB-1101-SW1",
 					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetVideoInput"),
 				},
-				action{
+				{
 					ID:  "ITB-1101-SW1",
 					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetAudioInput"),
 				},
@@ -41,7 +41,7 @@ func TestGetInput(t *testing.T) {
 
 	for _, tt := range getInputTest {
 		t.Run(tt.name, func(t *testing.T) {
-			room, err := tt.deviceService.Room(ctx, tt.room)
+			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {
 				t.Errorf("unable to get room: %s", err)
 			}

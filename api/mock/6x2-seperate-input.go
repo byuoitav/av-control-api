@@ -17,261 +17,270 @@ import (
 //
 // In this room, the audio is coming off of the 6x2 audio outputs -> speakers
 // mics are going into audioIn1 and audioIn2 on the 6x2
-type SixTwoSeparateInput struct{}
+type SixTwoSeparateInput struct {
+	BaseURL string
+}
 
-func (SixTwoSeparateInput) Room(context.Context, string) ([]api.Device, error) {
-	return []api.Device{
-		api.Device{
-			ID:      "ITB-1101-D1",
-			Address: "ITB-1101-D1.av",
-			Type: api.DeviceType{
-				ID: "Projector",
-				Commands: map[string]api.Command{
-					"SetPower": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetPower/{{power}}",
+func (s *SixTwoSeparateInput) SetBaseURL(baseURL string) {
+	s.BaseURL = baseURL
+}
+
+func (s *SixTwoSeparateInput) Room(context.Context, string) (api.Room, error) {
+	return api.Room{
+		ID: "ITB-1101",
+		Devices: []api.Device{
+			{
+				ID:      "ITB-1101-D1",
+				Address: "ITB-1101-D1.av",
+				Type: api.DeviceType{
+					ID: "Projector",
+					Commands: map[string]api.Command{
+						"SetPower": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetPower/{{power}}",
+							},
+							Order: intP(0),
 						},
-						Order: intP(0),
+						"GetPower": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetPower",
+							},
+						},
+						"SetBlanked": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetBlanked/{{blanked}}",
+							},
+							Order: intP(0),
+						},
+						"GetBlanked": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetBlanked",
+							},
+						},
+						"SetAVInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetAVInput/{{port}}",
+							},
+						},
+						"GetAVInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetAVInput",
+							},
+						},
 					},
-					"GetPower": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetPower",
+				},
+				Ports: []api.Port{
+					{
+						Name: "hdbaset",
+						Endpoints: api.Endpoints{
+							"ITB-1101-SW1",
 						},
-					},
-					"SetBlanked": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetBlanked/{{blanked}}",
-						},
-						Order: intP(0),
-					},
-					"GetBlanked": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetBlanked",
-						},
-					},
-					"SetAVInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetAVInput/{{port}}",
-						},
-					},
-					"GetAVInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetAVInput",
-						},
+						Type:     "audiovideo",
+						Incoming: true,
 					},
 				},
 			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "hdbaset",
-					Endpoints: api.Endpoints{
-						"ITB-1101-SW1",
-					},
-					Type:     "audiovideo",
-					Incoming: true,
-				},
-			},
-		},
-		api.Device{
-			ID:      "ITB-1101-D2",
-			Address: "ITB-1101-D2.av",
-			Type: api.DeviceType{
-				ID: "Projector",
-				Commands: map[string]api.Command{
-					"SetPower": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetPower/{{power}}",
+			{
+				ID:      "ITB-1101-D2",
+				Address: "ITB-1101-D2.av",
+				Type: api.DeviceType{
+					ID: "Projector",
+					Commands: map[string]api.Command{
+						"SetPower": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetPower/{{power}}",
+							},
+							Order: intP(0),
 						},
-						Order: intP(0),
-					},
-					"GetPower": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetPower",
+						"GetPower": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetPower",
+							},
 						},
-					},
-					"SetBlanked": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetBlanked/{{blanked}}",
+						"SetBlanked": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetBlanked/{{blanked}}",
+							},
+							Order: intP(0),
 						},
-						Order: intP(0),
-					},
-					"GetBlanked": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetBlanked",
+						"GetBlanked": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetBlanked",
+							},
 						},
-					},
-					"SetAVInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetAVInput/{{port}}",
+						"SetAVInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetAVInput/{{port}}",
+							},
 						},
-					},
-					"GetAVInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetAVInput",
+						"GetAVInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetAVInput",
+							},
 						},
 					},
 				},
-			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "hdbaset",
-					Endpoints: api.Endpoints{
-						"ITB-1101-SW1",
-					},
-					Type:     "audiovideo",
-					Incoming: true,
-				},
-			},
-		},
-		api.Device{
-			ID: "ITB-1101-AUD1",
-			Type: api.DeviceType{
-				ID: "non-controllable",
-			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "",
-					Endpoints: api.Endpoints{
-						"ITB-1101-SW1",
-					},
-					Type:     "audio",
-					Incoming: true,
-				},
-			},
-		},
-		api.Device{
-			ID: "ITB-1101-AUD2",
-			Type: api.DeviceType{
-				ID: "non-controllable",
-			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "",
-					Endpoints: api.Endpoints{
-						"ITB-1101-SW1",
-					},
-					Type:     "audio",
-					Incoming: true,
-				},
-			},
-		},
-		api.Device{
-			ID:      "ITB-1101-SW1",
-			Address: "ITB-1101-SW1.av",
-			Type: api.DeviceType{
-				ID: "6x1",
-				Commands: map[string]api.Command{
-					"SetAudioInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetAudioInput/{{port}}",
+				Ports: []api.Port{
+					{
+						Name: "hdbaset",
+						Endpoints: api.Endpoints{
+							"ITB-1101-SW1",
 						},
-					},
-					"GetAudioInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetAudioInput",
-						},
-					},
-					"SetVideoInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetVideoInput/{{port}}",
-						},
-					},
-					"GetVideoInput": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetVideoInput",
-						},
+						Type:     "audiovideo",
+						Incoming: true,
 					},
 				},
 			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "videoOut1",
-					Endpoints: api.Endpoints{
-						"ITB-1101-D1",
-					},
-					Type: "audiovideo",
+			{
+				ID: "ITB-1101-AUD1",
+				Type: api.DeviceType{
+					ID: "non-controllable",
 				},
-				api.Port{
-					Name: "videoOut2",
-					Endpoints: api.Endpoints{
-						"ITB-1101-D2",
-					},
-					Type: "audiovideo",
-				},
-				api.Port{
-					Name: "audioOut1",
-					Endpoints: api.Endpoints{
-						"ITB-1101-AUD1",
-					},
-					Type: "audio",
-				},
-				api.Port{
-					Name: "audioOut2",
-					Endpoints: api.Endpoints{
-						"ITB-1101-AUD2",
-					},
-					Type: "audio",
-				},
-				api.Port{
-					Name: "2",
-					Endpoints: api.Endpoints{
-						"ITB-1101-HDMI1",
-					},
-					Type:     "audiovideo",
-					Incoming: true,
-				},
-			},
-		},
-		api.Device{
-			ID:      "ITB-1101-VIA1",
-			Address: "ITB-1101-VIA1.av",
-			Type: api.DeviceType{
-				ID: "via-connect-pro",
-				Commands: map[string]api.Command{
-					"GetVolume": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetVolume",
+				Ports: []api.Port{
+					{
+						Name: "",
+						Endpoints: api.Endpoints{
+							"ITB-1101-SW1",
 						},
-					},
-					"GetMuted": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/GetMuted",
-						},
-					},
-					"SetVolume": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetVolume/{{level}}",
-						},
-					},
-					"SetMuted": api.Command{
-						URLs: map[string]string{
-							"default": "http://ITB-1101-CP1.byu.edu/{{address}}/SetMuted/{{muted}}",
-						},
+						Type:     "audio",
+						Incoming: true,
 					},
 				},
 			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "",
-					Endpoints: api.Endpoints{
-						"ITB-1101-SW1",
+			{
+				ID: "ITB-1101-AUD2",
+				Type: api.DeviceType{
+					ID: "non-controllable",
+				},
+				Ports: []api.Port{
+					{
+						Name: "",
+						Endpoints: api.Endpoints{
+							"ITB-1101-SW1",
+						},
+						Type:     "audio",
+						Incoming: true,
 					},
-					Type: "audiovideo",
 				},
 			},
-		},
-		api.Device{
-			ID: "ITB-1101-HDMI1",
-			Type: api.DeviceType{
-				ID: "hdmi-input",
-			},
-			Ports: []api.Port{
-				api.Port{
-					Name: "",
-					Endpoints: api.Endpoints{
-						"ITB-1101-SW1",
+			{
+				ID:      "ITB-1101-SW1",
+				Address: "ITB-1101-SW1.av",
+				Type: api.DeviceType{
+					ID: "6x1",
+					Commands: map[string]api.Command{
+						"SetAudioInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetAudioInput/{{port}}",
+							},
+						},
+						"GetAudioInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetAudioInput",
+							},
+						},
+						"SetVideoInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetVideoInput/{{port}}",
+							},
+						},
+						"GetVideoInput": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetVideoInput",
+							},
+						},
 					},
-					Type: "audiovideo",
+				},
+				Ports: []api.Port{
+					{
+						Name: "videoOut1",
+						Endpoints: api.Endpoints{
+							"ITB-1101-D1",
+						},
+						Type: "audiovideo",
+					},
+					{
+						Name: "videoOut2",
+						Endpoints: api.Endpoints{
+							"ITB-1101-D2",
+						},
+						Type: "audiovideo",
+					},
+					{
+						Name: "audioOut1",
+						Endpoints: api.Endpoints{
+							"ITB-1101-AUD1",
+						},
+						Type: "audio",
+					},
+					{
+						Name: "audioOut2",
+						Endpoints: api.Endpoints{
+							"ITB-1101-AUD2",
+						},
+						Type: "audio",
+					},
+					{
+						Name: "2",
+						Endpoints: api.Endpoints{
+							"ITB-1101-HDMI1",
+						},
+						Type:     "audiovideo",
+						Incoming: true,
+					},
+				},
+			},
+			{
+				ID:      "ITB-1101-VIA1",
+				Address: "ITB-1101-VIA1.av",
+				Type: api.DeviceType{
+					ID: "via-connect-pro",
+					Commands: map[string]api.Command{
+						"GetVolume": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetVolume",
+							},
+						},
+						"GetMuted": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/GetMuted",
+							},
+						},
+						"SetVolume": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetVolume/{{level}}",
+							},
+						},
+						"SetMuted": {
+							URLs: map[string]string{
+								"default": s.BaseURL + "/{{address}}/SetMuted/{{muted}}",
+							},
+						},
+					},
+				},
+				Ports: []api.Port{
+					{
+						Name: "",
+						Endpoints: api.Endpoints{
+							"ITB-1101-SW1",
+						},
+						Type: "audiovideo",
+					},
+				},
+			},
+			{
+				ID: "ITB-1101-HDMI1",
+				Type: api.DeviceType{
+					ID: "hdmi-input",
+				},
+				Ports: []api.Port{
+					{
+						Name: "",
+						Endpoints: api.Endpoints{
+							"ITB-1101-SW1",
+						},
+						Type: "audiovideo",
+					},
 				},
 			},
 		},

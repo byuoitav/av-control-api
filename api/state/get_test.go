@@ -14,11 +14,11 @@ import (
 )
 
 type getStateTest struct {
-	name          string
-	room          string
-	env           string
-	deviceService interface {
-		api.DeviceService
+	name        string
+	room        string
+	env         string
+	dataService interface {
+		api.DataService
 		SetBaseURL(string)
 	}
 
@@ -27,10 +27,10 @@ type getStateTest struct {
 }
 
 var getTests = []getStateTest{
-	getStateTest{
-		name:          "Simple",
-		deviceService: &mock.SimpleRoom{},
-		env:           "default",
+	{
+		name:        "Simple",
+		dataService: &mock.SimpleRoom{},
+		env:         "default",
 		driverResps: map[string]string{
 			"/ITB-1101-D1.av/GetPower":   `{"power": "on"}`,
 			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!1"}`,
@@ -40,7 +40,7 @@ var getTests = []getStateTest{
 		},
 		apiResp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
 					Input: &api.Input{
@@ -58,10 +58,10 @@ var getTests = []getStateTest{
 			},
 		},
 	},
-	getStateTest{
-		name:          "Simple2",
-		deviceService: &mock.SimpleRoom{},
-		env:           "default",
+	{
+		name:        "Simple2",
+		dataService: &mock.SimpleRoom{},
+		env:         "default",
 		driverResps: map[string]string{
 			"/ITB-1101-D1.av/GetPower":   `{"power": "standby"}`,
 			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!2"}`,
@@ -71,7 +71,7 @@ var getTests = []getStateTest{
 		},
 		apiResp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(false),
 					Blanked:   boolP(true),
 					Input: &api.Input{
@@ -105,9 +105,9 @@ func TestGetState(t *testing.T) {
 				ts.Close()
 			})
 
-			tt.deviceService.SetBaseURL(ts.URL)
+			tt.dataService.SetBaseURL(ts.URL)
 
-			room, err := tt.deviceService.Room(ctx, tt.room)
+			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {
 				t.Errorf("unable to get room: %s", err)
 			}

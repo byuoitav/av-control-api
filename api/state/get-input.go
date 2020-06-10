@@ -23,14 +23,14 @@ type getInput struct {
 }
 
 // GenerateActions makes an assumption that GetInput and GetInputByBlock will not ever be on the same device
-func (i *getInput) GenerateActions(ctx context.Context, room api.Room) generatedActions {
+func (g *getInput) GenerateActions(ctx context.Context, room api.Room) generatedActions {
 	var resp generatedActions
 	responses := make(chan actionResponse)
-	g := graph.NewGraph(room.Devices, "video")
+	gr := graph.NewGraph(room.Devices, "video")
 
-	outputs := graph.Leaves(g)
+	outputs := graph.Leaves(gr)
 
-	t := graph.Transpose(g)
+	t := graph.Transpose(gr)
 	inputs := graph.Leaves(t)
 
 	paths := path.DijkstraAllPaths(t)
@@ -45,7 +45,7 @@ func (i *getInput) GenerateActions(ctx context.Context, room api.Room) generated
 				continue
 			}
 
-			acts, errs := i.generateActionsForPath(ctx, path, responses)
+			acts, errs := g.generateActionsForPath(ctx, path, responses)
 			actsForOutput = append(actsForOutput, acts...)
 			errsForOutput = append(errsForOutput, errs...)
 		}
@@ -66,7 +66,7 @@ func (i *getInput) GenerateActions(ctx context.Context, room api.Room) generated
 	resp.Actions = uniqueActions(resp.Actions)
 
 	if len(resp.Actions) > 0 {
-		go i.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates, t, &paths, outputs, inputs)
+		go g.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates, t, &paths, outputs, inputs)
 	}
 
 	return resp

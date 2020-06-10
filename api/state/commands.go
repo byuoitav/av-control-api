@@ -21,12 +21,12 @@ func getCommand(d api.Device, cmd string, env string) (string, *int, error) {
 		return "", nil, errCommandNotFound
 	}
 
-	cmdUrl, ok := c.URLs[env]
+	cmdURL, ok := c.URLs[env]
 	if !ok {
 		return "", nil, errCommandEnvNotFound
 	}
 
-	u, err := url.Parse(cmdUrl)
+	u, err := url.Parse(cmdURL)
 	if err != nil {
 		return "", nil, fmt.Errorf("unable to parse url: %w", err)
 	}

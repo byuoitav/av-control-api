@@ -11,15 +11,15 @@ import (
 )
 
 var getPowerTest = []stateTest{
-	stateTest{
+	{
 		name: "simple",
-		deviceService: &mock.SimpleRoom{
+		dataService: &mock.SimpleRoom{
 			BaseURL: "http://host",
 		},
 		env: "default",
 		resp: generatedActions{
 			Actions: []action{
-				action{
+				{
 					ID:  "ITB-1101-D1",
 					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetPower"),
 				},
@@ -35,7 +35,7 @@ func TestGetPower(t *testing.T) {
 
 	for _, tt := range getPowerTest {
 		t.Run(tt.name, func(t *testing.T) {
-			room, err := tt.deviceService.Room(ctx, tt.room)
+			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {
 				t.Errorf("unable to get room: %s", err)
 			}

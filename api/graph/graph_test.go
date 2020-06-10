@@ -9,42 +9,42 @@ import (
 
 func TestFindPathToNeighbor(t *testing.T) {
 	room := []api.Device{
-		api.Device{
+		{
 			ID: "ITB-1101-HDMI2",
 			Ports: []api.Port{
-				api.Port{
+				{
 					Endpoints: []api.DeviceID{"ITB-1101-D1"},
-					Outgoing:  true,
+					Incoming:  false,
 					Type:      "video",
 				},
-				api.Port{
+				{
 					Endpoints: []api.DeviceID{"ITB-1101-D2"},
-					Outgoing:  true,
+					Incoming:  false,
 					Type:      "video",
 				},
-				api.Port{
+				{
 					Endpoints: []api.DeviceID{"ITB-1101-D3"},
-					Outgoing:  true,
+					Incoming:  false,
 					Type:      "video",
 				},
 			},
 		},
-		api.Device{
+		{
 			ID: "ITB-1101-D2",
 			Ports: []api.Port{
-				api.Port{
+				{
 					Name:      "hdmi!1",
 					Endpoints: []api.DeviceID{"ITB-1101-HDMI1"},
 					Incoming:  true,
 					Type:      "video",
 				},
-				api.Port{
+				{
 					Name:      "hdmi!2",
 					Endpoints: []api.DeviceID{"ITB-1101-HDMI2"},
 					Incoming:  true,
 					Type:      "video",
 				},
-				api.Port{
+				{
 					Name:      "hdmi!3",
 					Endpoints: []api.DeviceID{"ITB-1101-VIA1"},
 					Incoming:  true,
@@ -81,59 +81,59 @@ func TestFindPathToNeighbor(t *testing.T) {
 
 func TestFindPathThroughOneSwitch(t *testing.T) {
 	room := []api.Device{
-		api.Device{
+		{
 			ID: "ITB-1101-HDMI1",
 			Ports: []api.Port{
-				api.Port{
+				{
 					Endpoints: []api.DeviceID{"ITB-1101-SW1"},
-					Outgoing:  true,
+					Incoming:  false,
 					Type:      "video",
 				},
 			},
 		},
-		api.Device{
+		{
 			ID: "ITB-1101-HDMI2",
 			Ports: []api.Port{
-				api.Port{
+				{
 					Endpoints: []api.DeviceID{"ITB-1101-SW1"},
-					Outgoing:  true,
+					Incoming:  false,
 					Type:      "video",
 				},
 			},
 		},
-		api.Device{
+		{
 			ID: "ITB-1101-SW1",
 			Ports: []api.Port{
-				api.Port{
+				{
 					Name:      "0",
 					Endpoints: []api.DeviceID{"ITB-1101-HDMI1"},
 					Incoming:  true,
 					Type:      "video",
 				},
-				api.Port{
+				{
 					Name:      "1",
 					Endpoints: []api.DeviceID{"ITB-1101-HDMI2"},
 					Incoming:  true,
 					Type:      "video",
 				},
-				api.Port{
+				{
 					Name:      "0",
 					Endpoints: []api.DeviceID{"ITB-1101-D1"},
-					Outgoing:  true,
+					Incoming:  false,
 					Type:      "video",
 				},
-				api.Port{
+				{
 					Name:      "1",
 					Endpoints: []api.DeviceID{"ITB-1101-D2"},
-					Outgoing:  true,
+					Incoming:  false,
 					Type:      "video",
 				},
 			},
 		},
-		api.Device{
+		{
 			ID: "ITB-1101-D1",
 			Ports: []api.Port{
-				api.Port{
+				{
 					Name:      "hdmi!2",
 					Endpoints: []api.DeviceID{"ITB-1101-SW1"},
 					Incoming:  true,
@@ -141,10 +141,10 @@ func TestFindPathThroughOneSwitch(t *testing.T) {
 				},
 			},
 		},
-		api.Device{
+		{
 			ID: "ITB-1101-D2",
 			Ports: []api.Port{
-				api.Port{
+				{
 					Name:      "hdmi!2",
 					Endpoints: []api.DeviceID{"ITB-1101-SW1"},
 					Incoming:  true,
