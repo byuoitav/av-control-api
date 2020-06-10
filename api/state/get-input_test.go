@@ -13,22 +13,24 @@ import (
 
 var getInputTest = []stateTest{
 	{
-		name:        "simpleSeparateInput",
-		dataService: &mock.SimpleSeparateInput{},
-		env:         "default",
+		name: "simpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{
+			BaseURL: "http://host",
+		},
+		env: "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
 					ID:  "ITB-1101-D1",
-					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-D1.av/GetAVInput"),
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-D1.av/GetAVInput"),
 				},
 				{
 					ID:  "ITB-1101-SW1",
-					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetVideoInput"),
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-SW1.av/GetVideoInput"),
 				},
 				{
 					ID:  "ITB-1101-SW1",
-					Req: newRequest(http.MethodGet, "http://ITB-1101-CP1.byu.edu/ITB-1101-SW1.av/GetAudioInput"),
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-SW1.av/GetAudioInput"),
 				},
 			},
 			ExpectedUpdates: 1,

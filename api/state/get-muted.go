@@ -31,7 +31,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
-				g.Logger.Warn("unable to get command", zap.String("command", "GetMutedByBlock"), zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+				g.Logger.Warn("unable to get command", zap.String("command", "GetMutedByBlock"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Error: err.Error(),
@@ -45,7 +45,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 
 				url, err = fillURL(url, params)
 				if err != nil {
-					g.Logger.Warn("unable to fill url", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -57,7 +57,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
-					g.Logger.Warn("unable to build request", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -74,20 +74,19 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 					Response: responses,
 				}
 
-				g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+				g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
 				continue
 			}
 
-			// it should always be by block
 			url, order, err = getCommand(dev, "GetMuted", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
-				g.Logger.Warn("unable to get command", zap.String("command", "GetMuted"), zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+				g.Logger.Warn("unable to get command", zap.String("command", "GetMuted"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "muted",
@@ -102,7 +101,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 
 				url, err = fillURL(url, params)
 				if err != nil {
-					g.Logger.Warn("unable to fill url", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -114,7 +113,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				if err != nil {
-					g.Logger.Warn("unable to build request", zap.Any("device", path[0].Src.Device.ID), zap.Error(err))
+					g.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 					resp.Errors = append(resp.Errors, api.DeviceStateError{
 						ID:    dev.ID,
 						Field: "muted",
@@ -131,7 +130,7 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 					Response: responses,
 				}
 
-				g.Logger.Info("Successfully built action", zap.Any("device", path[0].Src.Device.ID))
+				g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
