@@ -26,7 +26,7 @@ var getVolumeTest = []stateTest{
 				},
 				{
 					ID:  "ITB-1101-VIA1",
-					Req: newRequest(http.MethodGet, "http://host/ITB-1101-VIA1/GetVolume"),
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-VIA1.av/GetVolume"),
 				},
 			},
 			ExpectedUpdates: 2,

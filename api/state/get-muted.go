@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/byuoitav/av-control-api/api"
-	"github.com/byuoitav/av-control-api/api/graph"
 	"go.uber.org/zap"
 )
 
@@ -17,71 +17,100 @@ type getMuted struct {
 	Environment string
 }
 
+var (
+	ErrMultipleIncoming = errors.New("multiple incoming ports on device")
+)
+
+func (g *getMuted) checkCommand(dev api.Device, responses chan actionResponse, room api.Room, incoming bool) (action, bool, error) {
+	numIncoming := 0
+	for _, port := range dev.Ports {
+		if port.Incoming && strings.Contains(port.Type, "audio") {
+			numIncoming++
+		}
+	}
+
+	if numIncoming > 1 {
+		return action{}, true, ErrMultipleIncoming
+	}
+
+	for _, port := range dev.Ports {
+		if port.Incoming && strings.Contains(port.Type, "audio") {
+			incoming = true
+			for _, d := range room.Devices {
+				if port.Endpoints.Contains(d.ID) {
+					url, order, err := getCommand(d, "GetMutedByBlock", g.Environment)
+					switch {
+					case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
+						act, incoming, err := g.checkCommand(d, responses, room, incoming)
+						if err != nil {
+							return action{}, incoming, err
+						}
+						return act, incoming, nil
+
+					case err != nil:
+						g.Logger.Warn("unable to get command", zap.String("command", "GetMutedByBlock"), zap.Any("device", d.ID), zap.Error(err))
+						return action{}, incoming, err
+
+					default:
+						params := map[string]string{
+							"address": d.Address,
+							"block":   string(d.ID),
+						}
+
+						url, err = fillURL(url, params)
+						if err != nil {
+							g.Logger.Warn("unable to fill url", zap.Any("device", d.ID), zap.Error(err))
+							return action{}, incoming, fmt.Errorf("%s (url after fill: %s)", err, url)
+						}
+
+						req, err := http.NewRequest(http.MethodGet, url, nil)
+						if err != nil {
+							g.Logger.Warn("unable to build request", zap.Any("device", d.ID), zap.Error(err))
+							return action{}, incoming, fmt.Errorf("unable to build http request: %s", err)
+						}
+
+						g.Logger.Info("Successfully built action", zap.Any("device", d.ID))
+
+						act := action{
+							ID:       d.ID,
+							Req:      req,
+							Order:    order,
+							Response: responses,
+						}
+						return act, incoming, nil
+					}
+				}
+			}
+		}
+	}
+
+	return action{}, incoming, errCommandNotFound
+}
+
 func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generatedActions {
 	var resp generatedActions
-
-	gr := graph.NewGraph(room.Devices, "audio")
 
 	responses := make(chan actionResponse)
 
 	for _, dev := range room.Devices {
-		path := graph.PathToEnd(gr, dev.ID)
-		if len(path) == 0 {
-			url, order, err := getCommand(dev, "GetMutedByBlock", g.Environment)
-			switch {
-			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-			case err != nil:
-				g.Logger.Warn("unable to get command", zap.String("command", "GetMutedByBlock"), zap.Any("device", dev.ID), zap.Error(err))
-				resp.Errors = append(resp.Errors, api.DeviceStateError{
-					ID:    dev.ID,
-					Error: err.Error(),
-				})
-				continue
-			default:
-				params := map[string]string{
-					"address": dev.Address,
-					"input":   string(dev.ID),
-				}
+		act, incoming, err := g.checkCommand(dev, responses, room, false)
+		switch {
+		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound), errors.Is(err, ErrMultipleIncoming):
+		case err != nil:
+			resp.Errors = append(resp.Errors, api.DeviceStateError{
+				ID:    dev.ID,
+				Field: "volume",
+				Error: err.Error(),
+			})
 
-				url, err = fillURL(url, params)
-				if err != nil {
-					g.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "muted",
-						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-					})
-
-					continue
-				}
-
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				if err != nil {
-					g.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "muted",
-						Error: fmt.Sprintf("unable to build http request: %s", err),
-					})
-
-					continue
-				}
-
-				act := action{
-					ID:       dev.ID,
-					Req:      req,
-					Order:    order,
-					Response: responses,
-				}
-
-				g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
-
-				resp.Actions = append(resp.Actions, act)
-				resp.ExpectedUpdates++
-				continue
-			}
-
-			url, order, err = getCommand(dev, "GetMuted", g.Environment)
+			continue
+		default:
+			resp.Actions = append(resp.Actions, act)
+			resp.ExpectedUpdates++
+			continue
+		}
+		if !incoming || errors.Is(err, ErrMultipleIncoming) {
+			url, order, err := getCommand(dev, "GetMuted", g.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
@@ -134,70 +163,6 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 
 				resp.Actions = append(resp.Actions, act)
 				resp.ExpectedUpdates++
-			}
-		} else {
-			endDev := path[len(path)-1].Dst
-			url, order, err := getCommand(*endDev.Device, "GetMutedByBlock", g.Environment)
-			switch {
-			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
-				continue
-			case err != nil:
-				g.Logger.Warn("unable to get command", zap.String("command", "GetMutedByBlock"), zap.Any("device", endDev.Device.ID), zap.Error(err))
-				resp.Errors = append(resp.Errors, api.DeviceStateError{
-					ID:    dev.ID,
-					Field: "muted",
-					Error: err.Error(),
-				})
-
-				continue
-			}
-
-			for _, port := range endDev.Ports {
-				if !port.Endpoints.Contains(dev.ID) {
-					continue
-				}
-
-				params := map[string]string{
-					"address": endDev.Address,
-					"input":   port.Name,
-				}
-
-				url, err = fillURL(url, params)
-				if err != nil {
-					g.Logger.Warn("unable to fill url", zap.Any("device", endDev.Device.ID), zap.Error(err))
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "muted",
-						Error: fmt.Sprintf("%s (url after fill: %s)", err, url),
-					})
-
-					continue
-				}
-
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				if err != nil {
-					g.Logger.Warn("unable to build request", zap.Any("device", endDev.Device.ID), zap.Error(err))
-					resp.Errors = append(resp.Errors, api.DeviceStateError{
-						ID:    dev.ID,
-						Field: "muted",
-						Error: fmt.Sprintf("unable to build http request: %s", err),
-					})
-
-					continue
-				}
-
-				act := action{
-					ID:       dev.ID,
-					Req:      req,
-					Order:    order,
-					Response: responses,
-				}
-
-				g.Logger.Info("Successfully built action", zap.Any("device", endDev.Device.ID))
-
-				resp.Actions = append(resp.Actions, act)
-				resp.ExpectedUpdates++
-				continue
 			}
 		}
 	}

@@ -22,10 +22,14 @@ var getMutedTest = []stateTest{
 			Actions: []action{
 				{
 					ID:  "ITB-1101-AMP1",
-					Req: newRequest(http.MethodGet, "http://host//ITB-1101-AMP1.av/GetMuted"),
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-AMP1.av/GetMuted"),
+				},
+				{
+					ID:  "ITB-1101-VIA1",
+					Req: newRequest(http.MethodGet, "http://host/ITB-1101-VIA1.av/GetMuted"),
 				},
 			},
-			ExpectedUpdates: 1,
+			ExpectedUpdates: 2,
 		},
 	},
 }
