@@ -51,7 +51,7 @@ func (g *getVolume) checkCommand(dev api.Device, responses chan actionResponse, 
 					default:
 						params := map[string]string{
 							"address": d.Address,
-							"block":   string(d.ID),
+							"block":   port.Name,
 						}
 
 						url, err = fillURL(url, params)
@@ -69,7 +69,7 @@ func (g *getVolume) checkCommand(dev api.Device, responses chan actionResponse, 
 						g.Logger.Info("Successfully built action", zap.Any("device", d.ID))
 
 						act := action{
-							ID:       d.ID,
+							ID:       dev.ID,
 							Req:      req,
 							Order:    order,
 							Response: responses,

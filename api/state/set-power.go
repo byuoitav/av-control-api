@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/byuoitav/av-control-api/api"
 )
@@ -28,13 +29,14 @@ func (s *setPower) GenerateActions(ctx context.Context, room api.Room, env strin
 	}
 
 	for _, dev := range devices {
-		var cmd string
-		if *stateReq.Devices[dev.ID].PoweredOn == true {
-			cmd = "PowerOn"
-		} else {
-			cmd = "Standby"
-		}
-		url, order, err := getCommand(dev, cmd, env)
+		// this is for gross old way where they're separate endpoints
+		// var cmd string
+		// if *stateReq.Devices[dev.ID].PoweredOn == true {
+		// 	cmd = "PowerOn"
+		// } else {
+		// 	cmd = "Standby"
+		// }
+		url, order, err := getCommand(dev, "SetPower", env)
 		if err != nil {
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
@@ -47,6 +49,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room api.Room, env strin
 
 		params := map[string]string{
 			"address": dev.Address,
+			"power":   strconv.FormatBool(*stateReq.Devices[dev.ID].PoweredOn),
 		}
 		url, err = fillURL(url, params)
 		if err != nil {

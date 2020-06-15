@@ -54,7 +54,7 @@ func (g *getMuted) checkCommand(dev api.Device, responses chan actionResponse, r
 					default:
 						params := map[string]string{
 							"address": d.Address,
-							"block":   string(d.ID),
+							"block":   port.Name,
 						}
 
 						url, err = fillURL(url, params)
@@ -72,7 +72,7 @@ func (g *getMuted) checkCommand(dev api.Device, responses chan actionResponse, r
 						g.Logger.Info("Successfully built action", zap.Any("device", d.ID))
 
 						act := action{
-							ID:       d.ID,
+							ID:       dev.ID,
 							Req:      req,
 							Order:    order,
 							Response: responses,
@@ -218,7 +218,6 @@ func (g *getMuted) handleResponses(respChan chan actionResponse, expectedResps, 
 			handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
 			continue
 		}
-
 		g.Logger.Info("Successfully got muted state", zap.Any("device", resp.Action.ID), zap.Boolp("muted", &state.Muted))
 		resp.Updates <- DeviceStateUpdate{
 			ID: resp.Action.ID,
