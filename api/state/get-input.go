@@ -169,7 +169,7 @@ type input struct {
 	AvailableInputs  []api.DeviceID `json:"availableInputs"`
 }
 
-type poopInput struct {
+type respInput struct {
 	Input *string `json:"input"`
 }
 
@@ -550,13 +550,13 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		}
 
 		var state input
-		var poop poopInput
+		var tmpInput respInput
 		var switcherBackup map[string]string
-		if err := json.Unmarshal(resp.Body, &poop); err != nil {
+		if err := json.Unmarshal(resp.Body, &tmp); err != nil {
 			handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
 			continue
 		}
-		if poop == (poopInput{}) {
+		if tmpInput == (respInput{}) {
 			if err := json.Unmarshal(resp.Body, &switcherBackup); err != nil {
 				handleErr(fmt.Errorf("unable to parse response from driver for switcher: %w. response:\n%s", err, resp.Body))
 			}
@@ -564,9 +564,9 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 
 		switch {
 		case strings.Contains(resp.Action.Req.URL.String(), "GetAVInputForOutput"):
-			if poop != (poopInput{}) {
-				state.Video = poop.Input
-				state.Audio = poop.Input
+			if tmpInput != (respInput{}) {
+				state.Video = tmpInput.Input
+				state.Audio = tmpInput.Input
 			} else {
 				for k, v := range switcherBackup {
 					tmpInput := v + ":" + k
@@ -574,13 +574,11 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 					state.Audio = &tmpInput
 				}
 			}
-
-			// separatable[resp.Action.ID] = boolP(false)
 
 		case strings.Contains(resp.Action.Req.URL.String(), "GetAVInput"):
-			if poop != (poopInput{}) {
-				state.Video = poop.Input
-				state.Audio = poop.Input
+			if tmpInput != (respInput{}) {
+				state.Video = tmpInput.Input
+				state.Audio = tmpInput.Input
 			} else {
 				for k, v := range switcherBackup {
 					tmpInput := v + ":" + k
@@ -588,51 +586,46 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 					state.Audio = &tmpInput
 				}
 			}
-			// separatable[resp.Action.ID] = boolP(false)
 
 		case strings.Contains(resp.Action.Req.URL.String(), "GetVideoInputForOutput"):
-			if poop != (poopInput{}) {
-				state.Video = poop.Input
+			if tmpInput != (respInput{}) {
+				state.Video = tmpInput.Input
 			} else {
 				for k, v := range switcherBackup {
 					tmpInput := v + ":" + k
 					state.Video = &tmpInput
 				}
 			}
-			// separatable[resp.Action.ID] = boolP(true)
 
 		case strings.Contains(resp.Action.Req.URL.String(), "GetVideoInput"):
-			if poop != (poopInput{}) {
-				state.Video = poop.Input
+			if tmpInput != (respInput{}) {
+				state.Video = tmpInput.Input
 			} else {
 				for k, v := range switcherBackup {
 					tmpInput := v + ":" + k
 					state.Video = &tmpInput
 				}
 			}
-			// separatable[resp.Action.ID] = boolP(true)
 
 		case strings.Contains(resp.Action.Req.URL.String(), "GetAudioInputForOutput"):
-			if poop != (poopInput{}) {
-				state.Audio = poop.Input
+			if tmpInput != (respInput{}) {
+				state.Audio = tmpInput.Input
 			} else {
 				for k, v := range switcherBackup {
 					tmpInput := v + ":" + k
 					state.Audio = &tmpInput
 				}
 			}
-			// separatable[resp.Action.ID] = boolP(true)
 
 		case strings.Contains(resp.Action.Req.URL.String(), "GetAudioInput"):
-			if poop != (poopInput{}) {
-				state.Audio = poop.Input
+			if tmpInput != (respInput{}) {
+				state.Audio = tmpInput.Input
 			} else {
 				for k, v := range switcherBackup {
 					tmpInput := v + ":" + k
 					state.Audio = &tmpInput
 				}
 			}
-			// separatable[resp.Action.ID] = boolP(true)
 		}
 
 		fmt.Printf("%s input: %s\n", resp.Action.ID, resp.Body)
