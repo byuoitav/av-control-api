@@ -552,7 +552,7 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		var state input
 		var tmpInput respInput
 		var switcherBackup map[string]string
-		if err := json.Unmarshal(resp.Body, &tmp); err != nil {
+		if err := json.Unmarshal(resp.Body, &tmpInput); err != nil {
 			handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
 			continue
 		}
