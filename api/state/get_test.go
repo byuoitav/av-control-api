@@ -33,11 +33,13 @@ var getTests = []getStateTest{
 		dataService: &mock.SimpleRoom{},
 		env:         "default",
 		driverResps: map[string]string{
-			"/ITB-1101-D1.av/GetPower":   `{"power": "on"}`,
-			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!1"}`,
-			"/ITB-1101-D1.av/GetBlanked": `{"blanked": false}`,
-			"/ITB-1101-D1.av/GetMuted":   `{"muted": false}`,
-			"/ITB-1101-D1.av/GetVolume":  `{"volume": 30}`,
+			"/ITB-1101-D1.av/GetPower":    `{"power": "on"}`,
+			"/ITB-1101-D1.av/GetAVInput":  `{"input": "hdmi!1"}`,
+			"/ITB-1101-D1.av/GetBlanked":  `{"blanked": false}`,
+			"/ITB-1101-D1.av/GetMuted":    `{"muted": false}`,
+			"/ITB-1101-D1.av/GetVolume":   `{"volume": 30}`,
+			"/ITB-1101-VIA1.av/GetVolume": `{"volume": 50}`,
+			"/ITB-1101-VIA1.av/GetMuted":  `{"muted": true}`,
 		},
 		apiResp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
@@ -49,12 +51,16 @@ var getTests = []getStateTest{
 						Video:            deviceID("ITB-1101-VIA1"),
 						CanSetSeparately: boolP(false),
 						AvailableInputs: []api.DeviceID{
-							api.DeviceID("ITB-1101-VIA1"),
 							api.DeviceID("ITB-1101-HDMI1"),
+							api.DeviceID("ITB-1101-VIA1"),
 						},
 					},
 					Volume: intP(30),
 					Muted:  boolP(false),
+				},
+				"ITB-1101-VIA1": {
+					Volume: intP(50),
+					Muted:  boolP(true),
 				},
 			},
 		},
@@ -64,11 +70,13 @@ var getTests = []getStateTest{
 		dataService: &mock.SimpleRoom{},
 		env:         "default",
 		driverResps: map[string]string{
-			"/ITB-1101-D1.av/GetPower":   `{"poweredOn": false}`,
-			"/ITB-1101-D1.av/GetAVInput": `{"input": "hdmi!2"}`,
-			"/ITB-1101-D1.av/GetBlanked": `{"blanked": true}`,
-			"/ITB-1101-D1.av/GetMuted":   `{"muted": true}`,
-			"/ITB-1101-D1.av/GetVolume":  `{"volume": 100}`,
+			"/ITB-1101-D1.av/GetPower":    `{"poweredOn": false}`,
+			"/ITB-1101-D1.av/GetAVInput":  `{"input": "hdmi!2"}`,
+			"/ITB-1101-D1.av/GetBlanked":  `{"blanked": true}`,
+			"/ITB-1101-D1.av/GetMuted":    `{"muted": true}`,
+			"/ITB-1101-D1.av/GetVolume":   `{"volume": 100}`,
+			"/ITB-1101-VIA1.av/GetVolume": `{"volume": 50}`,
+			"/ITB-1101-VIA1.av/GetMuted":  `{"muted": true}`,
 		},
 		apiResp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
@@ -87,12 +95,16 @@ var getTests = []getStateTest{
 					Volume: intP(100),
 					Muted:  boolP(true),
 				},
+				"ITB-1101-VIA1": {
+					Volume: intP(50),
+					Muted:  boolP(true),
+				},
 			},
 		},
 	},
 	{
 		name:        "SimpleSeparateInput/1",
-		dataService: &mock.SimpleRoom{},
+		dataService: &mock.SimpleSeparateInput{},
 		env:         "default",
 		driverResps: map[string]string{
 			"/ITB-1101-D1.av/GetPower":       `{"poweredOn": true}`,

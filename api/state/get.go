@@ -129,11 +129,6 @@ func (gs *GetSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 				curState.Muted = update.Muted
 			}
 
-			// this is on a group state so don't need it?
-			// if update.Outputs != nil {
-			// 	curState.Outputs = update.Outputs
-			// }
-
 			stateResp.Devices[update.ID] = curState
 		case err := <-errors:
 			stateResp.Errors = append(stateResp.Errors, err)

@@ -65,6 +65,17 @@ func (p Ports) Outgoing() Ports {
 	return toReturn
 }
 
+func (p Ports) Incoming() Ports {
+	var toReturn Ports
+	for _, port := range p {
+		if port.Incoming {
+			toReturn = append(toReturn, port)
+		}
+	}
+
+	return toReturn
+}
+
 func (d Device) MarshalJSON() ([]byte, error) {
 	type Alias Device
 

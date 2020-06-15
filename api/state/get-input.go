@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/byuoitav/av-control-api/api"
@@ -66,7 +67,7 @@ func (g *getInput) GenerateActions(ctx context.Context, room api.Room) generated
 	resp.Actions = uniqueActions(resp.Actions)
 
 	if len(resp.Actions) > 0 {
-		go g.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates, t, &paths, outputs, inputs)
+		go g.handleResponses(responses, len(resp.Actions), resp.ExpectedUpdates, t, &paths, outputs, inputs, room)
 	}
 
 	return resp
@@ -162,19 +163,360 @@ func (g *getInput) generateActionsForPath(ctx context.Context, path graph.Path, 
 }
 
 type input struct {
-	Audio            *string  `json:"audio"`
-	Video            *string  `json:"video"`
-	CanSetSeparately *bool    `json:"canSetSeparately"`
-	AvailableInputs  []string `json:"availableInputs"`
+	Audio            *string        `json:"audio"`
+	Video            *string        `json:"video"`
+	CanSetSeparately *bool          `json:"canSetSeparately"`
+	AvailableInputs  []api.DeviceID `json:"availableInputs"`
 }
 
-func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int, t *simple.DirectedGraph, paths *path.AllShortest, outputs, inputs []graph.Node) {
+type poopInput struct {
+	Input *string `json:"input"`
+}
+
+func (g *getInput) getDeepest(output graph.Node, inputType string, t *simple.DirectedGraph, status map[api.DeviceID][]input) graph.Node {
+	deepest := output
+	var prevEdge graph.Edge
+	var prevState input
+	search := traverse.DepthFirst{
+		Visit: func(node gonum.Node) {
+			deepest = node.(graph.Node)
+			fmt.Printf("deepest: %s\n", deepest.Device.ID)
+		},
+		Traverse: func(edge gonum.Edge) bool {
+			e := edge.(graph.Edge)
+
+			states := status[e.Src.Device.ID]
+
+			if inputType == "video" {
+				if prevEdge != (graph.Edge{}) && prevState.Video != nil {
+					if len(states) == 0 && prevState.Video == &e.Dst.Device.Address {
+						prevEdge = e
+						return true
+					}
+				}
+
+				if _, ok := e.Src.Type.Commands["GetAVInput"]; ok {
+					for _, state := range states {
+						if state.Video == nil {
+							continue
+						}
+
+						inputStr := *state.Video
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevEdge = e
+							prevState = state
+							return true
+						}
+
+						if len(e.Src.Device.Ports.Outgoing()) == 1 {
+							prevState = state
+							prevEdge = e
+							return true
+						}
+						return false
+					}
+				}
+
+				if _, ok := e.Src.Type.Commands["GetAVInputForOutput"]; ok {
+					for _, state := range states {
+						if state.Video == nil {
+							continue
+						}
+
+						inputStr := *state.Video
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevEdge = e
+							prevState = state
+							return true
+						}
+
+						if len(e.Src.Device.Ports.Outgoing()) == 1 {
+							prevState = state
+							prevEdge = e
+							return true
+						}
+					}
+
+					return false
+				}
+
+				if _, ok := e.Src.Type.Commands["GetVideoInput"]; ok {
+					for _, state := range states {
+						if state.Video == nil {
+							continue
+						}
+
+						inputStr := *state.Video
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevEdge = e
+							prevState = state
+							return true
+						}
+
+						// not sure if we want this outgoing thing
+
+						// if len(e.Src.Device.Ports.Outgoing()) == 1 {
+						// 	prevState = state
+						// 	prevEdge = e
+						// 	return true
+						// }
+					}
+
+					return false
+				}
+
+				if _, ok := e.Src.Type.Commands["GetVideoInputForOutput"]; ok {
+					for _, state := range states {
+						if state.Video == nil {
+							continue
+						}
+
+						inputStr := *state.Video
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+						if prevEdge == (graph.Edge{}) {
+							if inputStr == e.SrcPort.Name {
+								prevState = state
+								prevEdge = e
+								return true
+							}
+						} else {
+							if len(split) > 1 {
+								if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							} else {
+								if inputStr == e.SrcPort.Name {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							}
+						}
+					}
+
+					return false
+				}
+
+				if len(e.Src.Device.Ports.Outgoing()) == 1 {
+					prevEdge = e
+					return true
+				}
+
+				// dannyrandall: TODO idk how to handle prevState.Video being nil, i just put something
+				if prevState.Video == nil {
+					return false
+				}
+
+				if *prevState.Video == e.Dst.Address {
+					prevEdge = e
+					return true
+				}
+
+				return false
+				// } else if inputType == "audio" {
+			} else {
+				if _, ok := e.Src.Type.Commands["GetAVInput"]; ok {
+					for _, state := range states {
+						if state.Audio == nil {
+							continue
+						}
+
+						inputStr := *state.Audio
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevEdge = e
+							prevState = state
+							return true
+						}
+
+						if len(e.Src.Device.Ports.Outgoing()) == 1 {
+							prevState = state
+							prevEdge = e
+							return true
+						}
+					}
+					return false
+				}
+
+				if _, ok := e.Src.Type.Commands["GetAVInputForOutput"]; ok {
+					for _, state := range states {
+						if state.Audio == nil {
+							continue
+						}
+
+						inputStr := *state.Audio
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevEdge = e
+							prevState = state
+							return true
+						}
+
+						if len(e.Src.Device.Ports.Outgoing()) == 1 {
+							prevState = state
+							prevEdge = e
+							return true
+						}
+					}
+
+					return false
+				}
+
+				if _, ok := e.Src.Type.Commands["GetAudioInput"]; ok {
+					for _, state := range states {
+						if state.Audio == nil {
+							continue
+						}
+
+						inputStr := *state.Audio
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+
+						if e.SrcPort.Name == inputStr {
+							prevEdge = e
+							prevState = state
+							return true
+						}
+
+						// if len(e.Src.Device.Ports.Outgoing()) == 1 {
+						// 	prevState = state
+						// 	prevEdge = e
+						// 	return true
+						// }
+					}
+					return false
+				}
+
+				if _, ok := e.Src.Type.Commands["GetAudioInputForOutput"]; ok {
+					for _, state := range states {
+						if state.Audio == nil {
+							continue
+						}
+
+						inputStr := *state.Audio
+						split := strings.Split(inputStr, ":")
+						if len(split) > 1 {
+							inputStr = split[1]
+						}
+						if prevEdge == (graph.Edge{}) {
+							if inputStr == e.SrcPort.Name {
+								prevState = state
+								prevEdge = e
+								return true
+							}
+						} else {
+							if len(split) > 1 {
+								if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							} else {
+								if inputStr == e.SrcPort.Name {
+									prevState = state
+									prevEdge = e
+									return true
+								}
+							}
+						}
+					}
+
+					return false
+				}
+
+				if len(e.Src.Device.Ports.Outgoing()) == 1 {
+					prevEdge = e
+					return true
+				}
+
+				// dannyrandall: TODO idk how to handle prevState.Video being nil, i just put something
+				if prevState.Audio == nil {
+					return false
+				}
+
+				if *prevState.Audio == e.Dst.Address {
+					prevEdge = e
+					return true
+				}
+
+				return false
+			}
+		},
+	}
+
+	search.Walk(t, output, func(node gonum.Node) bool {
+		return t.From(node.ID()).Len() == 0
+	})
+
+	return deepest
+}
+
+func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, expectedUpdates int, t *simple.DirectedGraph, paths *path.AllShortest, outputs, inputs []graph.Node, room api.Room) {
 	if expectedResps == 0 {
 		return
 	}
 
 	var resps []actionResponse
 	var received int
+
+	separatable := make(map[api.DeviceID]*bool)
+	availableInputs := make(map[api.DeviceID][]api.DeviceID)
+
+	for _, dev := range room.Devices {
+		path := graph.PathToEnd(t, dev.ID)
+
+		for i := range path {
+			if len(path[i].Dst.Device.Ports.Incoming()) == 0 {
+				availableInputs[dev.ID] = append(availableInputs[dev.ID], path[i].Dst.Device.ID)
+			}
+			if _, ok := path[i].Src.Device.Type.Commands["GetVideoInput"]; ok {
+				separatable[dev.ID] = boolP(true)
+			}
+			if _, ok := path[i].Src.Device.Type.Commands["GetVideoInputForOutput"]; ok {
+				separatable[dev.ID] = boolP(true)
+			}
+			if _, ok := path[i].Src.Device.Type.Commands["GetAudioInput"]; ok {
+				separatable[dev.ID] = boolP(true)
+			}
+			if _, ok := path[i].Src.Device.Type.Commands["GetAudioInputForOutput"]; ok {
+				separatable[dev.ID] = boolP(true)
+			}
+		}
+		if _, ok := separatable[dev.ID]; !ok {
+			separatable[dev.ID] = boolP(false)
+		}
+
+	}
 
 	for resp := range respChan {
 		received++
@@ -208,9 +550,89 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		}
 
 		var state input
-		if err := json.Unmarshal(resp.Body, &state); err != nil {
+		var poop poopInput
+		var switcherBackup map[string]string
+		if err := json.Unmarshal(resp.Body, &poop); err != nil {
 			handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
 			continue
+		}
+		if poop == (poopInput{}) {
+			if err := json.Unmarshal(resp.Body, &switcherBackup); err != nil {
+				handleErr(fmt.Errorf("unable to parse response from driver for switcher: %w. response:\n%s", err, resp.Body))
+			}
+		}
+
+		switch {
+		case strings.Contains(resp.Action.Req.URL.String(), "GetAVInputForOutput"):
+			if poop != (poopInput{}) {
+				state.Video = poop.Input
+				state.Audio = poop.Input
+			} else {
+				for k, v := range switcherBackup {
+					tmpInput := v + ":" + k
+					state.Video = &tmpInput
+					state.Audio = &tmpInput
+				}
+			}
+
+			// separatable[resp.Action.ID] = boolP(false)
+
+		case strings.Contains(resp.Action.Req.URL.String(), "GetAVInput"):
+			if poop != (poopInput{}) {
+				state.Video = poop.Input
+				state.Audio = poop.Input
+			} else {
+				for k, v := range switcherBackup {
+					tmpInput := v + ":" + k
+					state.Video = &tmpInput
+					state.Audio = &tmpInput
+				}
+			}
+			// separatable[resp.Action.ID] = boolP(false)
+
+		case strings.Contains(resp.Action.Req.URL.String(), "GetVideoInputForOutput"):
+			if poop != (poopInput{}) {
+				state.Video = poop.Input
+			} else {
+				for k, v := range switcherBackup {
+					tmpInput := v + ":" + k
+					state.Video = &tmpInput
+				}
+			}
+			// separatable[resp.Action.ID] = boolP(true)
+
+		case strings.Contains(resp.Action.Req.URL.String(), "GetVideoInput"):
+			if poop != (poopInput{}) {
+				state.Video = poop.Input
+			} else {
+				for k, v := range switcherBackup {
+					tmpInput := v + ":" + k
+					state.Video = &tmpInput
+				}
+			}
+			// separatable[resp.Action.ID] = boolP(true)
+
+		case strings.Contains(resp.Action.Req.URL.String(), "GetAudioInputForOutput"):
+			if poop != (poopInput{}) {
+				state.Audio = poop.Input
+			} else {
+				for k, v := range switcherBackup {
+					tmpInput := v + ":" + k
+					state.Audio = &tmpInput
+				}
+			}
+			// separatable[resp.Action.ID] = boolP(true)
+
+		case strings.Contains(resp.Action.Req.URL.String(), "GetAudioInput"):
+			if poop != (poopInput{}) {
+				state.Audio = poop.Input
+			} else {
+				for k, v := range switcherBackup {
+					tmpInput := v + ":" + k
+					state.Audio = &tmpInput
+				}
+			}
+			// separatable[resp.Action.ID] = boolP(true)
 		}
 
 		fmt.Printf("%s input: %s\n", resp.Action.ID, resp.Body)
@@ -246,124 +668,31 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		if skip {
 			continue
 		}
-		deepest := output
-
-		var prevEdge graph.Edge
-		var prevState input
-		search := traverse.DepthFirst{
-			Visit: func(node gonum.Node) {
-				deepest = node.(graph.Node)
-			},
-			Traverse: func(edge gonum.Edge) bool {
-				e := edge.(graph.Edge)
-
-				states := status[e.Src.Device.ID]
-
-				if prevEdge != (graph.Edge{}) && *prevState.Video != "" {
-					if len(states) == 0 && *prevState.Video == e.Dst.Device.Address {
-						prevEdge = e
-						return true
-					}
-				}
-
-				if _, ok := e.Src.Type.Commands["GetInput"]; ok {
-					for _, state := range states {
-						if *state.Video == "" {
-							continue
-						}
-
-						inputStr := *state.Video
-						split := strings.Split(inputStr, ":")
-						if len(split) > 1 {
-							inputStr = split[1]
-						}
-
-						if e.SrcPort.Name == inputStr {
-							prevEdge = e
-							prevState = state
-							return true
-						}
-
-						if len(e.Src.Device.Ports.Outgoing()) == 1 {
-							prevState = state
-							prevEdge = e
-							return true
-						}
-					}
-
-					return false
-				}
-
-				if _, ok := e.Src.Type.Commands["GetInputByOutput"]; ok {
-					for _, state := range states {
-						if *state.Video == "" {
-							continue
-						}
-
-						inputStr := *state.Video
-						split := strings.Split(inputStr, ":")
-						if len(split) > 1 {
-							inputStr = split[1]
-						}
-						if prevEdge == (graph.Edge{}) {
-							if inputStr == e.SrcPort.Name {
-								prevState = state
-								prevEdge = e
-								return true
-							}
-						} else {
-							if len(split) > 1 {
-								if split[1] == prevEdge.DstPort.Name && e.SrcPort.Name == split[0] {
-									prevState = state
-									prevEdge = e
-									return true
-								}
-							} else {
-								if inputStr == e.SrcPort.Name {
-									prevState = state
-									prevEdge = e
-									return true
-								}
-							}
-						}
-					}
-					return false
-				}
-
-				if len(e.Src.Device.Ports.Outgoing()) == 1 {
-					prevEdge = e
-					return true
-				}
-
-				// dannyrandall: TODO idk how to handle prevState.Video being nil, i just put something
-				if prevState.Video == nil {
-					return false
-				}
-
-				if *prevState.Video == e.Dst.Address {
-					prevEdge = e
-					return true
-				}
-
-				return false
-			},
-		}
-
-		search.Walk(t, output, func(node gonum.Node) bool {
-			return t.From(node.ID()).Len() == 0
-		})
+		deepestVideo := g.getDeepest(output, "video", t, status)
+		deepestAudio := g.getDeepest(output, "audio", t, status)
 
 		// validate that the deepest is an input
 		valid := false
 		for _, input := range inputs {
-			if deepest.Device.ID == input.Device.ID {
+			if deepestVideo.Device.ID == input.Device.ID {
 				valid = true
 				break
 			}
 		}
 		if valid {
+			// it works with these print statements but not without(?)
+			for k, v := range availableInputs[output.Device.ID] {
+				fmt.Printf("Before: %v, %v\n", k, v)
+			}
+			sort.Slice(availableInputs[output.Device.ID], func(i, j int) bool { return i > j })
+			for k, v := range availableInputs[output.Device.ID] {
+				fmt.Printf("after: %v, %v\n", k, v)
+			}
 			i := api.Input{
-				Video: &deepest.Device.ID,
+				Video:            &deepestVideo.Device.ID,
+				Audio:            &deepestAudio.Device.ID,
+				CanSetSeparately: separatable[output.Device.ID],
+				AvailableInputs:  availableInputs[output.Device.ID],
 			}
 			resps[0].Updates <- DeviceStateUpdate{
 				ID: output.Device.ID,
@@ -373,13 +702,23 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 			}
 
 		} else {
-			states := status[deepest.Device.ID]
-			g.Logger.Warn("unable to traverse input tree back to a valid input", zap.Any("device", deepest.Device.ID))
+			states := status[deepestVideo.Device.ID]
+			g.Logger.Warn("unable to traverse input tree back to a valid video input", zap.Any("device", deepestVideo.Device.ID))
 
 			resps[0].Errors <- api.DeviceStateError{
 				ID:    output.Device.ID,
 				Field: "input",
-				Error: fmt.Sprintf("unable to traverse input tree back to a valid input. only got to %s|%+v", deepest.Device.ID, states),
+				Error: fmt.Sprintf("unable to traverse input tree back to a valid video input. only got to %s|%+v", deepestVideo.Device.ID, states),
+			}
+
+			// I don't know if it will get both of these but we'll see
+			states = status[deepestAudio.Device.ID]
+			g.Logger.Warn("unable to traverse input tree back to a valid audio input", zap.Any("device", deepestAudio.Device.ID))
+
+			resps[0].Errors <- api.DeviceStateError{
+				ID:    output.Device.ID,
+				Field: "input",
+				Error: fmt.Sprintf("unable to traverse input tree back to a valid audio input. only got to %s|%+v", deepestAudio.Device.ID, states),
 			}
 			resps[0].Updates <- DeviceStateUpdate{}
 		}
