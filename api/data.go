@@ -33,48 +33,13 @@ type Command struct {
 	Order *int              `json:"order,omitempty"`
 }
 
+// Port I think? this will only be used on DSP's ??
 type Port struct {
-	Name      string    `json:"name"`
-	Endpoints Endpoints `json:"endpoints"`
-	Incoming  bool      `json:"incoming"`
-	Type      string    `json:"type"`
-}
-
-type Endpoints []DeviceID
-
-func (e Endpoints) Contains(id DeviceID) bool {
-	for i := range e {
-		if e[i] == id {
-			return true
-		}
-	}
-
-	return false
+	Name string `json:"name"`
+	Type string `json:"type"`
 }
 
 type Ports []Port
-
-func (p Ports) Outgoing() Ports {
-	var toReturn Ports
-	for _, port := range p {
-		if !port.Incoming {
-			toReturn = append(toReturn, port)
-		}
-	}
-
-	return toReturn
-}
-
-func (p Ports) Incoming() Ports {
-	var toReturn Ports
-	for _, port := range p {
-		if port.Incoming {
-			toReturn = append(toReturn, port)
-		}
-	}
-
-	return toReturn
-}
 
 func (d Device) MarshalJSON() ([]byte, error) {
 	type Alias Device
