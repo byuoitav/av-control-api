@@ -2,6 +2,13 @@ package drivers
 
 import "context"
 
+type Device interface{}
+
+type DeviceWithPower interface {
+	GetPower(context.Context) (bool, error)
+	SetPower(context.Context, bool) error
+}
+
 type DeviceWithAudioInput interface {
 	GetAudioInputs(ctx context.Context) (map[string]string, error)
 	SetAudioInput(ctx context.Context, output, input string) error
@@ -15,11 +22,6 @@ type DeviceWithVideoInput interface {
 type DeviceWithAudioVideoInput interface {
 	GetAudioVideoInputs(ctx context.Context) (map[string]string, error)
 	SetAudioVideoInput(ctx context.Context, output, input string) error
-}
-
-type DeviceWithPower interface {
-	GetPower(context.Context) (bool, error)
-	SetPower(context.Context, bool) error
 }
 
 type DeviceWithBlank interface {

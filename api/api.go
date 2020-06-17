@@ -13,35 +13,6 @@ type StateResponse struct {
 	Errors  []DeviceStateError       `json:"errors,omitempty"`
 }
 
-/*
-{
-	"devices": {
-		"poweredOn": true,
-		"inputs": {
-			"output": {
-				"audioVideo": "input",
-				"audio": "input",
-				"video": "input",
-			},
-			"output2": {
-				"audioVideo": "input",
-				"audio": "input",
-				"video": "input",
-			}
-		},
-		"blanked": true,
-		"volumes": {
-			"001100": 50,
-			"001200": 30,
-			"TM CB1170MediaGain": 30
-		},
-		"mutes": {
-			"out1Mute": false
-		}
-	}
-}
-*/
-
 type DeviceState struct {
 	PoweredOn *bool `json:"poweredOn,omitempty"`
 	Blanked   *bool `json:"blanked,omitempty"`
@@ -55,20 +26,10 @@ type Input struct {
 	AudioVideo *string `json:"audiovideo,omitempty"`
 	Audio      *string `json:"audio,omitempty"`
 	Video      *string `json:"video,omitempty"`
+
 	// TODO ?
 	// AvailableInputs []DeviceID `json:"availableInputs,omitempty"`
 }
-
-// for option 2
-//type VolumeState struct {
-//	Outputs map[string]int
-//	Inputs  map[string]int
-//}
-//
-//type MutedState struct {
-//	Outputs map[string]bool
-//	Inputs  map[string]bool
-//}
 
 type DeviceStateError struct {
 	ID    DeviceID    `json:"id"`
