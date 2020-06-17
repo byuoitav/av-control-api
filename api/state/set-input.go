@@ -55,6 +55,12 @@ func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq 
 		}
 	}
 
+	// this is to keep track of whether we shouldate increment resp.expectedUpdates again in audio
+	increment := make(map[api.DeviceID]bool)
+	for _, device := range devices {
+		increment[device.ID] = false
+	}
+
 	t := graph.Transpose(video)
 	inputs := graph.Leaves(t)
 
@@ -82,6 +88,7 @@ func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq 
 
 		if len(errsForOutput) == 0 {
 			resp.ExpectedUpdates++
+			increment[device.ID] = true
 			resp.Actions = append(resp.Actions, actsForOutput...)
 		}
 
@@ -124,10 +131,14 @@ func (s *setInput) GenerateActions(ctx context.Context, room api.Room, stateReq 
 		acts, errs := s.generateActionsForAudioPath(ctx, path, responses, stateReq)
 		actsForOutput = append(actsForOutput, acts...)
 		errsForOutput = append(errsForOutput, errs...)
-
 		if len(errsForOutput) == 0 {
-			resp.ExpectedUpdates++
-			resp.Actions = append(resp.Actions, actsForOutput...)
+			// we don't wanna increment expected updates if it's really just one call
+			if increment[device.ID] {
+				resp.Actions = append(resp.Actions, actsForOutput...)
+			} else {
+				resp.ExpectedUpdates++
+				resp.Actions = append(resp.Actions, actsForOutput...)
+			}
 		}
 
 		resp.Errors = append(resp.Errors, errsForOutput...)

@@ -23,6 +23,10 @@ type getInput struct {
 	Environment string
 }
 
+type getInputData struct {
+	Command string
+}
+
 // GenerateActions makes an assumption that GetInput and GetInputByBlock will not ever be on the same device
 func (g *getInput) GenerateActions(ctx context.Context, room api.Room) generatedActions {
 	var resp generatedActions
@@ -255,7 +259,7 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 		}
 
 		switch {
-		case strings.Contains(resp.Action.Req.URL.String(), "GetAVInputForOutput"):
+		case resp.Action.Data == "GetAVInputForOutput":
 			if tmpInput != (respInput{}) {
 				state.Video = tmpInput.Input
 				state.Audio = tmpInput.Input
@@ -267,7 +271,7 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 				}
 			}
 
-		case strings.Contains(resp.Action.Req.URL.String(), "GetAVInput"):
+		case resp.Action.Data == "GetAVInput":
 			if tmpInput != (respInput{}) {
 				state.Video = tmpInput.Input
 				state.Audio = tmpInput.Input
@@ -278,13 +282,13 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 					state.Audio = &tmpInput
 				}
 			}
-		case strings.Contains(resp.Action.Req.URL.String(), "GetStream"):
+		case resp.Action.Data == "GetStream":
 			if tmpInput != (respInput{}) {
 				state.Video = tmpInput.Input
 				state.Audio = tmpInput.Input
 			}
 
-		case strings.Contains(resp.Action.Req.URL.String(), "GetVideoInputForOutput"):
+		case resp.Action.Data == "GetVideoInputForOutput":
 			if tmpInput != (respInput{}) {
 				state.Video = tmpInput.Input
 			} else {
@@ -294,7 +298,7 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 				}
 			}
 
-		case strings.Contains(resp.Action.Req.URL.String(), "GetVideoInput"):
+		case resp.Action.Data == "GetVideoInput":
 			if tmpInput != (respInput{}) {
 				state.Video = tmpInput.Input
 			} else {
@@ -304,7 +308,7 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 				}
 			}
 
-		case strings.Contains(resp.Action.Req.URL.String(), "GetAudioInputForOutput"):
+		case resp.Action.Data == "GetAudioInputForOutput":
 			if tmpInput != (respInput{}) {
 				state.Audio = tmpInput.Input
 			} else {
@@ -314,7 +318,7 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 				}
 			}
 
-		case strings.Contains(resp.Action.Req.URL.String(), "GetAudioInput"):
+		case resp.Action.Data == "GetAudioInput":
 			if tmpInput != (respInput{}) {
 				state.Audio = tmpInput.Input
 			} else {
@@ -371,14 +375,10 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 			}
 		}
 		if valid {
-			// it works with these print statements but not without(?)
-			// for k, v := range availableInputs[output.Device.ID] {
-			// 	fmt.Printf("Before: %v, %v\n", k, v)
-			// }
-			sort.Slice(availableInputs[output.Device.ID], func(i, j int) bool { return i < j })
-			// for k, v := range availableInputs[output.Device.ID] {
-			// 	fmt.Printf("after: %v, %v\n", k, v)
-			// }
+			sort.Slice(availableInputs[output.Device.ID], func(i, j int) bool {
+				return availableInputs[output.Device.ID][i] < availableInputs[output.Device.ID][j]
+			})
+
 			i := api.Input{
 				Video:            &deepestVideo.Device.ID,
 				Audio:            &deepestAudio.Device.ID,
@@ -449,6 +449,9 @@ func (g *getInput) checkCommand(dev api.Device, cmd string, resps chan actionRes
 			Req:      req,
 			Order:    order,
 			Response: resps,
+			Data: getInputData{
+				Command: cmd,
+			},
 		}
 
 		g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
@@ -476,7 +479,6 @@ func (g *getInput) getDeepest(output graph.Node, inputType string, t *simple.Dir
 					}
 				}
 
-				fmt.Println()
 				if _, ok := e.Src.Type.Commands["GetAVInput"]; ok {
 					for _, state := range states {
 						if state.Video == nil {
@@ -549,14 +551,6 @@ func (g *getInput) getDeepest(output graph.Node, inputType string, t *simple.Dir
 							prevState = state
 							return true
 						}
-
-						// not sure if we want this outgoing thing
-
-						// if len(e.Src.Device.Ports.Outgoing()) == 1 {
-						// 	prevState = state
-						// 	prevEdge = e
-						// 	return true
-						// }
 					}
 
 					return false

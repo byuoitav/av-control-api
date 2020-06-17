@@ -14,6 +14,7 @@ type action struct {
 	ID    api.DeviceID
 	Req   *http.Request
 	Order *int
+	Data  interface{}
 
 	Response chan actionResponse
 }

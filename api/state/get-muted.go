@@ -159,8 +159,6 @@ func (g *getMuted) GenerateActions(ctx context.Context, room api.Room) generated
 					Response: responses,
 				}
 
-				fmt.Printf("action for %s: %s\n", act.ID, act.Req.URL)
-
 				g.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 
 				resp.Actions = append(resp.Actions, act)

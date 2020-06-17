@@ -13,6 +13,7 @@ type stateTest struct {
 	dataService api.DataService
 	env         string
 	resp        generatedActions
+	req         api.StateRequest
 }
 
 func urlParse(rawurl string) *url.URL {
