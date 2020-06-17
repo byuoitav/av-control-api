@@ -1,0 +1,87 @@
+syntax = "proto3";
+package drivers;
+
+option go_package = ".;drivers";
+
+import "google/protobuf/empty.proto";
+
+service Driver {
+	rpc GetCapabilities(DeviceInfo) returns (Capabilities) {}
+
+	rpc GetPower(DeviceInfo) returns (Power) {}
+	rpc SetPower(SetPowerRequest) returns (google.protobuf.Empty) {}
+
+	rpc GetAudioInputs(DeviceInfo) returns (Inputs) {}
+	rpc SetAudioInput(SetInputRequest) returns (google.protobuf.Empty) {}
+
+	rpc GetVideoInputs(DeviceInfo) returns (Inputs) {}
+	rpc SetVideoInput(SetInputRequest) returns (google.protobuf.Empty) {}
+
+	rpc GetAudioVideoInputs(DeviceInfo) returns (Inputs) {}
+	rpc SetAudioVideoInput(SetInputRequest) returns (google.protobuf.Empty) {}
+
+	rpc GetBlank(DeviceInfo) returns (Blank) {}
+	rpc SetBlank(SetBlankRequest) returns (google.protobuf.Empty) {}
+
+	rpc GetVolumes(DeviceInfo) returns (Volumes) {}
+	rpc SetVolume(SetVolumeRequest) returns (google.protobuf.Empty) {}
+
+	rpc GetMutes(DeviceInfo) returns (Mutes) {}
+	rpc SetMute(SetMuteRequest) returns (google.protobuf.Empty) {}
+}
+
+message DeviceInfo {
+	string address = 1;
+}
+
+message Capabilities {
+	repeated string capabilities = 1;
+}
+
+message Power {
+	bool on = 1;
+}
+
+message SetPowerRequest {
+	DeviceInfo info = 1;
+	Power power = 2;
+}
+
+message Inputs {
+	map<string, string> inputs = 1;
+}
+
+message SetInputRequest {
+	DeviceInfo info = 1;
+	string output = 2;
+	string input = 3;
+}
+
+message Blank {
+	bool blanked = 1;
+}
+
+message SetBlankRequest {
+	DeviceInfo info = 1;
+	Blank blank = 2;
+}
+
+message Volumes {
+	map<string, sint32> volumes = 1;
+}
+
+message SetVolumeRequest {
+	DeviceInfo info = 1;
+	string block = 2;
+	sint32 level = 3;
+}
+
+message Mutes {
+	map<string, bool> mutes = 1;
+}
+
+message SetMuteRequest {
+	DeviceInfo info = 1;
+	string block = 2;
+	bool muted = 3;
+}
