@@ -43,19 +43,19 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 
 	for _, dev := range devices {
 		path := graph.PathToEnd(gr, dev.ID)
-		var cmd string
-		if *stateReq.Devices[dev.ID].Muted == true {
-			cmd = "Mute"
-		} else {
-			cmd = "UnMute"
-		}
+		// var cmd string
+		// if *stateReq.Devices[dev.ID].Muted == true {
+		// 	cmd = "Mute"
+		// } else {
+		// 	cmd = "UnMute"
+		// }
 
 		if len(path) == 0 {
 			url, order, err := getCommand(dev, "SetMutedByBlock", s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			case err != nil:
-				s.Logger.Warn("unable to get command", zap.String("command", "SetBlanked"), zap.Any("device", dev.ID), zap.Error(err))
+				s.Logger.Warn("unable to get command", zap.String("command", "SetMutedByBlock"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Error: err.Error(),
@@ -64,8 +64,9 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 			default:
 				params := map[string]string{
 					"address": dev.Address,
-					"input":   string(dev.ID),
-					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
+					// this should maybe be a port name
+					"input": string(dev.ID),
+					"muted": strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)
@@ -106,12 +107,12 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 				continue
 			}
 
-			url, order, err = getCommand(dev, cmd, s.Environment)
+			url, order, err = getCommand(dev, "SetMuted", s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
-				s.Logger.Warn("unable to get command", zap.String("command", cmd), zap.Any("device", dev.ID), zap.Error(err))
+				s.Logger.Warn("unable to get command", zap.String("command", "SetMuted"), zap.Any("device", dev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "setMuted",
@@ -122,7 +123,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 			default:
 				params := map[string]string{
 					"address": dev.Address,
-					// "muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
+					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)
@@ -184,7 +185,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 
 					params := map[string]string{
 						"address": endDev.Address,
-						"input":   port.Name,
+						"block":   port.Name,
 						"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
 					}
 
@@ -226,12 +227,12 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 				}
 			}
 
-			url, order, err = getCommand(*endDev.Device, cmd, s.Environment)
+			url, order, err = getCommand(*endDev.Device, "SetMuted", s.Environment)
 			switch {
 			case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 				continue
 			case err != nil:
-				s.Logger.Warn("unable to get command", zap.String("command", "SetMutedByBlock"), zap.Any("device", endDev.ID), zap.Error(err))
+				s.Logger.Warn("unable to get command", zap.String("command", "SetMuted"), zap.Any("device", endDev.ID), zap.Error(err))
 				resp.Errors = append(resp.Errors, api.DeviceStateError{
 					ID:    dev.ID,
 					Field: "setMuted",
@@ -248,6 +249,7 @@ func (s *setMuted) GenerateActions(ctx context.Context, room api.Room, stateReq 
 
 				params := map[string]string{
 					"address": endDev.Address,
+					"muted":   strconv.FormatBool(*stateReq.Devices[dev.ID].Muted),
 				}
 
 				url, err = fillURL(url, params)

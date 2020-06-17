@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/byuoitav/av-control-api/api"
 	"go.uber.org/zap"
@@ -36,16 +37,16 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room api.Room, stateRe
 	if len(devices) == 0 {
 		return resp
 	}
-
+	fmt.Printf("we here\n")
 	for _, dev := range devices {
-		var cmd string
-		if *stateReq.Devices[dev.ID].Blanked == true {
-			cmd = "BlankDisplay"
-		} else {
-			cmd = "UnblankDisplay"
-		}
+		// var cmd string
+		// if *stateReq.Devices[dev.ID].Blanked == true {
+		// 	cmd = "BlankDisplay"
+		// } else {
+		// 	cmd = "UnblankDisplay"
+		// }
 
-		url, order, err := getCommand(dev, cmd, s.Environment)
+		url, order, err := getCommand(dev, "SetBlanked", s.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):
 			continue
@@ -62,6 +63,7 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room api.Room, stateRe
 
 		params := map[string]string{
 			"address": dev.Address,
+			"blanked": strconv.FormatBool(*stateReq.Devices[dev.ID].Blanked),
 		}
 		url, err = fillURL(url, params)
 		if err != nil {
@@ -74,7 +76,7 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room api.Room, stateRe
 
 			continue
 		}
-
+		fmt.Printf("heyo\n")
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
 			s.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))

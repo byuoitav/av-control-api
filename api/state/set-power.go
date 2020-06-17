@@ -7,11 +7,15 @@ import (
 	"strconv"
 
 	"github.com/byuoitav/av-control-api/api"
+	"go.uber.org/zap"
 )
 
-type setPower struct{}
+type setPower struct {
+	Logger      api.Logger
+	Environment string
+}
 
-func (s *setPower) GenerateActions(ctx context.Context, room api.Room, env string, stateReq api.StateRequest) generatedActions {
+func (s *setPower) GenerateActions(ctx context.Context, room api.Room, stateReq api.StateRequest) generatedActions {
 	var resp generatedActions
 
 	responses := make(chan actionResponse)
@@ -36,8 +40,9 @@ func (s *setPower) GenerateActions(ctx context.Context, room api.Room, env strin
 		// } else {
 		// 	cmd = "Standby"
 		// }
-		url, order, err := getCommand(dev, "SetPower", env)
+		url, order, err := getCommand(dev, "SetPower", s.Environment)
 		if err != nil {
+			s.Logger.Warn("unable to get command", zap.String("command", "SetPower"), zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "setPower",
@@ -53,6 +58,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room api.Room, env strin
 		}
 		url, err = fillURL(url, params)
 		if err != nil {
+			s.Logger.Warn("unable to fill url", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "setPower",
@@ -64,6 +70,7 @@ func (s *setPower) GenerateActions(ctx context.Context, room api.Room, env strin
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
+			s.Logger.Warn("unable to build request", zap.Any("device", dev.ID), zap.Error(err))
 			resp.Errors = append(resp.Errors, api.DeviceStateError{
 				ID:    dev.ID,
 				Field: "setPower",
@@ -79,6 +86,8 @@ func (s *setPower) GenerateActions(ctx context.Context, room api.Room, env strin
 			Order:    order,
 			Response: responses,
 		}
+
+		s.Logger.Info("Successfully built action", zap.Any("device", dev.ID))
 
 		resp.Actions = append(resp.Actions, act)
 		resp.ExpectedUpdates++
@@ -107,7 +116,27 @@ func (s *setPower) handleResponses(respChan chan actionResponse, expectedResps, 
 	received := 0
 
 	for resp := range respChan {
+		handleErr := func(err error) {
+			s.Logger.Warn("error handling response", zap.Any("device", resp.Action.ID), zap.Error(err))
+			resp.Errors <- api.DeviceStateError{
+				ID:    resp.Action.ID,
+				Field: "setPower",
+				Error: err.Error(),
+			}
+
+			resp.Updates <- DeviceStateUpdate{}
+		}
 		received++
+
+		if resp.Error != nil {
+			handleErr(fmt.Errorf("unable t o make http requeset: %w", resp.Error))
+			continue
+		}
+
+		if resp.StatusCode/100 != 2 {
+			handleErr(fmt.Errorf("%v response from driver: %s", resp.StatusCode, resp.Body))
+			continue
+		}
 		var state powered
 
 		// since we get back {"power": "standby"} we're doing this for now
@@ -127,15 +156,9 @@ func (s *setPower) handleResponses(respChan chan actionResponse, expectedResps, 
 		}
 
 		// I guess ideally we'd do this but not for now...
-		// if err := json.Unmarshal(aResp.Body, &state); err != nil {
-		//  resp.Errors <- api.DeviceStateError{
-		// 	ID: resp.Action.ID,
-		// 	Field: "setPower",
-		// 	Error: fmt.Sprintf("unable to parse response from driver: %w. response:\n%s", err, aResp.Body),
-		// }
-
-		// resp.Updates <- OutputStateUpdate{}
-		// continue
+		// if err := json.Unmarshal(resp.Body, &state); err != nil {
+		// 	handleErr(fmt.Errorf("unable to parse response from driver: %w. response:\n%s", err, resp.Body))
+		// 	continue
 		// }
 
 		resp.Updates <- DeviceStateUpdate{
