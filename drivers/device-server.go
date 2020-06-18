@@ -2,49 +2,32 @@ package drivers
 
 import (
 	"context"
-	"errors"
 	"sync"
-
-	"golang.org/x/sync/singleflight"
-	"google.golang.org/grpc"
 )
 
-var (
-	ErrFuncNotSupported = errors.New("device does not support this function")
-	ErrMissingAddress   = errors.New("must include address of the device")
-	ErrMissingInput     = errors.New("missing input")
-)
+// NewDeviceFunc is passed to NewServer and is called to create a new Device struct whenever the Server needs to control with a new Device.
+type NewDeviceFunc func(context.Context, string) (Device, error)
 
-// CreateDeviceFunc is passed to CreateDeviceServer and is called to create a new Device struct whenever the Server needs to communicate  with a new Device.
-type CreateDeviceFunc func(context.Context, string) (Device, error)
+func NewServer(newDev NewDeviceFunc) (Server, error) {
+	newDev = saveDevicesFunc(newDev)
+	server := newGrpcServer(newDev)
+	return server, nil
+}
 
-func CreateDeviceServer(create CreateDeviceFunc) (Server, error) {
+func saveDevicesFunc(newDev NewDeviceFunc) NewDeviceFunc {
 	m := &sync.Map{}
-	single := &singleflight.Group{}
 
-	newDev := func(ctx context.Context, addr string) (Device, error) {
+	return func(ctx context.Context, addr string) (Device, error) {
 		if dev, ok := m.Load(addr); ok {
 			return dev, nil
 		}
 
-		dev, err := create(ctx, addr)
+		dev, err := newDev(ctx, addr)
 		if err != nil {
-			return nil, err
+			return dev, err
 		}
 
 		m.Store(addr, dev)
 		return dev, nil
 	}
-
-	dev, err := newDev(context.TODO(), "")
-	if err != nil {
-		return nil, err
-	}
-
-	// build a DeviceServer
-
-	server := grpc.NewServer()
-	RegisterDeviceServer(server, nil)
-
-	return server, nil
 }
