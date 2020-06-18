@@ -13,11 +13,9 @@ import (
 
 var getBlankedTest = []stateTest{
 	{
-		name: "Simple",
-		dataService: &mock.SimpleRoom{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "Simple",
+		dataService: &mock.SimpleRoom{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
@@ -29,11 +27,9 @@ var getBlankedTest = []stateTest{
 		},
 	},
 	{
-		name: "SimpleSeparateInput",
-		dataService: &mock.SimpleSeparateInput{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "SimpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
@@ -45,11 +41,9 @@ var getBlankedTest = []stateTest{
 		},
 	},
 	{
-		name: "SixByTwoSeparateInput",
-		dataService: &mock.SixTwoSeparateInput{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "SixByTwoSeparateInput",
+		dataService: &mock.SixTwoSeparateInput{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{

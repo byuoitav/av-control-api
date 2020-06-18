@@ -20,12 +20,18 @@ type getStateTest struct {
 	env         string
 	dataService interface {
 		api.DataService
-		SetBaseURL(string)
 	}
 
 	driverResps map[string]string
 	apiResp     api.StateResponse
 }
+
+var (
+	via  = "ITB-1101-VIA1"
+	hdmi = "ITB-1101-HDMI1"
+	sign = "ITB-1101-SIGN1"
+	pc   = "ITB-1101-PC1"
+)
 
 var getTests = []getStateTest{
 	{
@@ -46,21 +52,26 @@ var getTests = []getStateTest{
 				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
-					Input: &api.Input{
-						Audio:            deviceID("ITB-1101-VIA1"),
-						Video:            deviceID("ITB-1101-VIA1"),
-						CanSetSeparately: boolP(false),
-						AvailableInputs: []api.DeviceID{
-							api.DeviceID("ITB-1101-HDMI1"),
-							api.DeviceID("ITB-1101-VIA1"),
+					Input: map[string]api.Input{
+						"ITB-1101-D1": {
+							Audio: &via,
+							Video: &via,
 						},
 					},
-					Volume: intP(30),
-					Muted:  boolP(false),
+					Volumes: map[string]int{
+						"ITB-1101-D1": 30,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-D1": false,
+					},
 				},
 				"ITB-1101-VIA1": {
-					Volume: intP(50),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-VIA1": 50,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-VIA1": true,
+					},
 				},
 			},
 		},
@@ -83,21 +94,26 @@ var getTests = []getStateTest{
 				"ITB-1101-D1": {
 					PoweredOn: boolP(false),
 					Blanked:   boolP(true),
-					Input: &api.Input{
-						Audio:            deviceID("ITB-1101-HDMI1"),
-						Video:            deviceID("ITB-1101-HDMI1"),
-						CanSetSeparately: boolP(false),
-						AvailableInputs: []api.DeviceID{
-							api.DeviceID("ITB-1101-HDMI1"),
-							api.DeviceID("ITB-1101-VIA1"),
+					Input: map[string]api.Input{
+						"ITB-1101-D1": {
+							Audio: &hdmi,
+							Video: &hdmi,
 						},
 					},
-					Volume: intP(100),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-D1": 100,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-D1": true,
+					},
 				},
 				"ITB-1101-VIA1": {
-					Volume: intP(50),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						via: 50,
+					},
+					Mutes: map[string]bool{
+						via: true,
+					},
 				},
 			},
 		},
@@ -122,23 +138,28 @@ var getTests = []getStateTest{
 				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
-					Input: &api.Input{
-						Audio:            deviceID("ITB-1101-HDMI1"),
-						Video:            deviceID("ITB-1101-VIA1"),
-						CanSetSeparately: boolP(true),
-						AvailableInputs: []api.DeviceID{
-							api.DeviceID("ITB-1101-HDMI1"),
-							api.DeviceID("ITB-1101-VIA1"),
+					Input: map[string]api.Input{
+						"ITB-1101-D1": {
+							Audio: &hdmi,
+							Video: &via,
 						},
 					},
 				},
 				"ITB-1101-AMP1": {
-					Volume: intP(30),
-					Muted:  boolP(false),
+					Volumes: map[string]int{
+						"ITB-1101-AMP1": 30,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-AMP1": false,
+					},
 				},
 				"ITB-1101-VIA1": {
-					Volume: intP(50),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						via: 50,
+					},
+					Mutes: map[string]bool{
+						via: true,
+					},
 				},
 			},
 		},
@@ -180,69 +201,82 @@ var getTests = []getStateTest{
 				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
-					Input: &api.Input{
-						Audio:            deviceID("ITB-1101-HDMI1"),
-						Video:            deviceID("ITB-1101-HDMI1"),
-						CanSetSeparately: boolP(false),
-						AvailableInputs: []api.DeviceID{
-							api.DeviceID("ITB-1101-HDMI1"),
-							api.DeviceID("ITB-1101-PC1"),
-							api.DeviceID("ITB-1101-SIGN1"),
-							api.DeviceID("ITB-1101-VIA1"),
+					Input: map[string]api.Input{
+						"ITB-1101-D1": {
+							Audio: &hdmi,
+							Video: &hdmi,
 						},
 					},
-					Volume: intP(100),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-D1": 100,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-D1": true,
+					},
 				},
 				"ITB-1101-D2": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
-					Input: &api.Input{
-						Audio:            deviceID("ITB-1101-SIGN1"),
-						Video:            deviceID("ITB-1101-SIGN1"),
-						CanSetSeparately: boolP(false),
-						AvailableInputs: []api.DeviceID{
-							api.DeviceID("ITB-1101-HDMI1"),
-							api.DeviceID("ITB-1101-PC1"),
-							api.DeviceID("ITB-1101-SIGN1"),
-							api.DeviceID("ITB-1101-VIA1"),
+					Input: map[string]api.Input{
+						"ITB-1101-D2": {
+							Audio: &sign,
+							Video: &sign,
 						},
 					},
-					Volume: intP(100),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-D2": 100,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-D2": true,
+					},
 				},
 				"ITB-1101-D3": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
-					Input: &api.Input{
-						Audio:            deviceID("ITB-1101-PC1"),
-						Video:            deviceID("ITB-1101-PC1"),
-						CanSetSeparately: boolP(false),
-						AvailableInputs: []api.DeviceID{
-							api.DeviceID("ITB-1101-HDMI1"),
-							api.DeviceID("ITB-1101-PC1"),
-							api.DeviceID("ITB-1101-SIGN1"),
-							api.DeviceID("ITB-1101-VIA1"),
+					Input: map[string]api.Input{
+						"ITB-1101-D3": {
+							Audio: &pc,
+							Video: &pc,
 						},
 					},
-					Volume: intP(100),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-D3": 100,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-D3": true,
+					},
 				},
 				"ITB-1101-VIA1": {
-					Volume: intP(50),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						via: 50,
+					},
+					Mutes: map[string]bool{
+						via: true,
+					},
 				},
 				"ITB-1101-MIC1": {
-					Volume: intP(50),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-MIC1": 50,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-MIC1": true,
+					},
 				},
 				"ITB-1101-MIC2": {
-					Volume: intP(50),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-MIC2": 50,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-MIC2": true,
+					},
 				},
 				"ITB-1101-MIC3": {
-					Volume: intP(50),
-					Muted:  boolP(true),
+					Volumes: map[string]int{
+						"ITB-1101-MIC3": 50,
+					},
+					Mutes: map[string]bool{
+						"ITB-1101-MIC3": true,
+					},
 				},
 			},
 		},
@@ -262,8 +296,6 @@ func TestGetState(t *testing.T) {
 			t.Cleanup(func() {
 				ts.Close()
 			})
-
-			tt.dataService.SetBaseURL(ts.URL)
 
 			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {

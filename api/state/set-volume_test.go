@@ -14,11 +14,9 @@ import (
 
 var setVolumeTest = []stateTest{
 	{
-		name: "Simple",
-		dataService: &mock.SimpleRoom{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "Simple",
+		dataService: &mock.SimpleRoom{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
@@ -31,7 +29,9 @@ var setVolumeTest = []stateTest{
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": {
-					Volume: intP(50),
+					Volumes: map[string]int{
+						"ITB-1101-D1": 50,
+					},
 				},
 			},
 		},
@@ -40,7 +40,9 @@ var setVolumeTest = []stateTest{
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": {
-					Volume: intP(50),
+					Volumes: map[string]int{
+						"ITB-1101-D1": 50,
+					},
 				},
 			},
 		},

@@ -12,16 +12,14 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-var devID1 = api.DeviceID("ITB-1101-VIA1")
-var devID2 = api.DeviceID("ITB-1101-HDMI1")
+var devID1 = "ITB-1101-VIA1"
+var devID2 = "ITB-1101-HDMI1"
 
 var setInputTest = []stateTest{
 	{
-		name: "Simple",
-		dataService: &mock.SimpleRoom{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "Simple",
+		dataService: &mock.SimpleRoom{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
@@ -34,20 +32,20 @@ var setInputTest = []stateTest{
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": {
-					Input: &api.Input{
-						Video: &devID1,
-						Audio: &devID1,
+					Input: map[string]api.Input{
+						"hdmi1": api.Input{
+							Video: &devID1,
+							Audio: &devID1,
+						},
 					},
 				},
 			},
 		},
 	},
 	{
-		name: "SimpleSeparate",
-		dataService: &mock.SimpleSeparateInput{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "SimpleSeparate",
+		dataService: &mock.SimpleSeparateInput{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
@@ -68,9 +66,11 @@ var setInputTest = []stateTest{
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": {
-					Input: &api.Input{
-						Video: &devID2,
-						Audio: &devID1,
+					Input: map[string]api.Input{
+						"hdmi1": api.Input{
+							Video: &devID2,
+							Audio: &devID1,
+						},
 					},
 				},
 			},

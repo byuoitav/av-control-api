@@ -35,11 +35,11 @@ func (gs *GetSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 			Environment: gs.Environment,
 			Logger:      log.With(zap.String("evaluator", "getInput")),
 		},
-		&getVolume{
+		&getVolumes{
 			Environment: gs.Environment,
 			Logger:      log.With(zap.String("evaluator", "getVolume")),
 		},
-		&getMuted{
+		&getMutes{
 			Environment: gs.Environment,
 			Logger:      log.With(zap.String("evaluator", "getMuted")),
 		},
@@ -114,19 +114,35 @@ func (gs *GetSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 			}
 
 			if update.Input != nil {
-				curState.Input = update.Input
+				for k, v := range update.Input {
+					tmpInput := curState.Input[k]
+					if v.AudioVideo != nil {
+						tmpInput.AudioVideo = v.AudioVideo
+					}
+					if v.Video != nil {
+						tmpInput.Video = v.Video
+					}
+					if v.Audio != nil {
+						tmpInput.Audio = v.Audio
+					}
+					curState.Input[k] = tmpInput
+				}
 			}
 
 			if update.Blanked != nil {
 				curState.Blanked = update.Blanked
 			}
 
-			if update.Volume != nil {
-				curState.Volume = update.Volume
+			if update.Volumes != nil {
+				for k, v := range update.Volumes {
+					curState.Volumes[k] = v
+				}
 			}
 
-			if update.Muted != nil {
-				curState.Muted = update.Muted
+			if update.Mutes != nil {
+				for k, v := range update.Mutes {
+					curState.Mutes[k] = v
+				}
 			}
 
 			stateResp.Devices[update.ID] = curState

@@ -14,11 +14,9 @@ import (
 
 var setPowerTest = []stateTest{
 	{
-		name: "Simple",
-		dataService: &mock.SimpleRoom{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "Simple",
+		dataService: &mock.SimpleRoom{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{

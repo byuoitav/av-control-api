@@ -16,11 +16,25 @@ import (
 // and the inputs are going directly into hdmi 1 & 2 on the TV.
 // the via is also capable of getting/setting it's own volume/mute.
 type SimpleRoom struct {
-	BaseURL string
+	Mapping api.DriverMapping
 }
 
-func (s *SimpleRoom) SetBaseURL(baseURL string) {
-	s.BaseURL = baseURL
+func (s *SimpleRoom) DriverMapping(context.Context) (api.DriverMapping, error) {
+	s.Mapping = api.DriverMapping{
+		"Sony XBR": {
+			BaseURLs: map[string]string{
+				"default": "http://localhost:8016",
+				"k8s":     "http://sony-tv.service",
+			},
+		},
+		"via-connect-pro": {
+			BaseURLs: map[string]string{
+				"default": "http://localhost:8012",
+				"k8s":     "http://via-service.service",
+			},
+		},
+	}
+	return s.Mapping, nil
 }
 
 func (s *SimpleRoom) Room(context.Context, string) (api.Room, error) {
@@ -30,130 +44,35 @@ func (s *SimpleRoom) Room(context.Context, string) (api.Room, error) {
 			{
 				ID:      "ITB-1101-D1",
 				Address: "ITB-1101-D1.av",
-				Type: api.DeviceType{
-					ID: "Sony XBR",
-					Commands: map[string]api.Command{
-						"SetPower": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/SetPower/{{power}}",
-							},
-							Order: intP(0),
-						},
-						"GetPower": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/GetPower",
-							},
-						},
-						"GetBlanked": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/GetBlanked",
-							},
-						},
-						"SetBlanked": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/SetBlanked/{{blanked}}",
-							},
-						},
-						"SetAVInput": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/SetAVInput/{{port}}",
-							},
-						},
-						"GetAVInput": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/GetAVInput",
-							},
-						},
-						"GetVolume": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/GetVolume",
-							},
-						},
-						"GetMuted": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/GetMuted",
-							},
-						},
-						"SetVolume": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/SetVolume/{{level}}",
-							},
-						},
-						"SetMuted": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/SetMuted/{{muted}}",
-							},
-						},
-					},
-				},
+				Type:    "Sony XBR",
 				Ports: []api.Port{
 					{
 						Name: "hdmi!1",
-						Endpoints: api.Endpoints{
-							"ITB-1101-VIA1",
-						},
-						Type:     "audiovideo",
-						Incoming: true,
+						Type: "audiovideo",
 					},
 					{
 						Name: "hdmi!2",
-						Endpoints: api.Endpoints{
-							"ITB-1101-HDMI1",
-						},
-						Type:     "audiovideo",
-						Incoming: true,
+						Type: "audiovideo",
 					},
 				},
 			},
 			{
 				ID:      "ITB-1101-VIA1",
 				Address: "ITB-1101-VIA1.av",
-				Type: api.DeviceType{
-					ID: "via-connect-pro",
-					Commands: map[string]api.Command{
-						"GetVolume": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/GetVolume",
-							},
-						},
-						"GetMuted": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/GetMuted",
-							},
-						},
-						"SetVolume": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/SetVolume/{{level}}",
-							},
-						},
-						"SetMuted": {
-							URLs: map[string]string{
-								"default": s.BaseURL + "/{{address}}/SetMuted/{{muted}}",
-							},
-						},
-					},
-				},
+				Type:    "via-connect-pro",
 				Ports: []api.Port{
 					{
 						Name: "",
-						Endpoints: api.Endpoints{
-							"ITB-1101-D1",
-						},
 						Type: "audiovideo",
 					},
 				},
 			},
 			{
-				ID: "ITB-1101-HDMI1",
-				Type: api.DeviceType{
-					ID: "hdmi-input",
-				},
+				ID:   "ITB-1101-HDMI1",
+				Type: "hdmi-input",
 				Ports: []api.Port{
 					{
 						Name: "",
-						Endpoints: api.Endpoints{
-							"ITB-1101-D1",
-						},
 						Type: "audiovideo",
 					},
 				},

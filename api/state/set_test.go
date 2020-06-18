@@ -19,7 +19,6 @@ type setStateTest struct {
 	env         string
 	dataService interface {
 		api.DataService
-		SetBaseURL(string)
 	}
 
 	apiReq      api.StateRequest
@@ -65,8 +64,6 @@ func TestSetState(t *testing.T) {
 			t.Cleanup(func() {
 				ts.Close()
 			})
-
-			tt.dataService.SetBaseURL(ts.URL)
 
 			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {

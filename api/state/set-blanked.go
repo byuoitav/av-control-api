@@ -39,13 +39,6 @@ func (s *setBlanked) GenerateActions(ctx context.Context, room api.Room, stateRe
 	}
 	fmt.Printf("we here\n")
 	for _, dev := range devices {
-		// var cmd string
-		// if *stateReq.Devices[dev.ID].Blanked == true {
-		// 	cmd = "BlankDisplay"
-		// } else {
-		// 	cmd = "UnblankDisplay"
-		// }
-
 		url, order, err := getCommand(dev, "SetBlanked", s.Environment)
 		switch {
 		case errors.Is(err, errCommandNotFound), errors.Is(err, errCommandEnvNotFound):

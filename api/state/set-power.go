@@ -33,13 +33,6 @@ func (s *setPower) GenerateActions(ctx context.Context, room api.Room, stateReq 
 	}
 
 	for _, dev := range devices {
-		// this is for gross old way where they're separate endpoints
-		// var cmd string
-		// if *stateReq.Devices[dev.ID].PoweredOn == true {
-		// 	cmd = "PowerOn"
-		// } else {
-		// 	cmd = "Standby"
-		// }
 		url, order, err := getCommand(dev, "SetPower", s.Environment)
 		if err != nil {
 			s.Logger.Warn("unable to get command", zap.String("command", "SetPower"), zap.Any("device", dev.ID), zap.Error(err))

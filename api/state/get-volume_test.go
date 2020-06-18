@@ -13,11 +13,9 @@ import (
 
 var getVolumeTest = []stateTest{
 	{
-		name: "simpleSeparateInput",
-		dataService: &mock.SimpleSeparateInput{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "simpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
@@ -45,7 +43,7 @@ func TestGetVolume(t *testing.T) {
 				t.Errorf("unable to get room: %s", err)
 			}
 
-			get := getVolume{
+			get := getVolumes{
 				Logger:      log.Logger{},
 				Environment: tt.env,
 			}

@@ -13,11 +13,9 @@ import (
 
 var getInputTest = []stateTest{
 	{
-		name: "simpleSeparateInput",
-		dataService: &mock.SimpleSeparateInput{
-			BaseURL: "http://host",
-		},
-		env: "default",
+		name:        "simpleSeparateInput",
+		dataService: &mock.SimpleSeparateInput{},
+		env:         "default",
 		resp: generatedActions{
 			Actions: []action{
 				{
