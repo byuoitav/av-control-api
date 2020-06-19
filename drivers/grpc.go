@@ -27,8 +27,49 @@ type grpcServer struct {
 	single    *singleflight.Group
 }
 
-func (g *grpcServer) GetCapabilities(context.Context, *DeviceInfo) (*Capabilities, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCapabilities not implemented")
+func (g *grpcServer) GetCapabilities(ctx context.Context, info *DeviceInfo) (*Capabilities, error) {
+	device, err := g.newDevice(ctx, info.GetAddress())
+	if err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+
+	var caps []string
+
+	if _, ok := device.(DeviceWithPower); ok {
+		caps = append(caps, string(CapabilityPower))
+	}
+
+	if _, ok := device.(DeviceWithAudioInput); ok {
+		caps = append(caps, string(CapabilityAudioInput))
+	}
+
+	if _, ok := device.(DeviceWithVideoInput); ok {
+		caps = append(caps, string(CapabilityVideoInput))
+	}
+
+	if _, ok := device.(DeviceWithAudioVideoInput); ok {
+		caps = append(caps, string(CapabilityAudioVideoInput))
+	}
+
+	if _, ok := device.(DeviceWithBlank); ok {
+		caps = append(caps, string(CapabilityBlank))
+	}
+
+	if _, ok := device.(DeviceWithVolume); ok {
+		caps = append(caps, string(CapabilityVolume))
+	}
+
+	if _, ok := device.(DeviceWithMute); ok {
+		caps = append(caps, string(CapabilityMute))
+	}
+
+	if _, ok := device.(DeviceWithInfo); ok {
+		caps = append(caps, string(CapabilityInfo))
+	}
+
+	return &Capabilities{
+		Capabilities: caps,
+	}, nil
 }
 
 func (g *grpcServer) GetPower(ctx context.Context, info *DeviceInfo) (*Power, error) {
@@ -276,8 +317,8 @@ func (g *grpcServer) SetBlank(ctx context.Context, req *SetBlankRequest) (*empty
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetVolumes(ctx context.Context, info *DeviceInfo) (*Volumes, error) {
-	device, err := g.newDevice(ctx, info.GetAddress())
+func (g *grpcServer) GetVolumes(ctx context.Context, info *GetAudioInfo) (*Volumes, error) {
+	device, err := g.newDevice(ctx, info.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -288,7 +329,7 @@ func (g *grpcServer) GetVolumes(ctx context.Context, info *DeviceInfo) (*Volumes
 	}
 
 	val, err, _ := g.single.Do("GetVolumes"+info.String(), func() (interface{}, error) {
-		volumes, err := dev.GetVolumes(ctx)
+		volumes, err := dev.GetVolumes(ctx, info.GetBlocks())
 		if err != nil {
 			return nil, err
 		}
@@ -331,8 +372,8 @@ func (g *grpcServer) SetVolume(ctx context.Context, req *SetVolumeRequest) (*emp
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetMutes(ctx context.Context, info *DeviceInfo) (*Mutes, error) {
-	device, err := g.newDevice(ctx, info.GetAddress())
+func (g *grpcServer) GetMutes(ctx context.Context, info *GetAudioInfo) (*Mutes, error) {
+	device, err := g.newDevice(ctx, info.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -343,7 +384,7 @@ func (g *grpcServer) GetMutes(ctx context.Context, info *DeviceInfo) (*Mutes, er
 	}
 
 	val, err, _ := g.single.Do("GetMutes"+info.String(), func() (interface{}, error) {
-		mutes, err := dev.GetMutes(ctx)
+		mutes, err := dev.GetMutes(ctx, info.GetBlocks())
 		if err != nil {
 			return nil, err
 		}

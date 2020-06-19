@@ -2,6 +2,19 @@ package drivers
 
 import "context"
 
+type Capability string
+
+const (
+	CapabilityPower           Capability = "Power"
+	CapabilityAudioInput      Capability = "AudioInput"
+	CapabilityVideoInput      Capability = "VideoInput"
+	CapabilityAudioVideoInput Capability = "AudioVideoInput"
+	CapabilityBlank           Capability = "Blank"
+	CapabilityVolume          Capability = "Volume"
+	CapabilityMute            Capability = "Mute"
+	CapabilityInfo            Capability = "Info"
+)
+
 type Device interface{}
 
 type DeviceWithPower interface {
@@ -30,12 +43,12 @@ type DeviceWithBlank interface {
 }
 
 type DeviceWithVolume interface {
-	GetVolumes(context.Context) (map[string]int, error)
+	GetVolumes(ctx context.Context, blocks []string) (map[string]int, error)
 	SetVolume(context.Context, string, int) error
 }
 
 type DeviceWithMute interface {
-	GetMutes(context.Context) (map[string]bool, error)
+	GetMutes(ctx context.Context, blocks []string) (map[string]bool, error)
 	SetMute(context.Context, string, bool) error
 }
 

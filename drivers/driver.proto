@@ -23,10 +23,10 @@ service Driver {
 	rpc GetBlank(DeviceInfo) returns (Blank) {}
 	rpc SetBlank(SetBlankRequest) returns (google.protobuf.Empty) {}
 
-	rpc GetVolumes(DeviceInfo) returns (Volumes) {}
+	rpc GetVolumes(GetAudioInfo) returns (Volumes) {}
 	rpc SetVolume(SetVolumeRequest) returns (google.protobuf.Empty) {}
 
-	rpc GetMutes(DeviceInfo) returns (Mutes) {}
+	rpc GetMutes(GetAudioInfo) returns (Mutes) {}
 	rpc SetMute(SetMuteRequest) returns (google.protobuf.Empty) {}
 }
 
@@ -64,6 +64,11 @@ message Blank {
 message SetBlankRequest {
 	DeviceInfo info = 1;
 	Blank blank = 2;
+}
+
+message GetAudioInfo {
+	DeviceInfo info = 1;
+	repeated string blocks = 2;
 }
 
 message Volumes {
