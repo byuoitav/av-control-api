@@ -3,7 +3,6 @@ package drivers
 import (
 	"context"
 	"net"
-	reflect "reflect"
 	"testing"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 type grpcDriverTest struct {
@@ -30,12 +28,12 @@ var grpcDriverTests = []grpcDriverTest{
 			info := &DeviceInfo{}
 
 			// try getting capabilities
-			caps, err := client.GetCapabilities(ctx, info)
+			got, err := client.GetCapabilities(ctx, info)
 			if err != nil {
 				t.Fatalf("unable to get capabilities: %s", err)
 			}
 
-			expected := &Capabilities{
+			want := &Capabilities{
 				Capabilities: []string{
 					string(CapabilityPower),
 					string(CapabilityAudioVideoInput),
@@ -46,13 +44,41 @@ var grpcDriverTests = []grpcDriverTest{
 			}
 
 			opts := cmp.Options{
-				cmp.Exporter(func(t reflect.Type) bool {
-					return true
-				}),
-				cmpopts.IgnoreTypes(protoimpl.MessageState{}, protoimpl.UnknownFields{}),
+				cmpopts.IgnoreUnexported(Capabilities{}),
 			}
 
-			if diff := cmp.Diff(expected, caps, opts...); diff != "" {
+			if diff := cmp.Diff(want, got, opts...); diff != "" {
+				t.Fatalf("generated incorrect response (-want, +got):\n%s", diff)
+			}
+		},
+	},
+	grpcDriverTest{
+		name: "TV/Power",
+		newDevice: saveDevicesFunc(func(context.Context, string) (Device, error) {
+			return &mockTV{}, nil
+		}),
+		test: func(ctx context.Context, t *testing.T, client DriverClient) {
+			req := &SetPowerRequest{
+				Info: &DeviceInfo{},
+				Power: &Power{
+					On: true,
+				},
+			}
+
+			if _, err := client.SetPower(ctx, req); err != nil {
+				t.Fatalf("unable to get set power: %s", err)
+			}
+
+			got, err := client.GetPower(ctx, req.GetInfo())
+			if err != nil {
+				t.Fatalf("unable to get power: %s", err)
+			}
+
+			opts := cmp.Options{
+				cmpopts.IgnoreUnexported(Power{}),
+			}
+
+			if diff := cmp.Diff(req.GetPower(), got, opts...); diff != "" {
 				t.Fatalf("generated incorrect response (-want, +got):\n%s", diff)
 			}
 		},

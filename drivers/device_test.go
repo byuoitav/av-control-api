@@ -1,6 +1,8 @@
 package drivers
 
-import "context"
+import (
+	"context"
+)
 
 type mockTV struct {
 	on       bool
