@@ -10,24 +10,35 @@ import (
 	status "google.golang.org/grpc/status"
 )
 
+type wrappedGrpcServer struct {
+	*grpc.Server
+}
+
+func (w *wrappedGrpcServer) Stop(ctx context.Context) error {
+	w.Server.Stop()
+	return nil
+}
+
 func newGrpcServer(newDev NewDeviceFunc) Server {
-	g := &grpcServer{
+	g := &grpcDriverServer{
 		newDevice: newDev,
 		single:    &singleflight.Group{},
 	}
 
-	server := grpc.NewServer()
-	RegisterDriverServer(server, g)
+	server := &wrappedGrpcServer{
+		Server: grpc.NewServer(),
+	}
 
+	RegisterDriverServer(server.Server, g)
 	return server
 }
 
-type grpcServer struct {
+type grpcDriverServer struct {
 	newDevice NewDeviceFunc
 	single    *singleflight.Group
 }
 
-func (g *grpcServer) GetCapabilities(ctx context.Context, info *DeviceInfo) (*Capabilities, error) {
+func (g *grpcDriverServer) GetCapabilities(ctx context.Context, info *DeviceInfo) (*Capabilities, error) {
 	device, err := g.newDevice(ctx, info.GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -72,7 +83,7 @@ func (g *grpcServer) GetCapabilities(ctx context.Context, info *DeviceInfo) (*Ca
 	}, nil
 }
 
-func (g *grpcServer) GetPower(ctx context.Context, info *DeviceInfo) (*Power, error) {
+func (g *grpcDriverServer) GetPower(ctx context.Context, info *DeviceInfo) (*Power, error) {
 	device, err := g.newDevice(ctx, info.GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -100,7 +111,7 @@ func (g *grpcServer) GetPower(ctx context.Context, info *DeviceInfo) (*Power, er
 	}, nil
 }
 
-func (g *grpcServer) SetPower(ctx context.Context, req *SetPowerRequest) (*empty.Empty, error) {
+func (g *grpcDriverServer) SetPower(ctx context.Context, req *SetPowerRequest) (*empty.Empty, error) {
 	device, err := g.newDevice(ctx, req.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -121,7 +132,7 @@ func (g *grpcServer) SetPower(ctx context.Context, req *SetPowerRequest) (*empty
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetAudioInputs(ctx context.Context, info *DeviceInfo) (*Inputs, error) {
+func (g *grpcDriverServer) GetAudioInputs(ctx context.Context, info *DeviceInfo) (*Inputs, error) {
 	device, err := g.newDevice(ctx, info.GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -149,7 +160,7 @@ func (g *grpcServer) GetAudioInputs(ctx context.Context, info *DeviceInfo) (*Inp
 	}, nil
 }
 
-func (g *grpcServer) SetAudioInput(ctx context.Context, req *SetInputRequest) (*empty.Empty, error) {
+func (g *grpcDriverServer) SetAudioInput(ctx context.Context, req *SetInputRequest) (*empty.Empty, error) {
 	device, err := g.newDevice(ctx, req.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -170,7 +181,7 @@ func (g *grpcServer) SetAudioInput(ctx context.Context, req *SetInputRequest) (*
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetVideoInputs(ctx context.Context, info *DeviceInfo) (*Inputs, error) {
+func (g *grpcDriverServer) GetVideoInputs(ctx context.Context, info *DeviceInfo) (*Inputs, error) {
 	device, err := g.newDevice(ctx, info.GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -198,7 +209,7 @@ func (g *grpcServer) GetVideoInputs(ctx context.Context, info *DeviceInfo) (*Inp
 	}, nil
 }
 
-func (g *grpcServer) SetVideoInput(ctx context.Context, req *SetInputRequest) (*empty.Empty, error) {
+func (g *grpcDriverServer) SetVideoInput(ctx context.Context, req *SetInputRequest) (*empty.Empty, error) {
 	device, err := g.newDevice(ctx, req.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -219,7 +230,7 @@ func (g *grpcServer) SetVideoInput(ctx context.Context, req *SetInputRequest) (*
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetAudioVideoInputs(ctx context.Context, info *DeviceInfo) (*Inputs, error) {
+func (g *grpcDriverServer) GetAudioVideoInputs(ctx context.Context, info *DeviceInfo) (*Inputs, error) {
 	device, err := g.newDevice(ctx, info.GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -247,7 +258,7 @@ func (g *grpcServer) GetAudioVideoInputs(ctx context.Context, info *DeviceInfo) 
 	}, nil
 }
 
-func (g *grpcServer) SetAudioVideoInput(ctx context.Context, req *SetInputRequest) (*empty.Empty, error) {
+func (g *grpcDriverServer) SetAudioVideoInput(ctx context.Context, req *SetInputRequest) (*empty.Empty, error) {
 	device, err := g.newDevice(ctx, req.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -268,7 +279,7 @@ func (g *grpcServer) SetAudioVideoInput(ctx context.Context, req *SetInputReques
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetBlank(ctx context.Context, info *DeviceInfo) (*Blank, error) {
+func (g *grpcDriverServer) GetBlank(ctx context.Context, info *DeviceInfo) (*Blank, error) {
 	device, err := g.newDevice(ctx, info.GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -296,7 +307,7 @@ func (g *grpcServer) GetBlank(ctx context.Context, info *DeviceInfo) (*Blank, er
 	}, nil
 }
 
-func (g *grpcServer) SetBlank(ctx context.Context, req *SetBlankRequest) (*empty.Empty, error) {
+func (g *grpcDriverServer) SetBlank(ctx context.Context, req *SetBlankRequest) (*empty.Empty, error) {
 	device, err := g.newDevice(ctx, req.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -317,7 +328,7 @@ func (g *grpcServer) SetBlank(ctx context.Context, req *SetBlankRequest) (*empty
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetVolumes(ctx context.Context, info *GetAudioInfo) (*Volumes, error) {
+func (g *grpcDriverServer) GetVolumes(ctx context.Context, info *GetAudioInfo) (*Volumes, error) {
 	device, err := g.newDevice(ctx, info.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -351,7 +362,7 @@ func (g *grpcServer) GetVolumes(ctx context.Context, info *GetAudioInfo) (*Volum
 	}, nil
 }
 
-func (g *grpcServer) SetVolume(ctx context.Context, req *SetVolumeRequest) (*empty.Empty, error) {
+func (g *grpcDriverServer) SetVolume(ctx context.Context, req *SetVolumeRequest) (*empty.Empty, error) {
 	device, err := g.newDevice(ctx, req.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -372,7 +383,7 @@ func (g *grpcServer) SetVolume(ctx context.Context, req *SetVolumeRequest) (*emp
 	return &empty.Empty{}, nil
 }
 
-func (g *grpcServer) GetMutes(ctx context.Context, info *GetAudioInfo) (*Mutes, error) {
+func (g *grpcDriverServer) GetMutes(ctx context.Context, info *GetAudioInfo) (*Mutes, error) {
 	device, err := g.newDevice(ctx, info.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
@@ -400,7 +411,7 @@ func (g *grpcServer) GetMutes(ctx context.Context, info *GetAudioInfo) (*Mutes, 
 	}, nil
 }
 
-func (g *grpcServer) SetMute(ctx context.Context, req *SetMuteRequest) (*empty.Empty, error) {
+func (g *grpcDriverServer) SetMute(ctx context.Context, req *SetMuteRequest) (*empty.Empty, error) {
 	device, err := g.newDevice(ctx, req.GetInfo().GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())

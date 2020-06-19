@@ -15,6 +15,9 @@ const (
 	CapabilityInfo            Capability = "Info"
 )
 
+// NewDeviceFunc is passed to NewServer and is called to create a new Device struct whenever the Server needs to control with a new Device.
+type NewDeviceFunc func(context.Context, string) (Device, error)
+
 type Device interface{}
 
 type DeviceWithPower interface {

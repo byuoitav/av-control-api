@@ -8,10 +8,8 @@ import (
 
 type Server interface {
 	Serve(lis net.Listener) error
+	Stop(ctx context.Context) error
 }
-
-// NewDeviceFunc is passed to NewServer and is called to create a new Device struct whenever the Server needs to control with a new Device.
-type NewDeviceFunc func(context.Context, string) (Device, error)
 
 func NewServer(newDev NewDeviceFunc) (Server, error) {
 	newDev = saveDevicesFunc(newDev)

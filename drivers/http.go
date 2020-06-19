@@ -1,6 +1,7 @@
 package drivers
 
 import (
+	"context"
 	"net"
 	"net/http"
 
@@ -38,6 +39,10 @@ func wrapEchoServer(e *echo.Echo) Server {
 
 func (e *wrappedEchoServer) Serve(lis net.Listener) error {
 	return e.Server.Serve(lis)
+}
+
+func (e *wrappedEchoServer) Stop(ctx context.Context) error {
+	return e.Shutdown(ctx)
 }
 
 type power struct {
