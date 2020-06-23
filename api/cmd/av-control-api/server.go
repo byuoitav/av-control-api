@@ -12,7 +12,6 @@ import (
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
 	"github.com/byuoitav/av-control-api/api/log"
-	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -82,7 +81,10 @@ func main() {
 	log := log.Wrap(logger)
 
 	// build the data service
-	var dsOpts []couch.Option
+	dsOpts := []couch.Option{
+		couch.WithEnvironment(env),
+	}
+
 	if len(dbUsername) > 0 {
 		dsOpts = append(dsOpts, couch.WithBasicAuth(dbUsername, dbPassword))
 	}
@@ -97,17 +99,16 @@ func main() {
 	}
 
 	// build the getsetter
-	gs := &state.GetSetter{
-		Logger:      log,
-		Environment: env,
-	}
+	//gs := &state.GetSetter{
+	//	Logger:      log,
+	//}
 
 	// build http stuff
 	middleware := handlers.Middleware{}
 	handlers := handlers.Handlers{
 		Logger:      log,
 		DataService: ds,
-		State:       gs,
+		//State:       gs,
 	}
 
 	e := echo.New()
@@ -121,13 +122,10 @@ func main() {
 	})
 
 	api := e.Group("/v1", middleware.RequestID)
-
+	api.GET("/driverMapping", handlers.GetDriverMapping)
 	api.GET("/room/:room", handlers.GetRoomConfiguration)
 	api.GET("/room/:room/state", handlers.GetRoomState)
 	api.PUT("/room/:room/state", handlers.SetRoomState)
-
-	//e.GET("/room/:room/graph/:type", handlers.GetRoomGraph)
-	//e.GET("/room/:room/graph/:type/transpose", handlers.GetRoomGraphTranspose)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {

@@ -10,12 +10,17 @@ import (
 )
 
 type DataService struct {
-	client *kivik.Client
+	client       *kivik.Client
+	database     string
+	mappingDocID string
+	environment  string
 }
 
 func New(ctx context.Context, addr string, opts ...Option) (*DataService, error) {
 	options := options{
-		scheme: _defaultScheme,
+		scheme:       _defaultScheme,
+		database:     _defaultDatabase,
+		mappingDocID: _defaultMappingDocID,
 	}
 
 	for _, o := range opts {
@@ -36,7 +41,10 @@ func New(ctx context.Context, addr string, opts ...Option) (*DataService, error)
 	}
 
 	return &DataService{
-		client: client,
+		client:       client,
+		database:     options.database,
+		mappingDocID: options.mappingDocID,
+		environment:  options.environment,
 	}, nil
 }
 

@@ -5,79 +5,52 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/byuoitav/av-control-api/api/graph"
+	"github.com/byuoitav/av-control-api/api"
 	"github.com/labstack/echo"
+	"go.uber.org/zap"
 )
 
 func (h *Handlers) GetRoomConfiguration(c echo.Context) error {
 	roomID := c.Param("room")
 	if len(roomID) == 0 {
-		return c.String(http.StatusBadRequest, "room must be in the format BLDG-ROOM")
+		return c.String(http.StatusBadRequest, "must include a room")
 	}
+
+	id := c.Get(_cRequestID).(string)
+	log := h.Logger.With(zap.String("requestID", id), zap.String("endpoint", c.Request().URL.String()))
 
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
+	ctx = api.WithRequestID(ctx, id)
+
+	log.Info("Getting room", zap.String("room", roomID))
 	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {
+		log.Warn("failed to get room", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
+	log.Info("Successfully got configuration")
 	return c.JSON(http.StatusOK, room)
 }
 
-func (h *Handlers) GetRoomGraph(c echo.Context) error {
-	roomID := c.Param("room")
-	portType := c.Param("type")
-	switch {
-	case len(roomID) == 0:
-		return c.String(http.StatusBadRequest, "room must be in the format BLDG-ROOM")
-	case len(portType) == 0:
-		return c.String(http.StatusBadRequest, "invalid port type")
-	}
+func (h *Handlers) GetDriverMapping(c echo.Context) error {
+	id := c.Get(_cRequestID).(string)
+	log := h.Logger.With(zap.String("requestID", id), zap.String("endpoint", c.Request().URL.String()))
 
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
-	room, err := h.DataService.Room(ctx, roomID)
+	ctx = api.WithRequestID(ctx, id)
+
+	log.Info("Getting driver mapping")
+	mapping, err := h.DataService.DriverMapping(ctx)
 	if err != nil {
+		log.Warn("failed to get driver mapping", zap.Error(err))
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	g := graph.NewGraph(room.Devices, portType)
-	svg, err := graph.GraphToSvg(g)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.Blob(http.StatusOK, "image/svg+xml", svg)
-}
-
-func (h *Handlers) GetRoomGraphTranspose(c echo.Context) error {
-	roomID := c.Param("room")
-	portType := c.Param("type")
-	switch {
-	case len(roomID) == 0:
-		return c.String(http.StatusBadRequest, "room must be in the format BLDG-ROOM")
-	case len(portType) == 0:
-		return c.String(http.StatusBadRequest, "invalid port type")
-	}
-
-	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
-	defer cancel()
-
-	room, err := h.DataService.Room(ctx, roomID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	g := graph.NewGraph(room.Devices, portType)
-	t := graph.Transpose(g)
-
-	svg, err := graph.GraphToSvg(t)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.Blob(http.StatusOK, "image/svg+xml", svg)
+	log.Info("Successfully got driver mapping")
+	return c.JSON(http.StatusOK, mapping)
 }

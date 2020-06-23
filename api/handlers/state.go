@@ -17,13 +17,13 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 	}
 
 	id := c.Get(_cRequestID).(string)
-	log := h.Logger.With(zap.String("requestID", id))
+	log := h.Logger.With(zap.String("requestID", id), zap.String("endpoint", c.Request().URL.String()))
 
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 20*time.Second)
 	defer cancel()
 
 	ctx = api.WithRequestID(ctx, id)
-	log.Info("Getting room to *get* state", zap.String("room", roomID))
+	log.Info("Getting room", zap.String("room", roomID))
 
 	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {
@@ -63,10 +63,10 @@ func (h *Handlers) SetRoomState(c echo.Context) error {
 	}
 
 	id := c.Get(_cRequestID).(string)
-	log := h.Logger.With(zap.String("requestID", id))
+	log := h.Logger.With(zap.String("requestID", id), zap.String("endpoint", c.Request().URL.String()))
 
 	ctx = api.WithRequestID(ctx, id)
-	log.Info("Getting room to *set* state", zap.String("room", roomID))
+	log.Info("Getting room", zap.String("room", roomID))
 
 	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {

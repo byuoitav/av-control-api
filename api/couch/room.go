@@ -2,143 +2,85 @@ package couch
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/byuoitav/av-control-api/api"
-	kivik "github.com/go-kivik/kivik/v4"
 	"golang.org/x/net/context"
-	"golang.org/x/sync/errgroup"
 )
+
+type room struct {
+	ID      string            `json:"_id"`
+	Devices map[string]device `json:"devices"`
+}
+
+type device struct {
+	Address string            `json:"address"`
+	Driver  string            `json:"driver"`
+	Proxy   map[string]string `json:"proxy"`
+	Ports   []port            `json:"ports"`
+}
+
+type port struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
 
 // Room gets a room
 func (d *DataService) Room(ctx context.Context, id string) (api.Room, error) {
-	var devs []device
-	var types []deviceType
+	var room room
 
-	group, gctx := errgroup.WithContext(ctx)
-
-	group.Go(func() error {
-		var err error
-
-		devs, err = d.Devices(gctx, id)
-		if err != nil {
-			return fmt.Errorf("unable to get devices: %w", err)
-		}
-
-		return nil
-	})
-
-	group.Go(func() error {
-		var err error
-
-		types, err = d.DeviceTypes(gctx)
-		if err != nil {
-			return fmt.Errorf("unable to get device types: %w", err)
-		}
-
-		return err
-	})
-
-	if err := group.Wait(); err != nil {
-		return api.Room{}, err
+	db := d.client.DB(ctx, d.database)
+	if err := db.Get(ctx, id).ScanDoc(&room); err != nil {
+		return api.Room{}, fmt.Errorf("unable to get/scan room: %w", err)
 	}
 
+	return room.convert()
+}
+
+func (r room) convert() (api.Room, error) {
 	room := api.Room{
-		ID: id,
+		ID:      r.ID,
+		Devices: make(map[api.DeviceID]api.Device),
 	}
 
-	// fill the devices with the types
-	for i := range devs {
-		for j := range types {
-			if devs[i].TypeID == types[j].ID {
-				devs[i].Type = types[j]
-				break
-			}
-		}
-
-		if devs[i].Type.ID == "" {
-			return room, fmt.Errorf("no device type %q found", devs[i].TypeID)
-		}
-
-		apiDev, err := devs[i].convert()
+	for id, dev := range r.Devices {
+		apiDev, err := dev.convert()
 		if err != nil {
-			return room, fmt.Errorf("unable to convert %q: %w", devs[i].ID, err)
+			return room, fmt.Errorf("unable to convert device %q: %w", id, err)
 		}
 
-		room.Devices = append(room.Devices, apiDev)
+		room.Devices[api.DeviceID(id)] = apiDev
 	}
 
 	return room, nil
 }
 
-func (d *DataService) Devices(ctx context.Context, roomID string) ([]device, error) {
-	var devs []device
-
-	db := d.client.DB(ctx, "devices")
-	roomQuery := kivik.Options{
-		"selector": map[string]interface{}{
-			"_id": map[string]interface{}{
-				"$regex": roomID + "-.*",
-			},
-		},
+func (d device) convert() (api.Device, error) {
+	dev := api.Device{
+		Address: d.Address,
+		Driver:  d.Driver,
+		Proxy:   make(map[*regexp.Regexp]string),
 	}
 
-	rows, err := db.Find(ctx, roomQuery)
-	if err != nil {
-		return devs, fmt.Errorf("unable to get all docs: %w", err)
+	for i := range d.Ports {
+		dev.Ports = append(dev.Ports, d.Ports[i].convert())
 	}
 
-	for rows.Next() {
-		var dev device
-		if err = rows.ScanDoc(&dev); err != nil {
-			return devs, fmt.Errorf("unable to scan %q: %w", rows.ID(), err)
+	for k, v := range d.Proxy {
+		regex, err := regexp.Compile(k)
+		if err != nil {
+			return dev, err
 		}
 
-		devs = append(devs, dev)
+		dev.Proxy[regex] = v
 	}
 
-	return devs, nil
+	return dev, nil
 }
 
-func (d *DataService) DriverMapping(ctx context.Context, roomID string) (api.DriverMapping, error) {
-	var mapping driverMapping
-
-	db := d.client.DB(ctx, "devices")
-
-	err := db.Get(context.TODO(), roomID).ScanDoc(&mapping)
-	if err != nil {
-		return api.DriverMapping{}, fmt.Errorf("unable to scan in driver mapping for %s: %s", roomID, err)
+func (p port) convert() api.Port {
+	return api.Port{
+		Name: p.Name,
+		Type: p.Type,
 	}
-
-	toReturn := mapping.convert()
-
-	return toReturn, nil
-}
-
-// DeviceTypes gets all of the device type documents available
-// TODO i'm sure we can optimize this to only get the type documents associated with the devices in this room
-// (in a single request)
-func (d *DataService) DeviceTypes(ctx context.Context) ([]deviceType, error) {
-	var types []deviceType
-
-	db := d.client.DB(ctx, "device-types")
-
-	opts := kivik.Options{
-		"include_docs": true,
-	}
-
-	rows, err := db.AllDocs(ctx, opts)
-	if err != nil {
-		return types, fmt.Errorf("unable to get all docs: %w", err)
-	}
-
-	for rows.Next() {
-		var typ deviceType
-		if err = rows.ScanDoc(&typ); err != nil {
-			return types, fmt.Errorf("unable to scan %q: %w", rows.ID(), err)
-		}
-
-		types = append(types, typ)
-	}
-
-	return types, nil
 }
