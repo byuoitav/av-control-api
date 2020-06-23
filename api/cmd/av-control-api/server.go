@@ -12,6 +12,7 @@ import (
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
 	"github.com/byuoitav/av-control-api/api/log"
+	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -95,20 +96,21 @@ func main() {
 
 	ds, err := couch.New(context.TODO(), dbAddr, dsOpts...)
 	if err != nil {
-		logger.Fatal("unable to connect to dataservice", zap.Error(err))
+		logger.Fatal("unable to connect to data service", zap.Error(err))
 	}
 
 	// build the getsetter
-	//gs := &state.GetSetter{
-	//	Logger:      log,
-	//}
+	gs, err := state.New(context.TODO(), ds, log)
+	if err != nil {
+		logger.Fatal("unable to build state get/setter", zap.Error(err))
+	}
 
 	// build http stuff
 	middleware := handlers.Middleware{}
 	handlers := handlers.Handlers{
 		Logger:      log,
 		DataService: ds,
-		//State:       gs,
+		State:       gs,
 	}
 
 	e := echo.New()

@@ -1,14 +1,6 @@
 package state
 
-import (
-	"context"
-	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/byuoitav/av-control-api/api"
-	"go.uber.org/zap"
-)
+/*
 
 type setPower struct {
 	Logger      api.Logger
@@ -168,3 +160,4 @@ func (s *setPower) handleResponses(respChan chan actionResponse, expectedResps, 
 
 	close(respChan)
 }
+*/

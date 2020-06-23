@@ -33,7 +33,7 @@ type Input struct {
 
 type DeviceStateError struct {
 	ID    DeviceID    `json:"id"`
-	Field string      `json:"field"`
+	Field string      `json:"field,omitempty"`
 	Value interface{} `json:"value,omitempty"`
 	Error string      `json:"error"`
 }

@@ -9,7 +9,10 @@ import (
 
 type driverMapping struct {
 	Drivers map[string]struct {
-		BaseURLs map[string]string `json:"baseURLs"`
+		Environments map[string]struct {
+			Address string `json:"address"`
+			SSL     bool   `json:"ssl"`
+		} `json:"envs"`
 	} `json:"drivers"`
 }
 
@@ -28,8 +31,11 @@ func (d driverMapping) convert(env string) api.DriverMapping {
 	mapping := make(api.DriverMapping)
 
 	for k, v := range d.Drivers {
-		if baseURL, ok := v.BaseURLs[env]; ok {
-			mapping[k] = baseURL
+		if config, ok := v.Environments[env]; ok {
+			mapping[k] = api.DriverConfig{
+				Address: config.Address,
+				SSL:     config.SSL,
+			}
 		}
 	}
 

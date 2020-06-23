@@ -1,13 +1,9 @@
 package state
 
 import (
-	"context"
-	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/byuoitav/av-control-api/api"
-	"go.uber.org/zap"
 )
 
 type action struct {
@@ -61,6 +57,7 @@ type actionResponse struct {
 	Updates chan DeviceStateUpdate
 }
 
+/*
 func (gs *GetSetter) executeActions(ctx context.Context, actions []action, updates chan DeviceStateUpdate, errors chan api.DeviceStateError) {
 	for i := range actions {
 		go func(action action) {
@@ -107,6 +104,7 @@ func (gs *GetSetter) executeActions(ctx context.Context, actions []action, updat
 		time.Sleep(50 * time.Millisecond)
 	}
 }
+*/
 
 func uniqueActions(actions []action) []action {
 	var unique []action

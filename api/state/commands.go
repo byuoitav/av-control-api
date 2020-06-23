@@ -1,14 +1,6 @@
 package state
 
-import (
-	"errors"
-	"fmt"
-	"net/url"
-	"strings"
-
-	"github.com/byuoitav/av-control-api/api"
-)
-
+/*
 var (
 	errCommandNotFound    = errors.New("command not found")
 	errCommandEnvNotFound = errors.New("command environment not found")
@@ -82,3 +74,4 @@ func fillURL(url string, params map[string]string) (string, error) {
 
 	return url, nil
 }
+*/

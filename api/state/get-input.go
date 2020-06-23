@@ -1,15 +1,6 @@
 package state
 
-import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-
-	"github.com/byuoitav/av-control-api/api"
-	"go.uber.org/zap"
-)
+/*
 
 type getInput struct {
 	Logger      api.Logger
@@ -189,3 +180,4 @@ func (g *getInput) handleResponses(respChan chan actionResponse, expectedResps, 
 
 	close(respChan)
 }
+*/

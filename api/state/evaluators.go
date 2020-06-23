@@ -6,16 +6,6 @@ import (
 	"github.com/byuoitav/av-control-api/api"
 )
 
-var (
-	commandEvaluators = []commandEvaluator{
-		// &setMuted{},
-		// &setPower{},
-		// &setVolume{},
-		&setBlanked{},
-		// &setInput{},
-	}
-)
-
 type DeviceStateUpdate struct {
 	ID api.DeviceID
 	api.DeviceState

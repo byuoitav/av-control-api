@@ -3,157 +3,126 @@ package state
 import (
 	"context"
 	"errors"
-	"sort"
+	"fmt"
+	"sync"
+	"time"
 
 	"github.com/byuoitav/av-control-api/api"
+	"github.com/byuoitav/av-control-api/drivers"
 	"go.uber.org/zap"
 )
 
 var (
 	ErrNoStateGettable = errors.New("can't get the state of any devices in this room")
+	ErrUnknownDriver   = errors.New("unknown driver")
 )
 
 // Get .
-func (gs *GetSetter) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
-	stateResp := api.StateResponse{
+func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
+	resp := api.StateResponse{
 		Devices: make(map[api.DeviceID]api.DeviceState),
 	}
 
 	id := api.RequestID(ctx)
-	log := gs.Logger.With(zap.String("requestID", id))
+	log := gs.log.With(zap.String("requestID", id))
 
-	evaluators := []statusEvaluator{
-		&getPower{
-			Environment: gs.Environment,
-			Logger:      log.With(zap.String("evaluator", "getPower")),
-		},
-		&getBlanked{
-			Environment: gs.Environment,
-			Logger:      log.With(zap.String("evaluator", "getBlanked")),
-		},
-		&getInput{
-			Environment: gs.Environment,
-			Logger:      log.With(zap.String("evaluator", "getInput")),
-		},
-		&getVolumes{
-			Environment: gs.Environment,
-			Logger:      log.With(zap.String("evaluator", "getVolume")),
-		},
-		&getMutes{
-			Environment: gs.Environment,
-			Logger:      log.With(zap.String("evaluator", "getMuted")),
-		},
+	// make sure the driver for every device in the room exists
+	for _, dev := range room.Devices {
+		_, ok := gs.drivers[dev.Driver]
+		if !ok {
+			return resp, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
+		}
 	}
 
-	var actions []action
-	var expectedUpdates int
+	wg := sync.WaitGroup{}
+	wg.Add(len(room.Devices))
 
-	log.Info("Generating actions")
-	for i := range evaluators {
-		resp := evaluators[i].GenerateActions(ctx, room)
-		actions = append(actions, resp.Actions...)
-		stateResp.Errors = append(stateResp.Errors, resp.Errors...)
-		expectedUpdates += resp.ExpectedUpdates
+	getState := func(id api.DeviceID, dev api.Device) {
+		defer wg.Done()
+
+		driver := gs.drivers[dev.Driver]
+		log := log.With(zap.String("deviceID", string(id)))
+
+		state, errors := getStateForDevice(ctx, id, dev, driver, log)
+
+		resp.Devices[id] = state
+		resp.Errors = append(resp.Errors, errors...)
 	}
 
-	log.Info("Done generating actions", zap.Int("actions", len(actions)), zap.Int("errors", len(stateResp.Errors)), zap.Int("expectedUpdates", expectedUpdates))
-
-	if expectedUpdates == 0 {
-		return stateResp, ErrNoStateGettable
+	// TODO mutex on resp
+	for id, dev := range room.Devices {
+		go getState(id, dev)
 	}
 
-	// split the commands into their lists by id
-	actsByID := make(map[api.DeviceID][]action)
-	for i := range actions {
-		actsByID[actions[i].ID] = append(actsByID[actions[i].ID], actions[i])
+	wg.Wait()
+	return resp, nil
+}
+
+func getStateForDevice(ctx context.Context, id api.DeviceID, dev api.Device, driver drivers.DriverClient, log api.Logger) (api.DeviceState, []api.DeviceStateError) {
+	var state api.DeviceState
+	var errors []api.DeviceStateError
+
+	deviceInfo := &drivers.DeviceInfo{
+		Address: dev.Address,
 	}
 
-	log.Info("Ordering commands for each device")
+	log.Info("Getting state")
+	log.Debug("Getting capabilities")
 
-	// order every id's commands
-	for id := range actsByID {
-		sort.Slice(actsByID[id], func(i, j int) bool {
-			switch {
-			case actsByID[id][i].Order == nil && actsByID[id][j].Order == nil:
-				return false
-			case actsByID[id][i].Order == nil:
-				return false
-			case actsByID[id][j].Order == nil:
-				return true
-			default:
-				return *actsByID[id][i].Order < *actsByID[id][j].Order
-			}
+	// TODO status (grpc) on errors
+	caps, err := driver.GetCapabilities(ctx, deviceInfo)
+	if err != nil {
+		log.Warn("unable to get capabilities", zap.Error(err))
+
+		errors = append(errors, api.DeviceStateError{
+			ID:    id,
+			Error: fmt.Sprintf("unable to get capabilities: %s", err),
 		})
+		return state, errors
 	}
 
-	log.Info("Done ordering commands")
+	// TODO mutex on state/errors
+	log.Debug("Got capabilities", zap.Strings("capabilities", caps.GetCapabilities()))
+	wg := sync.WaitGroup{}
 
-	// execute commands
-	updates := make(chan DeviceStateUpdate)
-	errors := make(chan api.DeviceStateError)
+	for _, capability := range caps.GetCapabilities() {
+		switch drivers.Capability(capability) {
+		case drivers.CapabilityPower:
+			wg.Add(1)
 
-	for id := range actsByID {
-		gs.executeActions(ctx, actsByID[id], updates, errors)
-	}
+			go func() {
+				log.Info("Getting power")
+				defer wg.Done()
 
-	updatesReceived := 0
-
-	for {
-		select {
-		case update := <-updates:
-			updatesReceived++
-
-			if len(update.ID) == 0 {
-				break
-			}
-
-			curState := stateResp.Devices[update.ID]
-
-			if update.PoweredOn != nil {
-				curState.PoweredOn = update.PoweredOn
-			}
-
-			if update.Input != nil {
-				for k, v := range update.Input {
-					tmpInput := curState.Input[k]
-					if v.AudioVideo != nil {
-						tmpInput.AudioVideo = v.AudioVideo
-					}
-					if v.Video != nil {
-						tmpInput.Video = v.Video
-					}
-					if v.Audio != nil {
-						tmpInput.Audio = v.Audio
-					}
-					curState.Input[k] = tmpInput
+				power, err := driver.GetPower(ctx, deviceInfo)
+				if err != nil {
+					errors = append(errors, api.DeviceStateError{
+						ID:    id,
+						Field: "power",
+						Error: err.Error(),
+					})
+					return
 				}
-			}
 
-			if update.Blanked != nil {
-				curState.Blanked = update.Blanked
-			}
+				log.Info("Got power", zap.Bool("on", power.On))
+				state.PoweredOn = &power.On
+			}()
+		default:
+			log.Warn("unknown capability", zap.String("capability", capability))
 
-			if update.Volumes != nil {
-				for k, v := range update.Volumes {
-					curState.Volumes[k] = v
-				}
-			}
-
-			if update.Mutes != nil {
-				for k, v := range update.Mutes {
-					curState.Mutes[k] = v
-				}
-			}
-
-			stateResp.Devices[update.ID] = curState
-		case err := <-errors:
-			stateResp.Errors = append(stateResp.Errors, err)
+			errors = append(errors, api.DeviceStateError{
+				ID:    id,
+				Error: fmt.Sprintf("don't know how to handle capability %q", capability),
+			})
+			continue
 		}
 
-		if updatesReceived == expectedUpdates {
-			break
-		}
+		// TODO don't wait on the last one
+		time.Sleep(50 * time.Millisecond)
 	}
 
-	return stateResp, nil
+	wg.Wait()
+
+	log.Info("Finished getting state")
+	return state, errors
 }

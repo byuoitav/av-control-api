@@ -11,7 +11,12 @@ type DataService interface {
 	DriverMapping(ctx context.Context) (DriverMapping, error)
 }
 
-type DriverMapping map[string]string
+type DriverMapping map[string]DriverConfig
+
+type DriverConfig struct {
+	Address string
+	SSL     bool
+}
 
 type Room struct {
 	ID      string              `json:"id"`

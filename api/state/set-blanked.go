@@ -1,16 +1,6 @@
 package state
 
-import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/byuoitav/av-control-api/api"
-	"go.uber.org/zap"
-)
+/*
 
 type setBlanked struct {
 	Logger      api.Logger
@@ -161,3 +151,4 @@ func (s *setBlanked) handleResponses(respChan chan actionResponse, expectedResps
 
 	close(respChan)
 }
+*/

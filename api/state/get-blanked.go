@@ -1,16 +1,6 @@
 package state
 
-import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-
-	"github.com/byuoitav/av-control-api/api"
-	"go.uber.org/zap"
-)
-
+/*
 type getBlanked struct {
 	Logger      api.Logger
 	Environment string
@@ -128,3 +118,4 @@ func (g *getBlanked) handleResponse(respChan chan actionResponse) {
 		},
 	}
 }
+*/

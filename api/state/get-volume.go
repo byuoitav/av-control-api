@@ -1,15 +1,6 @@
 package state
 
-import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-
-	"github.com/byuoitav/av-control-api/api"
-	"go.uber.org/zap"
-)
+/*
 
 type getVolumes struct {
 	Logger      api.Logger
@@ -144,3 +135,4 @@ func (g *getVolumes) handleResponses(respChan chan actionResponse, expectedResps
 
 	close(respChan)
 }
+*/
