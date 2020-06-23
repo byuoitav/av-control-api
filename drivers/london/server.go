@@ -18,13 +18,13 @@ func main() {
 
 	pflag.Parse()
 
-	create := func(ctx context.Context, addr string) (drivers.DSP, error) {
+	create := func(ctx context.Context, addr string) (drivers.Device, error) {
 		logger := drivers.Log.Named(addr)
 
 		return london.New(addr, london.WithLogger(logger)), nil
 	}
 
-	server, err := drivers.CreateDSPServer(create)
+	server, err := drivers.NewServer(create)
 	if err != nil {
 		fmt.Printf("failed to create server: %s\n", err)
 		os.Exit(1)

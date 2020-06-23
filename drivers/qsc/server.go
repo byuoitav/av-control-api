@@ -24,13 +24,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	create := func(ctx context.Context, addr string) (drivers.DSP, error) {
+	create := func(ctx context.Context, addr string) (drivers.Device, error) {
 		return &qsc.DSP{
 			Address: addr,
 		}, nil
 	}
 
-	server, err := drivers.CreateDSPServer(create)
+	server, err := drivers.NewServer(create)
 	if err != nil {
 		fmt.Printf("Error while trying to create DSP Server: %s\n", err)
 		os.Exit(1)

@@ -40,7 +40,7 @@ type DataService interface {
 ]
 */
 type DriverMapping map[string]struct {
-	BaseURLs map[string]string
+	BaseURLs map[string]string `json:"BaseURLs"`
 }
 
 type Room struct {

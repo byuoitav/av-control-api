@@ -32,10 +32,26 @@ type port struct {
 	Type      string   `json:"type"`
 }
 
+type driverMapping struct {
+	Mapping map[string]struct {
+		BaseURLs map[string]string `json:"BaseURLs"`
+	} `json:"mapping"`
+}
+
+func (d driverMapping) convert() api.DriverMapping {
+	toReturn := make(map[string]struct {
+		BaseURLs map[string]string `json:"BaseURLs"`
+	})
+	for k, v := range d.Mapping {
+		toReturn[k] = v
+	}
+
+	return toReturn
+}
+
 func (d device) convert() (api.Device, error) {
 	toReturn := api.Device{
 		ID:      api.DeviceID(d.ID),
-		Type:    d.Type.convert(),
 		Address: d.Address,
 		Proxy:   make(map[*regexp.Regexp]string),
 	}
@@ -56,41 +72,9 @@ func (d device) convert() (api.Device, error) {
 	return toReturn, nil
 }
 
-func (dt deviceType) convert() api.DeviceType {
-	toReturn := api.DeviceType{
-		ID:       dt.ID,
-		Commands: make(map[string]api.Command),
-	}
-
-	for key, val := range dt.Commands {
-		toReturn.Commands[key] = val.convert()
-	}
-
-	return toReturn
-}
-
-func (c command) convert() api.Command {
-	toReturn := api.Command{
-		Order: c.Order,
-		URLs:  make(map[string]string),
-	}
-
-	for key, val := range c.URLs {
-		toReturn.URLs[key] = val
-	}
-
-	return toReturn
-}
-
 func (p port) convert() api.Port {
-	var endpoints api.Endpoints
-	for _, e := range p.Endpoints {
-		endpoints = append(endpoints, api.DeviceID(e))
-	}
 	return api.Port{
-		Name:      p.Name,
-		Endpoints: endpoints,
-		Incoming:  p.Incoming,
-		Type:      p.Type,
+		Name: p.Name,
+		Type: p.Type,
 	}
 }

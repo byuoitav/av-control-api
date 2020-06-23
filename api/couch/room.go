@@ -99,6 +99,21 @@ func (d *DataService) Devices(ctx context.Context, roomID string) ([]device, err
 	return devs, nil
 }
 
+func (d *DataService) DriverMapping(ctx context.Context, roomID string) (api.DriverMapping, error) {
+	var mapping driverMapping
+
+	db := d.client.DB(ctx, "devices")
+
+	err := db.Get(context.TODO(), roomID).ScanDoc(&mapping)
+	if err != nil {
+		return api.DriverMapping{}, fmt.Errorf("unable to scan in driver mapping for %s: %s", roomID, err)
+	}
+
+	toReturn := mapping.convert()
+
+	return toReturn, nil
+}
+
 // DeviceTypes gets all of the device type documents available
 // TODO i'm sure we can optimize this to only get the type documents associated with the devices in this room
 // (in a single request)

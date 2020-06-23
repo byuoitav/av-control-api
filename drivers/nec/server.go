@@ -28,12 +28,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	create := func(ctx context.Context, addr string) (drivers.Display, error) {
+	create := func(ctx context.Context, addr string) (drivers.Device, error) {
 		return nec.NewProjector(addr, nec.WithDelay(300*time.Second)), err // TODO add options
 	}
 
 	// create server
-	server, err := drivers.CreateDisplayServer(create)
+	server, err := drivers.NewServer(create)
 
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)

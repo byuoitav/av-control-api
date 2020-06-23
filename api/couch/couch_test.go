@@ -2,10 +2,9 @@ package couch
 
 import (
 	"fmt"
-	"os"
-	"strings"
 	"testing"
 
+	"github.com/go-kivik/kivik/v4"
 	"golang.org/x/net/context"
 )
 
@@ -39,37 +38,52 @@ import (
 // 	}
 // }
 
+// func TestDevice(t *testing.T) {
+// 	d := DataService{
+// 		DBAddress:  strings.Trim(os.Getenv("DB_ADDRESS"), "https://"),
+// 		DBUsername: os.Getenv("DB_USERNAME"),
+// 		DBPassword: os.Getenv("DB_PASSWORD"),
+// 	}
+
+// 	device, err := d.Device(context.TODO(), "ITB-1108A-CP1")
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	fmt.Printf("ID: %s\n", device.ID)
+// 	fmt.Printf("Address: %s\n", device.Address)
+// 	fmt.Printf("Type: %s\n", device.Type.ID)
+
+// 	device, err = d.Device(context.TODO(), "ITB-1108A-CP2")
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	fmt.Printf("ID: %s\n", device.ID)
+// 	fmt.Printf("Address: %s\n", device.Address)
+// 	fmt.Printf("Type: %s\n", device.Type.ID)
+
+// 	device, err = d.Device(context.TODO(), "ITB-1108A-CP3")
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	fmt.Printf("ID: %s\n", device.ID)
+// 	fmt.Printf("Address: %s\n", device.Address)
+// 	fmt.Printf("Type: %s\n", device.Type.ID)
+// }
+
 func TestDevice(t *testing.T) {
-	d := DataService{
-		DBAddress:  strings.Trim(os.Getenv("DB_ADDRESS"), "https://"),
-		DBUsername: os.Getenv("DB_USERNAME"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
+	d := DataService{}
+	client, err := kivik.New("couch", fmt.Sprintf("https://%s:%s@%s", d.DBUsername, d.DBPassword, d.DBAddress))
+	if err != nil {
+		t.Errorf("balls: %s", err)
 	}
+	d.client = client
 
-	device, err := d.Device(context.TODO(), "ITB-1108A-CP1")
+	_, err = d.DriverMapping(context.TODO(), "simple")
 	if err != nil {
 		t.Error(err)
 	}
 
-	fmt.Printf("ID: %s\n", device.ID)
-	fmt.Printf("Address: %s\n", device.Address)
-	fmt.Printf("Type: %s\n", device.Type.ID)
-
-	device, err = d.Device(context.TODO(), "ITB-1108A-CP2")
-	if err != nil {
-		t.Error(err)
-	}
-
-	fmt.Printf("ID: %s\n", device.ID)
-	fmt.Printf("Address: %s\n", device.Address)
-	fmt.Printf("Type: %s\n", device.Type.ID)
-
-	device, err = d.Device(context.TODO(), "ITB-1108A-CP3")
-	if err != nil {
-		t.Error(err)
-	}
-
-	fmt.Printf("ID: %s\n", device.ID)
-	fmt.Printf("Address: %s\n", device.Address)
-	fmt.Printf("Type: %s\n", device.Type.ID)
 }
