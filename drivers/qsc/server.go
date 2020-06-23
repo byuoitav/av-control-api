@@ -32,7 +32,7 @@ func main() {
 
 	server, err := drivers.NewServer(create)
 	if err != nil {
-		fmt.Printf("Error while trying to create DSP Server: %s\n", err)
+		fmt.Printf("failed to create server: %s\n", err)
 		os.Exit(1)
 	}
 

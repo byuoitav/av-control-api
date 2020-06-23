@@ -20,7 +20,7 @@ func main() {
 
 	// variable declarations
 
-	pflag.IntVarP(&port, "port", "P", 80, "port to run the server on")
+	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	// other flags
 
 	pflag.Parse()
@@ -34,12 +34,17 @@ func main() {
 	}
 
 	// import driver library
-	createVS := func(ctx context.Context, addr string) (drivers.VideoSwitcher, error) {
+	createVS := func(ctx context.Context, addr string) (drivers.Device, error) {
 		return kramer.NewVideoSwitcher(addr), nil
 	}
 
 	// create server
-	server := drivers.CreateVideoSwitcherServer(createVS)
+	server, err := drivers.NewServer(createVS)
+	if err != nil {
+		fmt.Printf("failed to create server: %s\n", err)
+		os.Exit(1)
+	}
+
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("failed to listen: %s\n", err)
 		os.Exit(1)

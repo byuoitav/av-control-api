@@ -34,6 +34,11 @@ func main() {
 	}
 
 	server, err := drivers.NewServer(create)
+	if err != nil {
+		fmt.Printf("failed to create server: %s\n", err)
+		os.Exit(1)
+	}
+
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)
 		os.Exit(1)

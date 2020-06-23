@@ -20,7 +20,7 @@ func main() {
 
 	// variable declarations
 
-	pflag.IntVarP(&port, "port", "P", 80, "port to run the server on")
+	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	// other flags
 
 	pflag.Parse()
@@ -34,14 +34,19 @@ func main() {
 	}
 
 	// import driver library
-	createJ := func(ctx context.Context, addr string) (drivers.VideoSwitcher, error) {
+	createJ := func(ctx context.Context, addr string) (drivers.Device, error) {
 		return &justaddpower.JustAddPowerReciever{
 			Address: addr,
 		}, nil
 	}
 
 	// create server
-	server := drivers.CreateVideoSwitcherServer(createJ)
+	server, err := drivers.NewServer(createJ)
+	if err != nil {
+		fmt.Printf("failed to create server: %s\n", err)
+		os.Exit(1)
+	}
+
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("failed to listen: %s\n", err)
 		os.Exit(1)

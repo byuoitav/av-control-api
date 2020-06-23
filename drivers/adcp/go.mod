@@ -3,8 +3,8 @@ module github.com/byuoitav/av-control-api/drivers/adcp
 go 1.14
 
 require (
-	github.com/byuoitav/adcp-driver v0.1.0
-	github.com/byuoitav/av-control-api v0.3.6
+	github.com/byuoitav/adcp-driver v0.1.1
+	github.com/byuoitav/av-control-api v0.3.9
 	github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect

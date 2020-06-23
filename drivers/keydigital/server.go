@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// import driver library
-	createVS := func(ctx context.Context, addr string) (drivers.VideoSwitcher, error) {
+	createVS := func(ctx context.Context, addr string) (drivers.Device, error) {
 		vs, err := keydigital.CreateVideoSwitcher(context.TODO(), addr, drivers.Log.Named(addr))
 		if err != nil {
 			return nil, fmt.Errorf("failed to discover device: %w", err)
@@ -44,7 +44,12 @@ func main() {
 	}
 
 	// create server
-	server := drivers.CreateVideoSwitcherServer(createVS)
+	server, err := drivers.NewServer(createVS)
+	if err != nil {
+		fmt.Printf("failed to create server: %s\n", err)
+		os.Exit(1)
+	}
+
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("failed to listen: %s\n", err)
 		os.Exit(1)

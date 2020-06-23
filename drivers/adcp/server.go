@@ -27,14 +27,19 @@ func main() {
 	}
 
 	// import display lib
-	display := func(ctx context.Context, addr string) (drivers.DisplayDSP, error) {
+	display := func(ctx context.Context, addr string) (drivers.Device, error) {
 		return &adcp.Projector{
 			Address: addr,
 		}, nil
 	}
 
 	// create server
-	server := drivers.CreateDisplayDSPServer(display)
+	server, err := drivers.NewServer(display)
+	if err != nil {
+		fmt.Printf("failed to create server: %s\n", err)
+		os.Exit(1)
+	}
+
 	if err = server.Serve(lis); err != nil {
 		fmt.Printf("error while listening: %s\n", err)
 		os.Exit(1)

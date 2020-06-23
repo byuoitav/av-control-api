@@ -31,15 +31,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	create := func(ctx context.Context, addr string) (drivers.DSP, error) {
+	create := func(ctx context.Context, addr string) (drivers.Device, error) {
 		return &atlona.Amp60{
 			Address: addr,
 		}, nil
 	}
 
-	server, err := drivers.CreateDSPServer(create)
+	server, err := drivers.NewServer(create)
 	if err != nil {
-		fmt.Printf("Error while trying to create DSP Server: %s\n", err)
+		fmt.Printf("failed to create server: %s\n", err)
 		os.Exit(1)
 	}
 
