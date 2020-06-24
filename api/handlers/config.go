@@ -17,14 +17,14 @@ func (h *Handlers) GetRoomConfiguration(c echo.Context) error {
 	}
 
 	id := c.Get(_cRequestID).(string)
-	log := h.Logger.With(zap.String("requestID", id), zap.String("endpoint", c.Request().URL.String()))
+	log := h.Logger.With(zap.String("requestID", id))
 
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
 	ctx = api.WithRequestID(ctx, id)
 
-	log.Info("Getting room", zap.String("room", roomID))
+	log.Info("Getting room", zap.String("endpoint", c.Request().URL.String()), zap.String("room", roomID))
 	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {
 		log.Warn("failed to get room", zap.Error(err))
@@ -37,14 +37,14 @@ func (h *Handlers) GetRoomConfiguration(c echo.Context) error {
 
 func (h *Handlers) GetDriverMapping(c echo.Context) error {
 	id := c.Get(_cRequestID).(string)
-	log := h.Logger.With(zap.String("requestID", id), zap.String("endpoint", c.Request().URL.String()))
+	log := h.Logger.With(zap.String("requestID", id))
 
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
 	ctx = api.WithRequestID(ctx, id)
 
-	log.Info("Getting driver mapping")
+	log.Info("Getting driver mapping", zap.String("endpoint", c.Request().URL.String()))
 	mapping, err := h.DataService.DriverMapping(ctx)
 	if err != nil {
 		log.Warn("failed to get driver mapping", zap.Error(err))

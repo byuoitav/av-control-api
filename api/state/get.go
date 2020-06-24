@@ -49,6 +49,7 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 
 	resps := make(chan getDeviceStateResponse)
 
+	// TODO handle 0 devices in room
 	for id, dev := range room.Devices {
 		req := getDeviceStateRequest{
 			id:     id,
@@ -58,8 +59,7 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 		}
 
 		go func() {
-			resps <- req.Do(ctx)
-
+			resps <- req.do(ctx)
 		}()
 	}
 
@@ -76,16 +76,17 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 	}
 
 	close(resps)
-
 	return stateResp, nil
 }
 
-func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse {
+func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse {
 	var respMu sync.Mutex
 	resp := getDeviceStateResponse{
 		id: req.id,
 		state: api.DeviceState{
-			Inputs: make(map[string]api.Input),
+			Inputs:  make(map[string]api.Input),
+			Volumes: make(map[string]int),
+			Mutes:   make(map[string]bool),
 		},
 	}
 
@@ -111,17 +112,24 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 	driverErr := func(field string, err error) {
 		req.log.Warn("unable to get "+field, zap.Error(err))
 
+		msg := err.Error()
+		if err, ok := status.FromError(err); ok {
+			msg = err.Message()
+		}
+
 		respMu.Lock()
 		defer respMu.Unlock()
 
 		resp.errors = append(resp.errors, api.DeviceStateError{
 			ID:    req.id,
 			Field: field,
-			Error: status.Convert(err).Message(),
+			Error: msg,
 		})
 	}
 
-	spreadRequests := func(i int) {
+	i := 0
+	spreadRequests := func() {
+		defer func() { i++ }()
 		if i == 0 {
 			return
 		}
@@ -132,11 +140,11 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 	req.log.Debug("Got capabilities", zap.Strings("capabilities", caps.GetCapabilities()))
 	wg := sync.WaitGroup{}
 
-	for i, capability := range caps.GetCapabilities() {
+	for _, capability := range caps.GetCapabilities() {
 		switch drivers.Capability(capability) {
 		case drivers.CapabilityPower:
 			wg.Add(1)
-			spreadRequests(i)
+			spreadRequests()
 
 			go func() {
 				req.log.Info("Getting power")
@@ -157,10 +165,10 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 			}()
 		case drivers.CapabilityAudioInput:
 			wg.Add(1)
-			spreadRequests(i)
+			spreadRequests()
 
 			go func() {
-				req.log.Info("Getting audio input")
+				req.log.Info("Getting audio inputs")
 				defer wg.Done()
 
 				inputs, err := req.driver.GetAudioInputs(ctx, deviceInfo)
@@ -182,10 +190,10 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 			}()
 		case drivers.CapabilityVideoInput:
 			wg.Add(1)
-			spreadRequests(i)
+			spreadRequests()
 
 			go func() {
-				req.log.Info("Getting video input")
+				req.log.Info("Getting video inputs")
 				defer wg.Done()
 
 				inputs, err := req.driver.GetVideoInputs(ctx, deviceInfo)
@@ -207,10 +215,10 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 			}()
 		case drivers.CapabilityAudioVideoInput:
 			wg.Add(1)
-			spreadRequests(i)
+			spreadRequests()
 
 			go func() {
-				req.log.Info("Getting audio-video input")
+				req.log.Info("Getting audioVideo inputs")
 				defer wg.Done()
 
 				inputs, err := req.driver.GetAudioVideoInputs(ctx, deviceInfo)
@@ -232,7 +240,7 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 			}()
 		case drivers.CapabilityBlank:
 			wg.Add(1)
-			spreadRequests(i)
+			spreadRequests()
 
 			go func() {
 				req.log.Info("Getting blank")
@@ -253,7 +261,7 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 			}()
 		case drivers.CapabilityVolume:
 			wg.Add(1)
-			spreadRequests(i)
+			spreadRequests()
 
 			go func() {
 				req.log.Info("Getting volumes")
@@ -281,7 +289,7 @@ func (req *getDeviceStateRequest) Do(ctx context.Context) getDeviceStateResponse
 			}()
 		case drivers.CapabilityMute:
 			wg.Add(1)
-			spreadRequests(i)
+			spreadRequests()
 
 			go func() {
 				req.log.Info("Getting mutes")
