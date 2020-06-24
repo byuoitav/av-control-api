@@ -13,6 +13,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.uber.org/zap v1.14.0
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	gonum.org/v1/gonum v0.7.0
 	google.golang.org/grpc v1.30.0
+	gopkg.in/yaml.v2 v2.2.7 // indirect
 )

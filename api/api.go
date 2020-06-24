@@ -17,13 +17,13 @@ type DeviceState struct {
 	PoweredOn *bool `json:"poweredOn,omitempty"`
 	Blanked   *bool `json:"blanked,omitempty"`
 
-	Input   map[string]Input `json:"inputs,omitempty"`
+	Inputs  map[string]Input `json:"inputs,omitempty"`
 	Volumes map[string]int   `json:"volumes,omitempty"`
 	Mutes   map[string]bool  `json:"mutes,omitempty"`
 }
 
 type Input struct {
-	AudioVideo *string `json:"audiovideo,omitempty"`
+	AudioVideo *string `json:"audioVideo,omitempty"`
 	Audio      *string `json:"audio,omitempty"`
 	Video      *string `json:"video,omitempty"`
 

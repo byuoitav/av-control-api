@@ -30,13 +30,33 @@ type Device struct {
 	Ports   Ports                     `json:"ports,omitempty"`
 }
 
+type Ports []Port
+
 // Port I think? this will only be used on DSP 's ??
 type Port struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
 
-type Ports []Port
+func (p Ports) Names() []string {
+	var names []string
+
+	for i := range p {
+		names = append(names, p[i].Name)
+	}
+
+	return names
+}
+
+func (d Device) TypePorts(typ string) Ports {
+	var p Ports
+
+	for i := range d.Ports {
+		p = append(p, d.Ports[i])
+	}
+
+	return p
+}
 
 func (d Device) MarshalJSON() ([]byte, error) {
 	type Alias Device
