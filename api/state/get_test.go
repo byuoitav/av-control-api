@@ -17,11 +17,7 @@ import (
 type getStateTest struct {
 	name        string
 	room        string
-	env         string
-	dataService interface {
-		api.DataService
-	}
-
+	dataService api.DataService
 	driverResps map[string]string
 	apiResp     api.StateResponse
 }
