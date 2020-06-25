@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/byuoitav/av-control-api/drivers/mock"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -14,7 +15,7 @@ func TestSavingDevices(t *testing.T) {
 
 	newDev := saveDevicesFunc(func(ctx context.Context, addr string) (Device, error) {
 		time.Sleep(time.Duration(rand.Intn(50)) * time.Millisecond)
-		return &mockTV{}, nil
+		return &mock.TV{}, nil
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -71,7 +72,7 @@ func TestSavingDevices(t *testing.T) {
 func TestSaveDevicesAtSameTime(t *testing.T) {
 	newDev := saveDevicesFunc(func(ctx context.Context, addr string) (Device, error) {
 		time.Sleep(2 * time.Second)
-		return &mockTV{}, nil
+		return &mock.TV{}, nil
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

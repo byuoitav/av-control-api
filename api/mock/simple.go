@@ -1,9 +1,9 @@
 package mock
 
 import (
-	"context"
-
 	"github.com/byuoitav/av-control-api/api"
+	"github.com/byuoitav/av-control-api/drivers"
+	"github.com/byuoitav/av-control-api/drivers/mock"
 )
 
 // SimpleRoom implements api.DeviceService and represents a simple room with the following devices:
@@ -16,67 +16,22 @@ import (
 // and the inputs are going directly into hdmi 1 & 2 on the TV.
 // the via is also capable of getting/setting it's own volume/mute.
 type SimpleRoom struct {
-	Mapping api.DriverMapping
 }
 
-func (s *SimpleRoom) DriverMapping(context.Context) (api.DriverMapping, error) {
-	s.Mapping = api.DriverMapping{
-		"Sony XBR": {
-			BaseURLs: map[string]string{
-				"default": "http://localhost:8016",
-				"k8s":     "http://sony-tv.service",
-			},
-		},
-		"via-connect-pro": {
-			BaseURLs: map[string]string{
-				"default": "http://localhost:8012",
-				"k8s":     "http://via-service.service",
+func (s *SimpleRoom) Room() api.Room {
+	return api.Room{
+		ID:           "ITB-1101",
+		ProxyBaseURL: "",
+		Devices: map[api.DeviceID]api.Device{
+			"ITB-1101-D1": api.Device{
+				Address: "ITB-1101-D1.av",
 			},
 		},
 	}
-	return s.Mapping, nil
 }
 
-func (s *SimpleRoom) Room(context.Context, string) (api.Room, error) {
-	return api.Room{
-		ID: "ITB-1101",
-		Devices: []api.Device{
-			{
-				ID:      "ITB-1101-D1",
-				Address: "ITB-1101-D1.av",
-				Type:    "Sony XBR",
-				Ports: []api.Port{
-					{
-						Name: "hdmi!1",
-						Type: "audiovideo",
-					},
-					{
-						Name: "hdmi!2",
-						Type: "audiovideo",
-					},
-				},
-			},
-			{
-				ID:      "ITB-1101-VIA1",
-				Address: "ITB-1101-VIA1.av",
-				Type:    "via-connect-pro",
-				Ports: []api.Port{
-					{
-						Name: "",
-						Type: "audiovideo",
-					},
-				},
-			},
-			{
-				ID:   "ITB-1101-HDMI1",
-				Type: "hdmi-input",
-				Ports: []api.Port{
-					{
-						Name: "",
-						Type: "audiovideo",
-					},
-				},
-			},
-		},
-	}, nil
+func (s *SimpleRoom) Devices() map[string]drivers.Device {
+	return map[string]drivers.Device{
+		"ITB-1101-D1.av": &mock.TV{},
+	}
 }

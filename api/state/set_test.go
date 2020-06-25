@@ -1,17 +1,6 @@
 package state
 
-import (
-	"context"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
-
-	"github.com/byuoitav/av-control-api/api"
-	"github.com/byuoitav/av-control-api/api/mock"
-	"github.com/google/go-cmp/cmp"
-)
+/*
 
 type setStateTest struct {
 	name        string
@@ -86,3 +75,4 @@ func TestSetState(t *testing.T) {
 		})
 	}
 }
+*/

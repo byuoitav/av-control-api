@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/byuoitav/av-control-api/drivers/mock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"golang.org/x/sync/errgroup"
@@ -23,7 +24,7 @@ var grpcDriverTests = []grpcDriverTest{
 	grpcDriverTest{
 		name: "TV/GetCapabilities",
 		newDevice: func(context.Context, string) (Device, error) {
-			return &mockTV{}, nil
+			return &mock.TV{}, nil
 		},
 		test: func(ctx context.Context, t *testing.T, client DriverClient) {
 			info := &DeviceInfo{}
@@ -56,7 +57,7 @@ var grpcDriverTests = []grpcDriverTest{
 	grpcDriverTest{
 		name: "TV/Power",
 		newDevice: saveDevicesFunc(func(context.Context, string) (Device, error) {
-			return &mockTV{}, nil
+			return &mock.TV{}, nil
 		}),
 		test: func(ctx context.Context, t *testing.T, client DriverClient) {
 			req := &SetPowerRequest{
@@ -87,8 +88,8 @@ var grpcDriverTests = []grpcDriverTest{
 	grpcDriverTest{
 		name: "TV/CombineRequests",
 		newDevice: saveDevicesFunc(func(context.Context, string) (Device, error) {
-			return &mockTV{
-				delay: time.Second,
+			return &mock.TV{
+				Delay: time.Second,
 			}, nil
 		}),
 		test: func(ctx context.Context, t *testing.T, client DriverClient) {
@@ -138,8 +139,8 @@ var grpcDriverTests = []grpcDriverTest{
 	grpcDriverTest{
 		name: "TV/SeparateRequests",
 		newDevice: saveDevicesFunc(func(context.Context, string) (Device, error) {
-			return &mockTV{
-				delay: time.Second,
+			return &mock.TV{
+				Delay: time.Second,
 			}, nil
 		}),
 		test: func(ctx context.Context, t *testing.T, client DriverClient) {

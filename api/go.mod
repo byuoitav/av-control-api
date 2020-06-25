@@ -18,3 +18,5 @@ require (
 	google.golang.org/grpc v1.30.0
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
+
+replace github.com/byuoitav/av-control-api => ../
