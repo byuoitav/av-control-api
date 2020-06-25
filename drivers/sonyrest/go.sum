@@ -7,6 +7,8 @@ github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d h1:F3/vBL2hw+zjCm7
 github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/sonyrest-driver v0.1.7 h1:3qfbGs0sThYG8KX6WRvsTNDTt1ob/JfZI/bJRrxvjfc=
 github.com/byuoitav/sonyrest-driver v0.1.7/go.mod h1:+d4nbt2XDbPgyQO0hicDauIzJScfq4QHcgNTizSc8nw=
+github.com/byuoitav/sonyrest-driver v0.1.8 h1:xPz11/e6cjj1rma6sBpb62L+OMMtRygYuUNqOFCTL+E=
+github.com/byuoitav/sonyrest-driver v0.1.8/go.mod h1:+d4nbt2XDbPgyQO0hicDauIzJScfq4QHcgNTizSc8nw=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=

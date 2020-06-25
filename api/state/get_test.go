@@ -2,15 +2,13 @@ package state
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/api/log"
 	"github.com/byuoitav/av-control-api/api/mock"
+	"github.com/byuoitav/av-control-api/drivers"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -18,7 +16,6 @@ type getStateTest struct {
 	name        string
 	room        string
 	dataService api.DataService
-	driverResps map[string]string
 	apiResp     api.StateResponse
 }
 
@@ -30,6 +27,12 @@ var (
 )
 
 var getTests = []getStateTest{
+	{
+		name:        "Simple/1",
+		room:        "",
+		dataService: &mock.SimpleRoom{},
+		apiResp:     api.StateResponse{},
+	},
 	{
 		name:        "Simple/1",
 		dataService: &mock.SimpleRoom{},
@@ -285,32 +288,37 @@ func TestGetState(t *testing.T) {
 
 	for _, tt := range getTests {
 		t.Run(tt.name, func(t *testing.T) {
-			// start http server
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintln(w, tt.driverResps[r.URL.Path])
-			}))
-			t.Cleanup(func() {
-				ts.Close()
-			})
+			// TODO start a mock driver
 
 			room, err := tt.dataService.Room(ctx, tt.room)
 			if err != nil {
-				t.Errorf("unable to get room: %s", err)
+				t.Fatalf("unable to get room: %s", err)
 			}
 
-			gs := &GetSetter{
-				Environment: tt.env,
-				Logger:      log.Logger{},
+			gs := &getSetter{
+				log: log.Logger{},
+				drivers: map[string]drivers.DriverClient{
+					"": nil,
+				},
 			}
 
 			resp, err := gs.Get(ctx, room)
 			if err != nil {
-				t.Errorf("unable to get room state: %s", err)
+				t.Fatalf("unable to get room state: %s", err)
 			}
 
 			if diff := cmp.Diff(tt.apiResp, resp); diff != "" {
 				t.Errorf("generated incorrect response (-want, +got):\n%s", diff)
 			}
 		})
+
+		//t.Run(tt.name, func(t *testing.T) {
+		//	// start http server
+		//	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//		fmt.Fprintln(w, tt.driverResps[r.URL.Path])
+		//	}))
+		//	t.Cleanup(func() {
+		//		ts.Close()
+		//	})
 	}
 }

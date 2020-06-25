@@ -13,9 +13,9 @@ type Server interface {
 	Stop(ctx context.Context) error
 }
 
-func NewServer(newDev NewDeviceFunc) (Server, error) {
+func NewServer(newDev NewDeviceFunc) Server {
 	newDev = saveDevicesFunc(newDev)
-	return newGrpcServer(newDev), nil
+	return newGrpcServer(newDev)
 }
 
 func saveDevicesFunc(newDev NewDeviceFunc) NewDeviceFunc {

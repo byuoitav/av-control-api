@@ -39,42 +39,53 @@ type grpcDriverServer struct {
 }
 
 func (g *grpcDriverServer) GetCapabilities(ctx context.Context, info *DeviceInfo) (*Capabilities, error) {
-	device, err := g.newDevice(ctx, info.GetAddress())
+	dev, err := g.newDevice(ctx, info.GetAddress())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 
+	if d, ok := dev.(DeviceWithCapabilities); ok {
+		caps, err := d.GetCapabilities(ctx)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, err.Error())
+		}
+
+		return &Capabilities{
+			Capabilities: caps,
+		}, nil
+	}
+
 	var caps []string
 
-	if _, ok := device.(DeviceWithPower); ok {
+	if _, ok := dev.(DeviceWithPower); ok {
 		caps = append(caps, string(CapabilityPower))
 	}
 
-	if _, ok := device.(DeviceWithAudioInput); ok {
+	if _, ok := dev.(DeviceWithAudioInput); ok {
 		caps = append(caps, string(CapabilityAudioInput))
 	}
 
-	if _, ok := device.(DeviceWithVideoInput); ok {
+	if _, ok := dev.(DeviceWithVideoInput); ok {
 		caps = append(caps, string(CapabilityVideoInput))
 	}
 
-	if _, ok := device.(DeviceWithAudioVideoInput); ok {
+	if _, ok := dev.(DeviceWithAudioVideoInput); ok {
 		caps = append(caps, string(CapabilityAudioVideoInput))
 	}
 
-	if _, ok := device.(DeviceWithBlank); ok {
+	if _, ok := dev.(DeviceWithBlank); ok {
 		caps = append(caps, string(CapabilityBlank))
 	}
 
-	if _, ok := device.(DeviceWithVolume); ok {
+	if _, ok := dev.(DeviceWithVolume); ok {
 		caps = append(caps, string(CapabilityVolume))
 	}
 
-	if _, ok := device.(DeviceWithMute); ok {
+	if _, ok := dev.(DeviceWithMute); ok {
 		caps = append(caps, string(CapabilityMute))
 	}
 
-	if _, ok := device.(DeviceWithInfo); ok {
+	if _, ok := dev.(DeviceWithInfo); ok {
 		caps = append(caps, string(CapabilityInfo))
 	}
 

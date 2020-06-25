@@ -20,6 +20,10 @@ type NewDeviceFunc func(context.Context, string) (Device, error)
 
 type Device interface{}
 
+type DeviceWithCapabilities interface {
+	GetCapabilities(context.Context) ([]string, error)
+}
+
 type DeviceWithPower interface {
 	GetPower(context.Context) (bool, error)
 	SetPower(context.Context, bool) error

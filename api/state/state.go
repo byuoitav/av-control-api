@@ -13,8 +13,7 @@ import (
 )
 
 type getSetter struct {
-	log  api.Logger
-	data api.DataService
+	log api.Logger
 
 	drivers map[string]drivers.DriverClient
 }
@@ -22,7 +21,6 @@ type getSetter struct {
 func New(ctx context.Context, ds api.DataService, log api.Logger) (api.StateGetSetter, error) {
 	gs := &getSetter{
 		log:     log,
-		data:    ds,
 		drivers: make(map[string]drivers.DriverClient),
 	}
 
