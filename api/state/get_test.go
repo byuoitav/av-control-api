@@ -19,13 +19,6 @@ type getStateTest struct {
 	apiResp api.StateResponse
 }
 
-var (
-	via  = "ITB-1101-VIA1"
-	hdmi = "ITB-1101-HDMI1"
-	sign = "ITB-1101-SIGN1"
-	pc   = "ITB-1101-PC1"
-)
-
 var getTests = []getStateTest{
 	{
 		name: "Simple",
