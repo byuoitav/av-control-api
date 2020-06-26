@@ -24,17 +24,33 @@ var getTests = []getStateTest{
 		name: "Simple",
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
-				"ITB-1101-D1": &mock.TV{},
+				"ITB-1101-D1": &mock.Device{
+					On: boolP(true),
+					AudioVideoInputs: map[string]string{
+						"": "hdmi1",
+					},
+					Blanked: boolP(false),
+					Volumes: map[string]int{
+						"": 77,
+					},
+					Mutes: map[string]bool{
+						"": false,
+					},
+				},
 			},
 		},
 		apiResp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
-					PoweredOn: boolP(false),
-					Blanked:   boolP(false),
-					Inputs:    map[string]api.Input{},
+					PoweredOn: boolP(true),
+					Inputs: map[string]api.Input{
+						"": api.Input{
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+					Blanked: boolP(false),
 					Volumes: map[string]int{
-						"": 0,
+						"": 77,
 					},
 					Mutes: map[string]bool{
 						"": false,
@@ -56,10 +72,15 @@ func TestGetState(t *testing.T) {
 				Devices: make(map[api.DeviceID]api.Device),
 			}
 
-			for id := range tt.driver.Devices {
-				room.Devices[api.DeviceID(id)] = api.Device{
-					Address: id,
+			for id, dev := range tt.driver.Devices {
+				var apiDev api.Device
+				apiDev.Address = id
+
+				if d, ok := dev.(*mock.Device); ok {
+					// TODO add in volume/mute ports
 				}
+
+				room.Devices[api.DeviceID(id)] = apiDev
 			}
 
 			// start a driver server

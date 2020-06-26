@@ -116,12 +116,13 @@ func (d *Device) GetCapabilities(context.Context) ([]string, error) {
 func (d *Device) GetPower(context.Context) (bool, error) {
 	d.once.Do(d.init)
 
+	d.Lock()
+	defer d.Unlock()
+
 	if !d.hasCapability("Power") {
 		return false, ErrNotSupported
 	}
 
-	d.Lock()
-	defer d.Unlock()
 	time.Sleep(d.Delay)
 	return *d.On, nil
 }
@@ -129,12 +130,13 @@ func (d *Device) GetPower(context.Context) (bool, error) {
 func (d *Device) SetPower(ctx context.Context, pow bool) error {
 	d.once.Do(d.init)
 
+	d.Lock()
+	defer d.Unlock()
+
 	if !d.hasCapability("Power") {
 		return ErrNotSupported
 	}
 
-	d.Lock()
-	defer d.Unlock()
 	time.Sleep(d.Delay)
 	d.On = &pow
 	return nil
@@ -143,18 +145,22 @@ func (d *Device) SetPower(ctx context.Context, pow bool) error {
 func (d *Device) GetAudioInputs(context.Context) (map[string]string, error) {
 	d.once.Do(d.init)
 
+	d.Lock()
+	defer d.Unlock()
+
 	if !d.hasCapability("AudioInput") {
 		return nil, ErrNotSupported
 	}
 
-	d.Lock()
-	defer d.Unlock()
 	time.Sleep(d.Delay)
 	return d.AudioInputs, nil
 }
 
 func (d *Device) SetAudioInput(ctx context.Context, output, input string) error {
 	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
 
 	if !d.hasCapability("AudioInput") {
 		return ErrNotSupported
@@ -164,60 +170,186 @@ func (d *Device) SetAudioInput(ctx context.Context, output, input string) error 
 		return ErrInvalidOutput
 	}
 
-	d.Lock()
-	defer d.Unlock()
 	time.Sleep(d.Delay)
 	d.AudioInputs[output] = input
 	return nil
 }
 
-/*
-func (d *Device) GetBlank(context.Context) (bool, error) {
-	m.Lock()
-	defer m.Unlock()
-	time.Sleep(m.Delay)
-	return m.Blank, nil
+func (d *Device) GetVideoInputs(context.Context) (map[string]string, error) {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("VideoInput") {
+		return nil, ErrNotSupported
+	}
+
+	time.Sleep(d.Delay)
+	return d.VideoInputs, nil
 }
 
-func (d *Device) SetBlank(ctx context.Context, blank bool) error {
-	m.Lock()
-	defer m.Unlock()
-	time.Sleep(m.Delay)
-	m.Blank = blank
+func (d *Device) SetVideoInput(ctx context.Context, output, input string) error {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("VideoInput") {
+		return ErrNotSupported
+	}
+
+	if !contains(d.videoOutputs, output) {
+		return ErrInvalidOutput
+	}
+
+	time.Sleep(d.Delay)
+	d.VideoInputs[output] = input
 	return nil
 }
 
-func (d *Device) GetVolumes(context.Context, []string) (map[string]int, error) {
-	m.Lock()
-	defer m.Unlock()
-	time.Sleep(m.Delay)
-	return map[string]int{
-		"": m.Volume,
-	}, nil
+func (d *Device) GetAudioVideoInputs(context.Context) (map[string]string, error) {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("AudioVideoInput") {
+		return nil, ErrNotSupported
+	}
+
+	time.Sleep(d.Delay)
+	return d.AudioVideoInputs, nil
+}
+
+func (d *Device) SetAudioVideoInput(ctx context.Context, output, input string) error {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("AudioVideoInput") {
+		return ErrNotSupported
+	}
+
+	if !contains(d.audioVideoOutputs, output) {
+		return ErrInvalidOutput
+	}
+
+	time.Sleep(d.Delay)
+	d.AudioVideoInputs[output] = input
+	return nil
+}
+
+func (d *Device) GetBlank(context.Context) (bool, error) {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("Blank") {
+		return false, ErrNotSupported
+	}
+
+	time.Sleep(d.Delay)
+	return *d.Blanked, nil
+}
+
+func (d *Device) SetBlank(ctx context.Context, blanked bool) error {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("Blank") {
+		return ErrNotSupported
+	}
+
+	time.Sleep(d.Delay)
+	d.Blanked = &blanked
+	return nil
+}
+
+func (d *Device) GetVolumes(ctx context.Context, blocks []string) (map[string]int, error) {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("Volume") {
+		return nil, ErrNotSupported
+	}
+
+	vols := make(map[string]int)
+	for i := range blocks {
+		if !contains(d.volumeBlocks, blocks[i]) {
+			return nil, ErrInvalidBlock
+		}
+
+		vols[blocks[i]] = d.Volumes[blocks[i]]
+	}
+
+	time.Sleep(d.Delay)
+	return vols, nil
 }
 
 func (d *Device) SetVolume(ctx context.Context, block string, level int) error {
-	m.Lock()
-	defer m.Unlock()
-	time.Sleep(m.Delay)
-	m.Volume = level
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("Volume") {
+		return ErrNotSupported
+	}
+
+	if !contains(d.volumeBlocks, block) {
+		return ErrInvalidOutput
+	}
+
+	time.Sleep(d.Delay)
+	d.Volumes[block] = level
 	return nil
 }
 
-func (d *Device) GetMutes(context.Context, []string) (map[string]bool, error) {
-	m.Lock()
-	defer m.Unlock()
-	time.Sleep(m.Delay)
-	return map[string]bool{
-		"": m.Mute,
-	}, nil
+func (d *Device) GetMutes(ctx context.Context, blocks []string) (map[string]bool, error) {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("Mute") {
+		return nil, ErrNotSupported
+	}
+
+	mutes := make(map[string]bool)
+	for i := range blocks {
+		if !contains(d.muteBlocks, blocks[i]) {
+			return nil, ErrInvalidBlock
+		}
+
+		mutes[blocks[i]] = d.Mutes[blocks[i]]
+	}
+
+	time.Sleep(d.Delay)
+	return mutes, nil
 }
 
-func (d *Device) SetMute(ctx context.Context, block string, mute bool) error {
-	m.Lock()
-	defer m.Unlock()
-	time.Sleep(m.Delay)
-	m.Mute = mute
+func (d *Device) SetMute(ctx context.Context, block string, muted bool) error {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	if !d.hasCapability("Mute") {
+		return ErrNotSupported
+	}
+
+	if !contains(d.muteBlocks, block) {
+		return ErrInvalidOutput
+	}
+
+	time.Sleep(d.Delay)
+	d.Mutes[block] = muted
 	return nil
 }
-*/
