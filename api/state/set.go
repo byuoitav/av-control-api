@@ -14,9 +14,8 @@ import (
 )
 
 var (
-	// ErrNoPowerSettable = errors.New("can't set power of given device")
-	// ErrNoStateSettable = errors.New("nothing to do for the given request and room")
-	ErrNotCapable = errors.New("can't set this field on this device")
+	ErrInvalidDevice = errors.New("device is invalid in this room")
+	ErrNotCapable    = errors.New("can't set this field on this device")
 )
 
 type setDeviceStateRequest struct {
@@ -34,8 +33,23 @@ type setDeviceStateResponse struct {
 }
 
 func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateRequest) (api.StateResponse, error) {
-	stateResp := api.StateResponse{
-		Devices: make(map[api.DeviceID]api.DeviceState),
+	if len(req.Devices) == 0 {
+		return api.StateResponse{}, nil
+	}
+
+	// make sure the driver for every device in the room exists
+	for _, dev := range room.Devices {
+		_, ok := gs.drivers[dev.Driver]
+		if !ok {
+			return api.StateResponse{}, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
+		}
+	}
+
+	// make sure each of the devices in the request are in this room
+	for id := range req.Devices {
+		if _, ok := room.Devices[id]; !ok {
+			return api.StateResponse{}, fmt.Errorf("%s: %w", id, ErrInvalidDevice)
+		}
 	}
 
 	id := api.RequestID(ctx)
@@ -44,18 +58,13 @@ func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateReques
 		log = gs.logger.With(zap.String("requestID", id))
 	}
 
-	// make sure the driver for every device in the room exists
-	for _, dev := range room.Devices {
-		_, ok := gs.drivers[dev.Driver]
-		if !ok {
-			return stateResp, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
-		}
+	stateResp := api.StateResponse{
+		Devices: make(map[api.DeviceID]api.DeviceState),
 	}
 
 	resps := make(chan setDeviceStateResponse)
 	expectedResps := 0
 
-	// TODO handle empty state request (error or no?)
 	for id, dev := range room.Devices {
 		state, ok := req.Devices[id]
 		if !ok {
@@ -77,17 +86,17 @@ func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateReques
 	}
 
 	if expectedResps > 0 {
-		received := 0
 		for resp := range resps {
-			received++
+			expectedResps--
 
 			stateResp.Devices[resp.id] = resp.state
 			stateResp.Errors = append(stateResp.Errors, resp.errors...)
 
-			if received == expectedResps {
+			if expectedResps == 0 {
 				break
 			}
 		}
+	} else {
 	}
 
 	close(resps)

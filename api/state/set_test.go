@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -14,14 +15,61 @@ import (
 )
 
 type setStateTest struct {
-	name    string
-	log     bool
-	driver  drivertest.Driver
-	apiReq  api.StateRequest
-	apiResp api.StateResponse
+	name   string
+	log    bool
+	driver drivertest.Driver
+	req    api.StateRequest
+	err    error
+	resp   api.StateResponse
 }
 
 var setTests = []setStateTest{
+	{
+		name: "EmptyRequest",
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D1": &mock.Device{
+					On:               boolP(true),
+					AudioVideoInputs: map[string]string{"": "hdmi1"},
+					Blanked:          boolP(false),
+					Volumes: map[string]int{
+						"": 77,
+					},
+					Mutes: map[string]bool{
+						"": false,
+					},
+				},
+			},
+		},
+		req:  api.StateRequest{},
+		resp: api.StateResponse{},
+	},
+	{
+		name: "InvalidDevices",
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D1": &mock.Device{
+					On:               boolP(true),
+					AudioVideoInputs: map[string]string{"": "hdmi1"},
+					Blanked:          boolP(false),
+					Volumes: map[string]int{
+						"": 77,
+					},
+					Mutes: map[string]bool{
+						"": false,
+					},
+				},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-SW1": api.DeviceState{
+					PoweredOn: boolP(false),
+				},
+			},
+		},
+		err: fmt.Errorf("ITB-1101-SW1: %s", ErrInvalidDevice),
+	},
 	{
 		name: "BasicTV/PowerOff",
 		driver: drivertest.Driver{
@@ -39,14 +87,14 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiReq: api.StateRequest{
+		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(false),
 				},
 			},
 		},
-		apiResp: api.StateResponse{
+		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(false),
@@ -71,7 +119,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiReq: api.StateRequest{
+		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Inputs: map[string]api.Input{
@@ -82,7 +130,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiResp: api.StateResponse{
+		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Inputs: map[string]api.Input{
@@ -111,14 +159,14 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiReq: api.StateRequest{
+		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Blanked: boolP(true),
 				},
 			},
 		},
-		apiResp: api.StateResponse{
+		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Blanked: boolP(true),
@@ -143,7 +191,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiReq: api.StateRequest{
+		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Volumes: map[string]int{
@@ -152,7 +200,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiResp: api.StateResponse{
+		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Volumes: map[string]int{
@@ -179,7 +227,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiReq: api.StateRequest{
+		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Mutes: map[string]bool{
@@ -188,7 +236,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiResp: api.StateResponse{
+		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					Mutes: map[string]bool{
@@ -215,7 +263,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiReq: api.StateRequest{
+		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(true),
@@ -234,7 +282,7 @@ var setTests = []setStateTest{
 				},
 			},
 		},
-		apiResp: api.StateResponse{
+		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": api.DeviceState{
 					PoweredOn: boolP(true),
@@ -249,6 +297,75 @@ var setTests = []setStateTest{
 					},
 					Mutes: map[string]bool{
 						"": false,
+					},
+				},
+			},
+		},
+	},
+	{
+		name: "VideoSwitcher/ChangeInput1",
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-SW1": &mock.Device{
+					AudioInputs: map[string]string{
+						"1": "1",
+						"2": "2",
+						"3": "3",
+						"4": "4",
+					},
+					VideoInputs: map[string]string{
+						"1": "4",
+						"2": "3",
+						"3": "2",
+						"4": "1",
+					},
+				},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-SW1": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"1": api.Input{
+							Audio: stringP("4"),
+							Video: stringP("1"),
+						},
+						"2": api.Input{
+							Audio: stringP("3"),
+							Video: stringP("2"),
+						},
+						"3": api.Input{
+							Audio: stringP("2"),
+							Video: stringP("3"),
+						},
+						"4": api.Input{
+							Audio: stringP("1"),
+							Video: stringP("4"),
+						},
+					},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-SW1": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"1": api.Input{
+							Audio: stringP("4"),
+							Video: stringP("1"),
+						},
+						"2": api.Input{
+							Audio: stringP("3"),
+							Video: stringP("2"),
+						},
+						"3": api.Input{
+							Audio: stringP("2"),
+							Video: stringP("3"),
+						},
+						"4": api.Input{
+							Audio: stringP("1"),
+							Video: stringP("4"),
+						},
 					},
 				},
 			},
@@ -313,14 +430,16 @@ func TestSetState(t *testing.T) {
 			}
 
 			// get the state of this room
-			resp, err := gs.Set(ctx, room, tt.apiReq)
-			if err != nil {
-				t.Fatalf("unable to set room state: %s", err)
+			resp, err := gs.Set(ctx, room, tt.req)
+			if tt.err != nil {
+				if diff := cmp.Diff(tt.err.Error(), err.Error()); diff != "" {
+					t.Fatalf("generated incorrect error (-want, +got):\n%s", diff)
+				}
 			}
 
 			// compare the expected response to what we got
-			if diff := cmp.Diff(tt.apiResp, resp); diff != "" {
-				t.Errorf("generated incorrect response (-want, +got):\n%s", diff)
+			if diff := cmp.Diff(tt.resp, resp); diff != "" {
+				t.Fatalf("generated incorrect response (-want, +got):\n%s", diff)
 			}
 		})
 	}
