@@ -182,6 +182,253 @@ var getTests = []getStateTest{
 			},
 		},
 	},
+	{
+		name: "SimpleSeparateInput",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D1": &mock.Device{
+					AudioVideoInputs: map[string]string{"": "hdmi1"},
+					On:               boolP(true),
+					Blanked:          boolP(false),
+					Volumes:          map[string]int{"": 50},
+					Mutes:            map[string]bool{"": false},
+				},
+				"ITB-1101-SW1": &mock.Device{
+					AudioVideoInputs: map[string]string{
+						"1": "hdmi1",
+					},
+				},
+				"ITB-1101-AMP1": &mock.Device{
+					Volumes: map[string]int{"": 30},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-HDMI1": &mock.Device{},
+			},
+		},
+		apiResp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"": api.Input{
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+					PoweredOn: boolP(true),
+					Blanked:   boolP(false),
+					Volumes:   map[string]int{"": 50},
+					Mutes:     map[string]bool{"": false},
+				},
+				"ITB-1101-SW1": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"1": {
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+				},
+				"ITB-1101-AMP1": api.DeviceState{
+					Volumes: map[string]int{"": 30},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-HDMI1": api.DeviceState{},
+			},
+		},
+	},
+	{
+		name: "6x2SeparateInput",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				//Projector
+				"ITB-1101-D1": &mock.Device{
+					On:               boolP(true),
+					AudioVideoInputs: map[string]string{"": "hdmi1"},
+					Blanked:          boolP(false),
+				},
+				"ITB-1101-D2": &mock.Device{
+					On:               boolP(true),
+					AudioVideoInputs: map[string]string{"": "hdbaset"},
+					Blanked:          boolP(true),
+				},
+				"ITB-1101-SW1": &mock.Device{
+					AudioInputs: map[string]string{
+						"1": "hdmi1",
+						"2": "hdbaset",
+					},
+					VideoInputs: map[string]string{
+						"1": "hdbaset",
+						"2": "hdmi1",
+					},
+				},
+				"ITB-1101-VIA1": &mock.Device{
+					Volumes: map[string]int{"": 69},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-HDMI1": &mock.Device{
+					Volumes: map[string]int{"": 50},
+					Mutes:   map[string]bool{"": true},
+				},
+			},
+		},
+		apiResp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": api.DeviceState{
+					PoweredOn: boolP(true),
+					Inputs: map[string]api.Input{
+						"": api.Input{
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+					Blanked: boolP(false),
+				},
+				"ITB-1101-D2": api.DeviceState{
+					PoweredOn: boolP(true),
+					Inputs: map[string]api.Input{
+						"": api.Input{
+							AudioVideo: stringP("hdbaset"),
+						},
+					},
+					Blanked: boolP(true),
+				},
+				"ITB-1101-SW1": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"1": api.Input{
+							Audio: stringP("hdmi1"),
+							Video: stringP("hdbaset"),
+						},
+						"2": api.Input{
+							Audio: stringP("hdbaset"),
+							Video: stringP("hdmi1"),
+						},
+					},
+				},
+				"ITB-1101-VIA1": api.DeviceState{
+					Volumes: map[string]int{"": 69},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-HDMI1": api.DeviceState{
+					Volumes: map[string]int{"": 50},
+					Mutes:   map[string]bool{"": true},
+				},
+			},
+		},
+	},
+	{
+		name: "JustAddPower",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D1": &mock.Device{
+					On:               boolP(true),
+					AudioVideoInputs: map[string]string{"": "hdmi1"},
+					Blanked:          boolP(true),
+					Volumes:          map[string]int{"": 50},
+					Mutes:            map[string]bool{"": true},
+				},
+				"ITB-1101-D2": &mock.Device{
+					On:               boolP(true),
+					AudioVideoInputs: map[string]string{"": "hdmi2"},
+					Blanked:          boolP(false),
+					Volumes:          map[string]int{"": 80},
+					Mutes:            map[string]bool{"": false},
+				},
+				"ITB-1101-D3": &mock.Device{
+					On: boolP(false),
+				},
+				"ITB-1101-RX1": &mock.Device{
+					AudioVideoInputs: map[string]string{"": "10.66.78.155"},
+				},
+				"ITB-1101-RX2": &mock.Device{
+					AudioVideoInputs: map[string]string{"": "10.66.78.156"},
+				},
+				"ITB-1101-RX3": &mock.Device{
+					AudioVideoInputs: map[string]string{"": "10.66.78.157"},
+				},
+				"ITB-1101-VIA1": &mock.Device{
+					Volumes: map[string]int{"": 60},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-DSP1": &mock.Device{
+					Volumes: map[string]int{
+						"1": 70,
+						"2": 30,
+						"3": 45,
+					},
+					Mutes: map[string]bool{
+						"1": false,
+						"2": true,
+						"3": true,
+					},
+				},
+			},
+		},
+		apiResp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": api.DeviceState{
+					PoweredOn: boolP(true),
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+					Blanked: boolP(true),
+					Volumes: map[string]int{"": 50},
+					Mutes:   map[string]bool{"": true},
+				},
+				"ITB-1101-D2": api.DeviceState{
+					PoweredOn: boolP(true),
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+						},
+					},
+					Blanked: boolP(false),
+					Volumes: map[string]int{"": 80},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-D3": api.DeviceState{
+					PoweredOn: boolP(false),
+				},
+				"ITB-1101-RX1": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("10.66.78.155"),
+						},
+					},
+				},
+				"ITB-1101-RX2": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("10.66.78.156"),
+						},
+					},
+				},
+				"ITB-1101-RX3": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("10.66.78.157"),
+						},
+					},
+				},
+				"ITB-1101-VIA1": api.DeviceState{
+					Volumes: map[string]int{"": 60},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-DSP1": api.DeviceState{
+					Volumes: map[string]int{
+						"1": 70,
+						"2": 30,
+						"3": 45,
+					},
+					Mutes: map[string]bool{
+						"1": false,
+						"2": true,
+						"3": true,
+					},
+				},
+			},
+		},
+	},
 }
 
 func TestGetState(t *testing.T) {
