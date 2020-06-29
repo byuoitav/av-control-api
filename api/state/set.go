@@ -426,6 +426,19 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 
 	wg.Wait()
 
+	// reset maps if they weren't used
+	if len(resp.state.Inputs) == 0 {
+		resp.state.Inputs = nil
+	}
+
+	if len(resp.state.Volumes) == 0 {
+		resp.state.Volumes = nil
+	}
+
+	if len(resp.state.Mutes) == 0 {
+		resp.state.Mutes = nil
+	}
+
 	req.log.Info("Finished setting state")
 	return resp
 }
