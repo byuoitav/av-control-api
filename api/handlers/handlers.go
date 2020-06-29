@@ -1,10 +1,13 @@
 package handlers
 
-import "github.com/byuoitav/av-control-api/api"
+import (
+	"github.com/byuoitav/av-control-api/api"
+	"go.uber.org/zap"
+)
 
 type Handlers struct {
 	Environment string
 	DataService api.DataService
-	Logger      api.Logger
+	Logger      *zap.Logger
 	State       api.StateGetSetter
 }

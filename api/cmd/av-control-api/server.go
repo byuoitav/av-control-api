@@ -23,7 +23,9 @@ func main() {
 		port     int
 		logLevel int8
 
-		env         string
+		host string
+		env  string
+
 		authAddr    string
 		authToken   string
 		disableAuth bool
@@ -36,6 +38,8 @@ func main() {
 
 	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.Int8VarP(&logLevel, "log-level", "L", 0, "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
+	pflag.StringVarP(&env, "env", "e", "default", "The deployment environment for the API")
+	pflag.StringVarP(&host, "host", "h", "default", "host of this server. necessary to proxy requests")
 	pflag.StringVar(&authAddr, "auth-addr", "", "address of the auth server")
 	pflag.StringVar(&authToken, "auth-token", "", "authorization token to use when calling the auth server")
 	pflag.BoolVar(&disableAuth, "disable-auth", false, "disables auth checks")
@@ -43,7 +47,6 @@ func main() {
 	pflag.StringVar(&dbUsername, "db-username", "", "database username")
 	pflag.StringVar(&dbPassword, "db-password", "", "database password")
 	pflag.BoolVar(&dbInsecure, "db-insecure", false, "don't use SSL in database connection")
-	pflag.StringVarP(&env, "env", "e", "default", "The deployment environment for the API")
 	pflag.Parse()
 
 	config := zap.Config{
