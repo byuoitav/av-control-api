@@ -13,14 +13,14 @@ import (
 )
 
 type getSetter struct {
-	log api.Logger
+	logger *zap.Logger
 
 	drivers map[string]drivers.DriverClient
 }
 
-func New(ctx context.Context, ds api.DataService, log api.Logger) (api.StateGetSetter, error) {
+func New(ctx context.Context, ds api.DataService, logger *zap.Logger) (api.StateGetSetter, error) {
 	gs := &getSetter{
-		log:     log,
+		logger:  logger,
 		drivers: make(map[string]drivers.DriverClient),
 	}
 
@@ -49,7 +49,7 @@ func New(ctx context.Context, ds api.DataService, log api.Logger) (api.StateGetS
 			opts = append(opts, grpc.WithInsecure())
 		}
 
-		gs.log.Debug(fmt.Sprintf("Setting up %#q driver", driver), zap.String("address", config.Address))
+		gs.logger.Debug(fmt.Sprintf("Setting up %#q driver", driver), zap.String("address", config.Address))
 
 		conn, err := grpc.DialContext(ctx, config.Address, opts...)
 		if err != nil {

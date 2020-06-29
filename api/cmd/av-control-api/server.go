@@ -11,7 +11,6 @@ import (
 
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
-	"github.com/byuoitav/av-control-api/api/log"
 	"github.com/byuoitav/av-control-api/api/state"
 	"github.com/labstack/echo"
 	"github.com/spf13/pflag"
@@ -79,8 +78,6 @@ func main() {
 	}
 	defer logger.Sync()
 
-	log := log.Wrap(logger)
-
 	// build the data service
 	dsOpts := []couch.Option{
 		couch.WithEnvironment(env),
@@ -100,7 +97,7 @@ func main() {
 	}
 
 	// build the getsetter
-	gs, err := state.New(context.TODO(), ds, log)
+	gs, err := state.New(context.TODO(), ds, logger)
 	if err != nil {
 		logger.Fatal("unable to build state get/setter", zap.Error(err))
 	}
@@ -108,7 +105,7 @@ func main() {
 	// build http stuff
 	middleware := handlers.Middleware{}
 	handlers := handlers.Handlers{
-		Logger:      log,
+		Logger:      logger,
 		DataService: ds,
 		State:       gs,
 	}
@@ -134,7 +131,7 @@ func main() {
 		logger.Fatal("unable to bind listener", zap.Error(err))
 	}
 
-	log.Info("Starting server", zap.String("on", lis.Addr().String()))
+	logger.Info("Starting server", zap.String("on", lis.Addr().String()))
 	err = e.Server.Serve(lis)
 	switch {
 	case errors.Is(err, http.ErrServerClosed):

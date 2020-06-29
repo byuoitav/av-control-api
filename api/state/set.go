@@ -24,7 +24,7 @@ type setDeviceStateRequest struct {
 	device api.Device
 	state  api.DeviceState
 	driver drivers.DriverClient
-	log    api.Logger
+	log    *zap.Logger
 }
 
 type setDeviceStateResponse struct {
@@ -39,7 +39,10 @@ func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateReques
 	}
 
 	id := api.RequestID(ctx)
-	log := gs.log.With(zap.String("requestID", id))
+	log := gs.logger
+	if len(id) > 0 {
+		log = gs.logger.With(zap.String("requestID", id))
+	}
 
 	// make sure the driver for every device in the room exists
 	for _, dev := range room.Devices {

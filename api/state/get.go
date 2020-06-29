@@ -22,7 +22,7 @@ type getDeviceStateRequest struct {
 	id     api.DeviceID
 	device api.Device
 	driver drivers.DriverClient
-	log    api.Logger
+	log    *zap.Logger
 }
 
 type getDeviceStateResponse struct {
@@ -37,7 +37,10 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 	}
 
 	id := api.RequestID(ctx)
-	log := gs.log.With(zap.String("requestID", id))
+	log := gs.logger
+	if len(id) > 0 {
+		log = gs.logger.With(zap.String("requestID", id))
+	}
 
 	// make sure the driver for every device in the room exists
 	for _, dev := range room.Devices {
@@ -209,7 +212,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 
 				for out, in := range inputs.GetInputs() {
 					input := resp.state.Inputs[out]
-					input.AudioVideo = &in
+					input.Video = &in
 					resp.state.Inputs[out] = input
 				}
 			}()
@@ -332,6 +335,19 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 	}
 
 	wg.Wait()
+
+	// reset maps if they weren't used
+	if len(resp.state.Inputs) == 0 {
+		resp.state.Inputs = nil
+	}
+
+	if len(resp.state.Volumes) == 0 {
+		resp.state.Volumes = nil
+	}
+
+	if len(resp.state.Mutes) == 0 {
+		resp.state.Mutes = nil
+	}
 
 	req.log.Info("Finished getting state")
 	return resp
