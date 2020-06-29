@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	_ "github.com/go-kivik/couchdb/v4"
-	kivik "github.com/go-kivik/kivik/v4"
+	_ "github.com/go-kivik/couchdb/v3"
+	kivik "github.com/go-kivik/kivik/v3"
 	"golang.org/x/net/context"
 )
 
