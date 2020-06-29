@@ -187,7 +187,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 
 				for out, in := range inputs.GetInputs() {
 					input := resp.state.Inputs[out]
-					input.Audio = &in
+					input.Audio = stringP(in)
 					resp.state.Inputs[out] = input
 				}
 			}()
@@ -212,7 +212,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 
 				for out, in := range inputs.GetInputs() {
 					input := resp.state.Inputs[out]
-					input.Video = &in
+					input.Video = stringP(in)
 					resp.state.Inputs[out] = input
 				}
 			}()

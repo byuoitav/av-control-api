@@ -150,7 +150,7 @@ var getTests = []getStateTest{
 					},
 					VideoInputs: map[string]string{
 						"1": "in4",
-						//"2": "in3",
+						"2": "in3",
 						//"3": "in2",
 						//"4": "in1",
 					},
