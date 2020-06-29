@@ -269,7 +269,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 
 				audioInfo := &drivers.GetAudioInfo{
 					Info:   deviceInfo,
-					Blocks: req.device.TypePorts("audio").Names(),
+					Blocks: req.device.Ports.OfType("volume").Names(),
 				}
 
 				vols, err := req.driver.GetVolumes(ctx, audioInfo)
@@ -297,7 +297,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 
 				audioInfo := &drivers.GetAudioInfo{
 					Info:   deviceInfo,
-					Blocks: req.device.TypePorts("audio").Names(),
+					Blocks: req.device.Ports.OfType("mute").Names(),
 				}
 
 				mutes, err := req.driver.GetMutes(ctx, audioInfo)

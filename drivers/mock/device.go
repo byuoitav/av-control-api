@@ -105,6 +105,28 @@ func contains(ss []string, s string) bool {
 	return false
 }
 
+func (d *Device) VolumeBlocks() []string {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	b := make([]string, len(d.volumeBlocks))
+	copy(b, d.volumeBlocks)
+	return b
+}
+
+func (d *Device) MuteBlocks() []string {
+	d.once.Do(d.init)
+
+	d.Lock()
+	defer d.Unlock()
+
+	b := make([]string, len(d.muteBlocks))
+	copy(b, d.muteBlocks)
+	return b
+}
+
 func (d *Device) GetCapabilities(context.Context) ([]string, error) {
 	d.once.Do(d.init)
 

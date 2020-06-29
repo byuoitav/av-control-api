@@ -77,7 +77,22 @@ func TestGetState(t *testing.T) {
 				apiDev.Address = id
 
 				if d, ok := dev.(*mock.Device); ok {
-					// TODO add in volume/mute ports
+					vols := d.VolumeBlocks()
+					mutes := d.MuteBlocks()
+
+					for _, block := range vols {
+						apiDev.Ports = append(apiDev.Ports, api.Port{
+							Name: block,
+							Type: "volume",
+						})
+					}
+
+					for _, block := range mutes {
+						apiDev.Ports = append(apiDev.Ports, api.Port{
+							Name: block,
+							Type: "mute",
+						})
+					}
 				}
 
 				room.Devices[api.DeviceID(id)] = apiDev

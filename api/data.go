@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"strings"
 )
 
 type DataService interface {
@@ -47,12 +48,14 @@ func (p Ports) Names() []string {
 	return names
 }
 
-func (d Device) TypePorts(typ string) Ports {
-	var p Ports
+func (p Ports) OfType(typ string) Ports {
+	var tp Ports
 
-	for i := range d.Ports {
-		p = append(p, d.Ports[i])
+	for i := range p {
+		if strings.Contains(p[i].Type, typ) {
+			tp = append(tp, p[i])
+		}
 	}
 
-	return p
+	return tp
 }
