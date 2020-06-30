@@ -429,6 +429,190 @@ var getTests = []getStateTest{
 			},
 		},
 	},
+	{
+		name: "JRCB-205",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"JRCB-205-D1": &mock.Device{
+					On:               boolP(true),
+					AudioVideoInputs: map[string]string{"": "hdmi1"},
+					Blanked:          boolP(true),
+					Volumes:          map[string]int{"": 50},
+					Mutes:            map[string]bool{"": false},
+				},
+				"JRCB-205-D2": &mock.Device{
+					On:               boolP(false),
+					AudioVideoInputs: map[string]string{"": "hdmi1"},
+					Blanked:          boolP(false),
+					Volumes:          map[string]int{"": 42},
+					Mutes:            map[string]bool{"": true},
+				},
+				"JRCB-205-DSP1": &mock.Device{
+					Volumes: map[string]int{
+						"1":  10,
+						"2":  15,
+						"3":  20,
+						"4":  25,
+						"5":  30,
+						"6":  35,
+						"7":  40,
+						"8":  45,
+						"9":  50,
+						"10": 55,
+						"11": 60,
+						"12": 65,
+						"13": 70,
+						"14": 75,
+						"15": 80,
+						"16": 85,
+						"17": 90,
+					},
+					Mutes: map[string]bool{
+						"1":  true,
+						"2":  false,
+						"3":  true,
+						"4":  false,
+						"5":  true,
+						"6":  false,
+						"7":  true,
+						"8":  false,
+						"9":  true,
+						"10": false,
+						"11": false,
+						"12": true,
+						"13": false,
+						"14": true,
+						"15": false,
+						"16": true,
+						"17": false,
+					},
+				},
+				"JRCB-205-SW1": &mock.Device{
+					AudioVideoInputs: map[string]string{
+						"1": "1",
+						"2": "1",
+						"3": "4",
+						"4": "3",
+						"5": "5",
+						"6": "2",
+						"7": "2",
+						"8": "10",
+					},
+				},
+				"JRCB-205-VIA1": &mock.Device{
+					Volumes: map[string]int{"": 40},
+					Mutes:   map[string]bool{"": true},
+				},
+				"JRCB-205-VIA2": &mock.Device{
+					Volumes: map[string]int{"": 30},
+					Mutes:   map[string]bool{"": false},
+				},
+			},
+		},
+		apiResp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"JRCB-205-D1": api.DeviceState{
+					PoweredOn: boolP(true),
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+					Blanked: boolP(true),
+					Volumes: map[string]int{"": 50},
+					Mutes:   map[string]bool{"": false},
+				},
+				"JRCB-205-D2": api.DeviceState{
+					PoweredOn: boolP(false),
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+					Blanked: boolP(false),
+					Volumes: map[string]int{"": 42},
+					Mutes:   map[string]bool{"": true},
+				},
+				"JRCB-205-DSP1": api.DeviceState{
+					Volumes: map[string]int{
+						"1":  10,
+						"2":  15,
+						"3":  20,
+						"4":  25,
+						"5":  30,
+						"6":  35,
+						"7":  40,
+						"8":  45,
+						"9":  50,
+						"10": 55,
+						"11": 60,
+						"12": 65,
+						"13": 70,
+						"14": 75,
+						"15": 80,
+						"16": 85,
+						"17": 90,
+					},
+					Mutes: map[string]bool{
+						"1":  true,
+						"2":  false,
+						"3":  true,
+						"4":  false,
+						"5":  true,
+						"6":  false,
+						"7":  true,
+						"8":  false,
+						"9":  true,
+						"10": false,
+						"11": false,
+						"12": true,
+						"13": false,
+						"14": true,
+						"15": false,
+						"16": true,
+						"17": false,
+					},
+				},
+				"JRCB-205-SW1": api.DeviceState{
+					Inputs: map[string]api.Input{
+						"1": {
+							AudioVideo: stringP("1"),
+						},
+						"2": {
+							AudioVideo: stringP("1"),
+						},
+						"3": {
+							AudioVideo: stringP("4"),
+						},
+						"4": {
+							AudioVideo: stringP("3"),
+						},
+						"5": {
+							AudioVideo: stringP("5"),
+						},
+						"6": {
+							AudioVideo: stringP("2"),
+						},
+						"7": {
+							AudioVideo: stringP("2"),
+						},
+						"8": {
+							AudioVideo: stringP("10"),
+						},
+					},
+				},
+				"JRCB-205-VIA1": api.DeviceState{
+					Volumes: map[string]int{"": 40},
+					Mutes:   map[string]bool{"": true},
+				},
+				"JRCB-205-VIA2": api.DeviceState{
+					Volumes: map[string]int{"": 30},
+					Mutes:   map[string]bool{"": false},
+				},
+			},
+		},
+	},
 }
 
 func TestGetState(t *testing.T) {
