@@ -2,6 +2,7 @@ package couch
 
 import (
 	"context"
+	"net/url"
 	"testing"
 
 	"github.com/byuoitav/av-control-api/api"
@@ -58,9 +59,11 @@ func TestRoom(t *testing.T) {
 		t.Fatalf("unable to get mapping: %s", err)
 	}
 
+	expectedURL, _ := url.Parse("http://ITB-1101-CP1.byu.edu:17000")
+
 	expected := api.Room{
 		ID:           "ITB-1101",
-		ProxyBaseURL: "http://ITB-1101-CP1.byu.edu:17000",
+		ProxyBaseURL: expectedURL,
 		Devices: map[api.DeviceID]api.Device{
 			"ITB-1101-D1": api.Device{
 				Driver:  "Sony Bravia",

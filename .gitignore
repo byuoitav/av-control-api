@@ -16,3 +16,4 @@
 
 # Build output
 drivers/.build/
+coverage.out

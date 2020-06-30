@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"net/url"
 	"strings"
 )
 
@@ -20,7 +21,7 @@ type DriverConfig struct {
 type Room struct {
 	ID string `json:"id"`
 	// TODO proxy API requests to here
-	ProxyBaseURL string              `json:"-"`
+	ProxyBaseURL *url.URL            `json:"-"`
 	Devices      map[DeviceID]Device `json:"devices"`
 }
 

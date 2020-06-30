@@ -6,6 +6,7 @@ import (
 )
 
 type Handlers struct {
+	Host        string
 	Environment string
 	DataService api.DataService
 	Logger      *zap.Logger
