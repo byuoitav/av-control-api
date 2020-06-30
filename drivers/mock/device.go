@@ -55,43 +55,43 @@ func (d *Device) init() {
 	d.Lock()
 	defer d.Unlock()
 
-	if d.On != nil || d.GetPowerError != nil {
+	if d.On != nil || d.GetPowerError != nil || d.SetPowerError != nil {
 		d.capabilities = append(d.capabilities, "Power")
 	}
 
-	if len(d.AudioInputs) > 0 || d.GetAudioInputsError != nil {
+	if len(d.AudioInputs) > 0 || d.GetAudioInputsError != nil || d.SetAudioInputError != nil {
 		d.capabilities = append(d.capabilities, "AudioInput")
 		for k := range d.AudioInputs {
 			d.audioOutputs = append(d.audioOutputs, k)
 		}
 	}
 
-	if len(d.VideoInputs) > 0 || d.GetVideoInputsError != nil {
+	if len(d.VideoInputs) > 0 || d.GetVideoInputsError != nil || d.SetVideoInputError != nil {
 		d.capabilities = append(d.capabilities, "VideoInput")
 		for k := range d.VideoInputs {
 			d.videoOutputs = append(d.videoOutputs, k)
 		}
 	}
 
-	if len(d.AudioVideoInputs) > 0 || d.GetAudioVideoInputsError != nil {
+	if len(d.AudioVideoInputs) > 0 || d.GetAudioVideoInputsError != nil || d.SetAudioVideoInputError != nil {
 		d.capabilities = append(d.capabilities, "AudioVideoInput")
 		for k := range d.AudioVideoInputs {
 			d.audioVideoOutputs = append(d.audioVideoOutputs, k)
 		}
 	}
 
-	if d.Blanked != nil || d.GetBlankError != nil {
+	if d.Blanked != nil || d.GetBlankError != nil || d.SetBlankError != nil {
 		d.capabilities = append(d.capabilities, "Blank")
 	}
 
-	if len(d.Volumes) > 0 || d.GetVolumesError != nil {
+	if len(d.Volumes) > 0 || d.GetVolumesError != nil || d.SetVolumeError != nil {
 		d.capabilities = append(d.capabilities, "Volume")
 		for k := range d.Volumes {
 			d.volumeBlocks = append(d.volumeBlocks, k)
 		}
 	}
 
-	if len(d.Mutes) > 0 || d.GetMutesError != nil {
+	if len(d.Mutes) > 0 || d.GetMutesError != nil || d.SetMuteError != nil {
 		d.capabilities = append(d.capabilities, "Mute")
 		for k := range d.Mutes {
 			d.muteBlocks = append(d.muteBlocks, k)
