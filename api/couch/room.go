@@ -2,6 +2,7 @@ package couch
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/byuoitav/av-control-api/api"
 	"golang.org/x/net/context"
@@ -37,25 +38,25 @@ func (d *DataService) Room(ctx context.Context, id string) (api.Room, error) {
 }
 
 func (r room) convert() (api.Room, error) {
+	url, err := url.Parse(r.ProxyBaseURL)
+	if err != nil {
+		return api.Room{}, fmt.Errorf("unable to parse proxy url: %w", err)
+	}
+
 	room := api.Room{
 		ID:           r.ID,
-		ProxyBaseURL: r.ProxyBaseURL,
+		ProxyBaseURL: url,
 		Devices:      make(map[api.DeviceID]api.Device),
 	}
 
 	for id, dev := range r.Devices {
-		apiDev, err := dev.convert()
-		if err != nil {
-			return room, fmt.Errorf("unable to convert device %q: %w", id, err)
-		}
-
-		room.Devices[api.DeviceID(id)] = apiDev
+		room.Devices[api.DeviceID(id)] = dev.convert()
 	}
 
 	return room, nil
 }
 
-func (d device) convert() (api.Device, error) {
+func (d device) convert() api.Device {
 	dev := api.Device{
 		Address: d.Address,
 		Driver:  d.Driver,
@@ -65,7 +66,7 @@ func (d device) convert() (api.Device, error) {
 		dev.Ports = append(dev.Ports, d.Ports[i].convert())
 	}
 
-	return dev, nil
+	return dev
 }
 
 func (p port) convert() api.Port {

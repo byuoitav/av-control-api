@@ -39,7 +39,7 @@ func main() {
 	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.Int8VarP(&logLevel, "log-level", "L", 0, "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
 	pflag.StringVarP(&env, "env", "e", "default", "The deployment environment for the API")
-	pflag.StringVarP(&host, "host", "h", "default", "host of this server. necessary to proxy requests")
+	pflag.StringVarP(&host, "host", "h", "", "host of this server. necessary to proxy requests")
 	pflag.StringVar(&authAddr, "auth-addr", "", "address of the auth server")
 	pflag.StringVar(&authToken, "auth-token", "", "authorization token to use when calling the auth server")
 	pflag.BoolVar(&disableAuth, "disable-auth", false, "disables auth checks")
@@ -50,8 +50,7 @@ func main() {
 	pflag.Parse()
 
 	config := zap.Config{
-		Level:       zap.NewAtomicLevelAt(zapcore.Level(logLevel)),
-		Development: false,
+		Level: zap.NewAtomicLevelAt(zapcore.Level(logLevel)),
 		Sampling: &zap.SamplingConfig{
 			Initial:    100,
 			Thereafter: 100,
@@ -63,7 +62,7 @@ func main() {
 			NameKey:        "logger",
 			CallerKey:      "caller",
 			MessageKey:     "msg",
-			StacktraceKey:  "stacktrace",
+			StacktraceKey:  "trace",
 			LineEnding:     zapcore.DefaultLineEnding,
 			EncodeLevel:    zapcore.LowercaseLevelEncoder,
 			EncodeTime:     zapcore.ISO8601TimeEncoder,
@@ -80,6 +79,11 @@ func main() {
 		os.Exit(1)
 	}
 	defer logger.Sync()
+
+	// validate flags
+	if host == "" {
+		logger.Fatal("--host is required. use --help for more details")
+	}
 
 	// build the data service
 	dsOpts := []couch.Option{
