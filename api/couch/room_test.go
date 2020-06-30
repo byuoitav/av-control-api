@@ -27,7 +27,7 @@ func TestRoom(t *testing.T) {
 	mock.ExpectDB().WithName(ds.database).WillReturn(db)
 	db.ExpectGet().WithDocID("ITB-1101").WillReturn(kivikmock.DocumentT(t, `{
 		"_id": "ITB-1101",
-		"proxyBaseURL": "http://ITB-1101-CP1.byu.edu:17000",
+		"proxy": "http://ITB-1101-CP1.byu.edu:17000",
 		"devices": {
 			"ITB-1101-D1": {
 				"driver": "Sony Bravia",
@@ -62,8 +62,8 @@ func TestRoom(t *testing.T) {
 	expectedURL, _ := url.Parse("http://ITB-1101-CP1.byu.edu:17000")
 
 	expected := api.Room{
-		ID:           "ITB-1101",
-		ProxyBaseURL: expectedURL,
+		ID:    "ITB-1101",
+		Proxy: expectedURL,
 		Devices: map[api.DeviceID]api.Device{
 			"ITB-1101-D1": api.Device{
 				Driver:  "Sony Bravia",

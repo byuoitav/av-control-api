@@ -9,9 +9,9 @@ import (
 )
 
 type room struct {
-	ID           string            `json:"_id"`
-	ProxyBaseURL string            `json:"proxyBaseURL"`
-	Devices      map[string]device `json:"devices"`
+	ID      string            `json:"_id"`
+	Proxy   string            `json:"proxy"`
+	Devices map[string]device `json:"devices"`
 }
 
 type device struct {
@@ -38,15 +38,15 @@ func (d *DataService) Room(ctx context.Context, id string) (api.Room, error) {
 }
 
 func (r room) convert() (api.Room, error) {
-	url, err := url.Parse(r.ProxyBaseURL)
+	url, err := url.Parse(r.Proxy)
 	if err != nil {
 		return api.Room{}, fmt.Errorf("unable to parse proxy url: %w", err)
 	}
 
 	room := api.Room{
-		ID:           r.ID,
-		ProxyBaseURL: url,
-		Devices:      make(map[api.DeviceID]api.Device),
+		ID:      r.ID,
+		Proxy:   url,
+		Devices: make(map[api.DeviceID]api.Device),
 	}
 
 	for id, dev := range r.Devices {

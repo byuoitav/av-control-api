@@ -21,8 +21,8 @@ type DriverConfig struct {
 type Room struct {
 	ID string `json:"id"`
 	// TODO proxy API requests to here
-	ProxyBaseURL *url.URL            `json:"-"`
-	Devices      map[DeviceID]Device `json:"devices"`
+	Proxy   *url.URL            `json:"-"`
+	Devices map[DeviceID]Device `json:"devices"`
 }
 
 type Device struct {

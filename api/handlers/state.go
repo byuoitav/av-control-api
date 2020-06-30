@@ -23,7 +23,7 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 	defer cancel()
 
 	ctx = api.WithRequestID(ctx, id)
-	log.Info("Getting room", zap.String("endpoint", c.Request().URL.String()), zap.String("room", roomID))
+	log.Info("Getting room state", zap.String("endpoint", c.Request().URL.String()), zap.String("room", roomID))
 
 	room, err := h.DataService.Room(ctx, roomID)
 	if err != nil {
@@ -31,7 +31,13 @@ func (h *Handlers) GetRoomState(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	log.Info("Got room. Getting state", zap.Int("numDevices", len(room.Devices)))
+	log.Debug("Got room")
+
+	if h.shouldProxy(room) {
+		url := *room.Proxy
+		url.Path = c.Request().URL.Path
+		return proxyRequest(ctx, c, url, log)
+	}
 
 	resp, err := h.State.Get(ctx, room)
 	if err != nil {

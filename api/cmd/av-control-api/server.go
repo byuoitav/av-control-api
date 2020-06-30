@@ -112,6 +112,7 @@ func main() {
 	// build http stuff
 	middleware := handlers.Middleware{}
 	handlers := handlers.Handlers{
+		Host:        host,
 		Logger:      logger,
 		DataService: ds,
 		State:       gs,
