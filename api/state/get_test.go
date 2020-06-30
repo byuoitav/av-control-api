@@ -14,6 +14,12 @@ import (
 	"go.uber.org/zap"
 )
 
+type contextKey int
+
+const (
+	_keyRequestID contextKey = iota
+)
+
 type getStateTest struct {
 	name    string
 	log     bool
@@ -612,17 +618,63 @@ var getTests = []getStateTest{
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
-					On:            boolP(true),
-					GetPowerError: errors.New("poop"),
+					GetPowerError:   errors.New("power error"),
+					GetVolumesError: errors.New("volume error"),
+					GetBlankError:   errors.New("blank error"),
+					UnknownCapError: errors.New("unknown error"),
+				},
+				"ITB-1101-D2": &mock.Device{
+					GetAudioVideoInputsError: errors.New("av error"),
+					GetAudioInputsError:      errors.New("audio error"),
+					GetVideoInputsError:      errors.New("video error"),
+					GetMutesError:            errors.New("mutes error"),
 				},
 			},
 		},
 		apiResp: api.StateResponse{
-			Devices: map[api.DeviceID]api.DeviceState{},
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {},
+				"ITB-1101-D2": {},
+			},
 			Errors: []api.DeviceStateError{
 				{
 					ID:    "ITB-1101-D1",
 					Field: "power",
+					Error: "power error",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "blank",
+					Error: "blank error",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Error: "unknown capability unknown",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "volumes",
+					Error: "volume error",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "inputs.$.audio",
+					Error: "audio error",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "inputs.$.video",
+					Error: "video error",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "inputs.$.audioVideo",
+					Error: "av error",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "mutes",
+					Error: "mutes error",
 				},
 			},
 		},
@@ -684,6 +736,8 @@ func TestGetState(t *testing.T) {
 			if tt.log {
 				gs.logger = zap.NewExample()
 			}
+
+			ctx = context.WithValue(ctx, _keyRequestID, "poop")
 
 			// get the state of this room
 			resp, err := gs.Get(ctx, room)
