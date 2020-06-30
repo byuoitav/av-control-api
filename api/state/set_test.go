@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -63,7 +64,7 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-SW1": api.DeviceState{
+				"ITB-1101-SW1": {
 					PoweredOn: boolP(false),
 				},
 			},
@@ -89,14 +90,14 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(false),
 				},
 			},
 		},
 		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(false),
 				},
 			},
@@ -121,9 +122,9 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Inputs: map[string]api.Input{
-						"": api.Input{
+						"": {
 							AudioVideo: stringP("hdmi3"),
 						},
 					},
@@ -132,9 +133,9 @@ var setTests = []setStateTest{
 		},
 		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Inputs: map[string]api.Input{
-						"": api.Input{
+						"": {
 							AudioVideo: stringP("hdmi3"),
 						},
 					},
@@ -161,14 +162,14 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Blanked: boolP(true),
 				},
 			},
 		},
 		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Blanked: boolP(true),
 				},
 			},
@@ -193,7 +194,7 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Volumes: map[string]int{
 						"": 15,
 					},
@@ -202,7 +203,7 @@ var setTests = []setStateTest{
 		},
 		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Volumes: map[string]int{
 						"": 15,
 					},
@@ -229,7 +230,7 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Mutes: map[string]bool{
 						"": true,
 					},
@@ -238,7 +239,7 @@ var setTests = []setStateTest{
 		},
 		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					Mutes: map[string]bool{
 						"": true,
 					},
@@ -265,11 +266,11 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
 					Inputs: map[string]api.Input{
-						"": api.Input{
+						"": {
 							AudioVideo: stringP("hdmi2"),
 						},
 					},
@@ -284,11 +285,11 @@ var setTests = []setStateTest{
 		},
 		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-D1": api.DeviceState{
+				"ITB-1101-D1": {
 					PoweredOn: boolP(true),
 					Blanked:   boolP(false),
 					Inputs: map[string]api.Input{
-						"": api.Input{
+						"": {
 							AudioVideo: stringP("hdmi2"),
 						},
 					},
@@ -324,21 +325,21 @@ var setTests = []setStateTest{
 		},
 		req: api.StateRequest{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-SW1": api.DeviceState{
+				"ITB-1101-SW1": {
 					Inputs: map[string]api.Input{
-						"1": api.Input{
+						"1": {
 							Audio: stringP("4"),
 							Video: stringP("1"),
 						},
-						"2": api.Input{
+						"2": {
 							Audio: stringP("3"),
 							Video: stringP("2"),
 						},
-						"3": api.Input{
+						"3": {
 							Audio: stringP("2"),
 							Video: stringP("3"),
 						},
-						"4": api.Input{
+						"4": {
 							Audio: stringP("1"),
 							Video: stringP("4"),
 						},
@@ -348,25 +349,130 @@ var setTests = []setStateTest{
 		},
 		resp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
-				"ITB-1101-SW1": api.DeviceState{
+				"ITB-1101-SW1": {
 					Inputs: map[string]api.Input{
-						"1": api.Input{
+						"1": {
 							Audio: stringP("4"),
 							Video: stringP("1"),
 						},
-						"2": api.Input{
+						"2": {
 							Audio: stringP("3"),
 							Video: stringP("2"),
 						},
-						"3": api.Input{
+						"3": {
 							Audio: stringP("2"),
 							Video: stringP("3"),
 						},
-						"4": api.Input{
+						"4": {
 							Audio: stringP("1"),
 							Video: stringP("4"),
 						},
 					},
+				},
+			},
+		},
+	},
+	{
+		name: "Errors!",
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D1": &mock.Device{
+					SetPowerError:  errors.New("power error"),
+					SetVolumeError: errors.New("volume error"),
+					SetBlankError:  errors.New("blank error"),
+				},
+				"ITB-1101-D2": &mock.Device{
+					SetAudioVideoInputError: errors.New("av error"),
+					SetAudioInputError:      errors.New("audio error"),
+					SetVideoInputError:      errors.New("video error"),
+					SetMuteError:            errors.New("mute error"),
+				},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {
+					PoweredOn: boolP(true),
+					Blanked:   boolP(false),
+					Volumes:   map[string]int{"": 30},
+				},
+				"ITB-1101-D2": {
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Audio:      stringP("hdmi2"),
+							Video:      stringP("hdmi2"),
+						},
+					},
+					Mutes: map[string]bool{"": true},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {},
+				"ITB-1101-D2": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D1",
+					Field: "poweredOn",
+					Value: true,
+					Error: "can't set this field on this device",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "blanked",
+					Value: true,
+					Error: "can't set this field on this device",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "volumes",
+					Value: map[string]int{"": 30},
+					Error: "can't set this field on this device",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "input.$.audio",
+					Value: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Audio:      stringP("hdmi2"),
+							Video:      stringP("hdmi2"),
+						},
+					},
+					Error: "can't set this field on this device",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "input.$.video",
+					Value: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Audio:      stringP("hdmi2"),
+							Video:      stringP("hdmi2"),
+						},
+					},
+					Error: "can't set this field on this device",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "input.$.audioVideo",
+					Value: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Audio:      stringP("hdmi2"),
+							Video:      stringP("hdmi2"),
+						},
+					},
+					Error: "can't set this field on this device",
+				},
+				{
+					ID:    "ITB-1101-D2",
+					Field: "mutes",
+					Value: map[string]bool{"": true},
+					Error: "can't set this field on this device",
 				},
 			},
 		},
