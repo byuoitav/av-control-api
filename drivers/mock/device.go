@@ -32,6 +32,17 @@ type Device struct {
 	volumeBlocks      []string
 	muteBlocks        []string
 
+	GetPowerError   error
+	SetPowerError   error
+	GetVolumesError error
+	SetVolumeError  error
+	GetBlankError   error
+	SetBlankError   error
+	GetInputsError  error
+	SetInputError   error
+	GetMutesError   error
+	SetMuteError    error
+
 	sync.Mutex
 }
 
@@ -39,7 +50,7 @@ func (d *Device) init() {
 	d.Lock()
 	defer d.Unlock()
 
-	if d.On != nil {
+	if d.On != nil || d.GetPowerError != nil {
 		d.capabilities = append(d.capabilities, "Power")
 	}
 
