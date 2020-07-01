@@ -12,7 +12,7 @@ import (
 	"github.com/byuoitav/av-control-api/api/couch"
 	"github.com/byuoitav/av-control-api/api/handlers"
 	"github.com/byuoitav/av-control-api/api/state"
-	"github.com/labstack/echo"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -73,16 +73,16 @@ func main() {
 		ErrorOutputPaths: []string{"stderr"},
 	}
 
-	logger, err := config.Build()
+	log, err := config.Build()
 	if err != nil {
 		fmt.Printf("unable to build logger: %s", err)
 		os.Exit(1)
 	}
-	defer logger.Sync()
+	defer log.Sync()
 
 	// validate flags
 	if host == "" {
-		logger.Fatal("--host is required. use --help for more details")
+		log.Fatal("--host is required. use --help for more details")
 	}
 
 	// build the data service
@@ -100,50 +100,50 @@ func main() {
 
 	ds, err := couch.New(context.TODO(), dbAddr, dsOpts...)
 	if err != nil {
-		logger.Fatal("unable to connect to data service", zap.Error(err))
+		log.Fatal("unable to connect to data service", zap.Error(err))
 	}
 
 	// build the getsetter
-	gs, err := state.New(context.TODO(), ds, logger)
+	gs, err := state.New(context.TODO(), ds, log)
 	if err != nil {
-		logger.Fatal("unable to build state get/setter", zap.Error(err))
+		log.Fatal("unable to build state get/setter", zap.Error(err))
 	}
 
 	// build http stuff
-	middleware := handlers.Middleware{}
 	handlers := handlers.Handlers{
 		Host:        host,
-		Logger:      logger,
 		DataService: ds,
+		Logger:      log,
 		State:       gs,
 	}
-
-	e := echo.New()
 
 	// TODO maybe check the database health check
 	// TODO add log level endpoint
 	// TODO add auth
+	r := gin.New()
+	r.Use(gin.Recovery())
 
-	e.GET("/healthz", func(c echo.Context) error {
-		return c.String(http.StatusOK, "healthy")
+	r.GET("/healthz", func(c *gin.Context) {
+		c.String(http.StatusOK, "healthy")
 	})
 
-	api := e.Group("/v1", middleware.RequestID)
-	api.GET("/driverMapping", handlers.GetDriverMapping)
-	api.GET("/room/:room", handlers.GetRoomConfiguration)
-	api.GET("/room/:room/state", handlers.GetRoomState)
-	api.PUT("/room/:room/state", handlers.SetRoomState)
+	api := r.Group("/v1", handlers.RequestID, handlers.Log)
+
+	room := api.Group("/room", handlers.Room, handlers.Proxy)
+	room.GET("/:room", handlers.GetRoomConfiguration)
+	room.GET("/:room/state", handlers.GetRoomState)
+	room.PUT("/:room/state", handlers.SetRoomState)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		logger.Fatal("unable to bind listener", zap.Error(err))
+		log.Fatal("unable to bind listener", zap.Error(err))
 	}
 
-	logger.Info("Starting server", zap.String("on", lis.Addr().String()))
-	err = e.Server.Serve(lis)
+	log.Info("Starting server", zap.String("on", lis.Addr().String()))
+	err = r.RunListener(lis)
 	switch {
 	case errors.Is(err, http.ErrServerClosed):
 	case err != nil:
-		logger.Fatal("failed to serve", zap.Error(err))
+		log.Fatal("failed to serve", zap.Error(err))
 	}
 }
