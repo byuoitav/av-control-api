@@ -2,23 +2,16 @@ package handlers
 
 import (
 	"context"
+	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/gin-gonic/gin"
-	"github.com/labstack/echo"
 	"go.uber.org/zap"
 )
 
-func proxyRequest(ctx context.Context, c echo.Context, url *url.URL, log *zap.Logger) error {
-	log.Info("Proxying request", zap.String("url", url.String()))
-	return nil
-}
-
-// TODO should we require the port to match?
 func (h *Handlers) Proxy(c *gin.Context) {
 	room := c.MustGet(_cRoom).(api.Room)
 
@@ -27,9 +20,14 @@ func (h *Handlers) Proxy(c *gin.Context) {
 		return
 	}
 
-	// TODO make sure there is no cycle
-
 	c.Abort()
+
+	// make sure there is no cycle
+	ip, _, _ := net.SplitHostPort(strings.TrimSpace(c.Request.RemoteAddr))
+	if strings.Contains(c.GetHeader(_hForwardedFor), ip) {
+		c.String(http.StatusBadRequest, "detected proxy cycle. please try again")
+		return
+	}
 
 	id := c.GetString(_cRequestID)
 	log := h.Logger
@@ -51,7 +49,28 @@ func (h *Handlers) Proxy(c *gin.Context) {
 		return
 	}
 
-	// add request id header
+	req.Header = c.Request.Header.Clone()
 
-	c.String(http.StatusOK, "hi")
+	// set X-Forwarded-For
+	fwdFor := req.Header.Get(_hForwardedFor)
+	if fwdFor == "" {
+		req.Header.Set(_hForwardedFor, ip)
+	} else {
+		req.Header.Set(_hForwardedFor, fwdFor+", "+ip)
+	}
+
+	// set X-Request-ID
+	if req.Header.Get(_hRequestID) == "" {
+		req.Header.Set(_hRequestID, id)
+	}
+
+	// send the request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to make proxy request: %s", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	c.DataFromReader(resp.StatusCode, resp.ContentLength, resp.Header.Get(_hContentType), resp.Body, nil)
 }

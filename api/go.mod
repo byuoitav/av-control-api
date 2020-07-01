@@ -12,7 +12,6 @@ require (
 	github.com/goccy/go-graphviz v0.0.5
 	github.com/google/go-cmp v0.5.0
 	github.com/json-iterator/go v1.1.10 // indirect
-	github.com/labstack/echo v3.3.10+incompatible
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/segmentio/ksuid v1.0.2
@@ -25,7 +24,6 @@ require (
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	istio.io/pkg v0.0.0-20200630182444-e8a83c9625a3
 )
 
 replace github.com/byuoitav/av-control-api => ../
