@@ -15,22 +15,23 @@ type DataService struct {
 	environment  string
 }
 
-func New(ctx context.Context, addr string, opts ...Option) (*DataService, error) {
+func New(ctx context.Context, url string, opts ...Option) (*DataService, error) {
+	client, err := kivik.New("couch", url)
+	if err != nil {
+		return nil, fmt.Errorf("unable to build client: %w", err)
+	}
+
+	return NewWithClient(ctx, client, opts...)
+}
+
+func NewWithClient(ctx context.Context, client *kivik.Client, opts ...Option) (*DataService, error) {
 	options := options{
-		scheme:       _defaultScheme,
 		database:     _defaultDatabase,
 		mappingDocID: _defaultMappingDocID,
 	}
 
 	for _, o := range opts {
 		o.apply(&options)
-	}
-
-	addr = fmt.Sprintf("%s://%s", options.scheme, addr)
-
-	client, err := kivik.New("couch", addr)
-	if err != nil {
-		return nil, fmt.Errorf("unable to build client: %w", err)
 	}
 
 	if options.authFunc != nil {

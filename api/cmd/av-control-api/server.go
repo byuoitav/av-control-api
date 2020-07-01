@@ -86,16 +86,18 @@ func main() {
 	}
 
 	// build the data service
+	if dbInsecure {
+		dbAddr = "http://" + dbAddr
+	} else {
+		dbAddr = "https://" + dbAddr
+	}
+
 	dsOpts := []couch.Option{
 		couch.WithEnvironment(env),
 	}
 
 	if len(dbUsername) > 0 {
 		dsOpts = append(dsOpts, couch.WithBasicAuth(dbUsername, dbPassword))
-	}
-
-	if dbInsecure {
-		dsOpts = append(dsOpts, couch.WithInsecure())
 	}
 
 	ds, err := couch.New(context.TODO(), dbAddr, dsOpts...)

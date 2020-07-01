@@ -3,7 +3,6 @@ package couch
 import "github.com/go-kivik/couchdb/v3"
 
 const (
-	_defaultScheme       = "https"
 	_defaultDatabase     = "av-control-api"
 	_defaultMappingDocID = "#driverMapping"
 	_defaultEnvironment  = "default"
@@ -11,7 +10,6 @@ const (
 
 type options struct {
 	authFunc     interface{}
-	scheme       string
 	database     string
 	mappingDocID string
 	environment  string
@@ -31,12 +29,6 @@ func (f optionFunc) apply(o *options) {
 func WithBasicAuth(username, password string) Option {
 	return optionFunc(func(o *options) {
 		o.authFunc = couchdb.BasicAuth(username, password)
-	})
-}
-
-func WithInsecure() Option {
-	return optionFunc(func(o *options) {
-		o.scheme = "http"
 	})
 }
 
