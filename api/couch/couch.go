@@ -1,7 +1,6 @@
 package couch
 
 import (
-	"errors"
 	"fmt"
 
 	_ "github.com/go-kivik/couchdb/v3"
@@ -46,17 +45,4 @@ func New(ctx context.Context, addr string, opts ...Option) (*DataService, error)
 		mappingDocID: options.mappingDocID,
 		environment:  options.environment,
 	}, nil
-}
-
-// Healthy is a healthcheck for the database
-func (d *DataService) Healthy(ctx context.Context) error {
-	alive, err := d.client.Ping(ctx)
-	switch {
-	case err != nil:
-		return err
-	case !alive:
-		return errors.New("not healthy")
-	}
-
-	return nil
 }

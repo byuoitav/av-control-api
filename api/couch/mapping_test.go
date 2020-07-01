@@ -2,6 +2,7 @@ package couch
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/byuoitav/av-control-api/api"
@@ -325,5 +326,33 @@ func TestMappingDifferentDocDB(t *testing.T) {
 
 	if diff := cmp.Diff(expected, mapping); diff != "" {
 		t.Errorf("generated incorrect mapping (-want, +got):\n%s", diff)
+	}
+}
+
+func TestGetMappingError(t *testing.T) {
+	errWanted := errors.New("unable to get/scan driver mapping: call to DB.Get() was not expected, all expectations already fulfilled")
+
+	client, mock, err := kivikmock.New()
+	if err != nil {
+		t.Fatalf("unable to create kivik mock: %s", err)
+	}
+
+	ds := &DataService{
+		client:       client,
+		database:     _defaultDatabase,
+		mappingDocID: _defaultMappingDocID,
+		environment:  "default",
+	}
+
+	db := mock.NewDB()
+	mock.ExpectDB().WithName(ds.database).WillReturn(db)
+
+	_, err = ds.DriverMapping(context.Background())
+	if err == nil {
+		t.Fatalf("somehow got mapping?")
+	}
+
+	if diff := cmp.Diff(errWanted.Error(), err.Error()); diff != "" {
+		t.Errorf("generated incorrect error (-want, +got):\n%s", diff)
 	}
 }

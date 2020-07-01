@@ -47,6 +47,7 @@ type Device struct {
 	GetMutesError            error
 	SetMuteError             error
 	UnknownCapError          error
+	GetCapsError             error
 
 	sync.Mutex
 }
@@ -148,6 +149,9 @@ func (d *Device) MuteBlocks() []string {
 }
 
 func (d *Device) GetCapabilities(context.Context) ([]string, error) {
+	if d.GetCapsError != nil {
+		return nil, d.GetCapsError
+	}
 	d.once.Do(d.init)
 
 	d.Lock()

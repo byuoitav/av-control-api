@@ -629,14 +629,26 @@ var getTests = []getStateTest{
 					GetVideoInputsError:      errors.New("video error"),
 					GetMutesError:            errors.New("mutes error"),
 				},
+				"ITB-1101-D3": &mock.Device{
+					GetCapsError: errors.New("no capabilities"),
+				},
 			},
 		},
 		apiResp: api.StateResponse{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": {},
 				"ITB-1101-D2": {},
+				"ITB-1101-D3": {
+					Inputs:  map[string]api.Input{},
+					Volumes: map[string]int{},
+					Mutes:   map[string]bool{},
+				},
 			},
 			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D3",
+					Error: "unable to get capabilities: no capabilities",
+				},
 				{
 					ID:    "ITB-1101-D1",
 					Field: "power",
@@ -737,7 +749,7 @@ func TestGetState(t *testing.T) {
 				gs.logger = zap.NewExample()
 			}
 
-			ctx = context.WithValue(ctx, _keyRequestID, "poop")
+			ctx = api.WithRequestID(ctx, "ID")
 
 			// get the state of this room
 			resp, err := gs.Get(ctx, room)
@@ -751,4 +763,49 @@ func TestGetState(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetWrongDriver(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	errWanted := errors.New("unknown driver: bad driver")
+
+	t.Run("", func(t *testing.T) {
+		room := api.Room{
+			Devices: make(map[api.DeviceID]api.Device),
+		}
+
+		apiDev := api.Device{
+			Address: "ITB-1101-D1",
+			Driver:  "bad driver",
+		}
+		room.Devices[api.DeviceID("ITB-1101-D1")] = apiDev
+
+		fakeDriver := drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D2": &mock.Device{},
+			},
+		}
+
+		server := drivertest.NewServer(fakeDriver.NewDeviceFunc())
+		conn, err := server.GRPCClientConn(ctx)
+		if err != nil {
+			t.Fatalf("unable to get grpc client connection: %s", err)
+		}
+
+		gs := &getSetter{
+			logger: zap.NewNop(),
+			drivers: map[string]drivers.DriverClient{
+				"": drivers.NewDriverClient(conn),
+			},
+		}
+
+		_, err = gs.Get(ctx, room)
+		if err != nil {
+			if diff := cmp.Diff(errWanted.Error(), err.Error()); diff != "" {
+				t.Fatalf("generated incorrect error (-want, +got):\n%s", diff)
+			}
+		}
+	})
 }

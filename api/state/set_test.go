@@ -373,13 +373,14 @@ var setTests = []setStateTest{
 		},
 	},
 	{
-		name: "Errors!",
+		name: "Errors!1",
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
-					SetPowerError:  errors.New("power error"),
-					SetVolumeError: errors.New("volume error"),
-					SetBlankError:  errors.New("blank error"),
+					SetPowerError:   errors.New("power error"),
+					SetVolumeError:  errors.New("volume error"),
+					SetBlankError:   errors.New("blank error"),
+					UnknownCapError: errors.New("unknown"),
 				},
 				"ITB-1101-D2": &mock.Device{
 					SetAudioVideoInputError: errors.New("av error"),
@@ -387,6 +388,7 @@ var setTests = []setStateTest{
 					SetVideoInputError:      errors.New("video error"),
 					SetMuteError:            errors.New("mute error"),
 				},
+				"ITB-1101-D5": &mock.Device{},
 			},
 		},
 		req: api.StateRequest{
@@ -459,6 +461,302 @@ var setTests = []setStateTest{
 			},
 		},
 	},
+	{
+		name: "NoCapabilitiesError",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D3": &mock.Device{
+					GetCapsError: errors.New("no capabilities"),
+				},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D3": {},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D3": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D3",
+					Error: "unable to get capabilities: no capabilities",
+				},
+			},
+		},
+	},
+	{
+		name: "CantSetPower",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D4": &mock.Device{},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					PoweredOn: boolP(true),
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "poweredOn",
+					Value: true,
+					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
+	{
+		name: "CantSetBlank",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D4": &mock.Device{},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Blanked: boolP(true),
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "blanked",
+					Value: true,
+					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
+	{
+		name: "CantSetVolumes",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D4": &mock.Device{},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Volumes: map[string]int{"": 10},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "volumes",
+					Value: map[string]int{"": 10},
+					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
+	{
+		name: "CantSetMutes",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D4": &mock.Device{},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Mutes: map[string]bool{"": true},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "mutes",
+					Value: map[string]bool{"": true},
+					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
+	{
+		name: "CantSetAudioInputs",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D4": &mock.Device{VideoInputs: map[string]string{"": "hdmi2"}},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Inputs: map[string]api.Input{
+						"": {
+							Audio: stringP("hdmi2"),
+							Video: stringP("hdmi2"),
+						},
+						"other": {
+							Audio: stringP("hdmi2"),
+						},
+					},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Inputs: map[string]api.Input{
+						"": {
+							Video: stringP("hdmi2"),
+						},
+					},
+				},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "input.$.audio",
+					Value: map[string]api.Input{
+						"": {
+							Audio: stringP("hdmi2"),
+							Video: stringP("hdmi2"),
+						},
+						"other": {
+							Audio: stringP("hdmi2"),
+						},
+					},
+					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
+	{
+		name: "CantSetVideoInputs",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D4": &mock.Device{AudioVideoInputs: map[string]string{"": "hdmi2"}},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Video:      stringP("hdmi2"),
+						},
+						"other": {
+							Video: stringP("hdmi2"),
+						},
+					},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+						},
+					},
+				},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "input.$.video",
+					Value: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Video:      stringP("hdmi2"),
+						},
+						"other": {
+							Video: stringP("hdmi2"),
+						},
+					},
+					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
+	{
+		name: "CantSetAudioVideoInputs",
+		log:  true,
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D4": &mock.Device{AudioInputs: map[string]string{"": "hdmi2"}},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Inputs: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Audio:      stringP("hdmi2"),
+						},
+						"other": {
+							AudioVideo: stringP("hdmi2"),
+						},
+					},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D4": {
+					Inputs: map[string]api.Input{
+						"": {
+							Audio: stringP("hdmi2"),
+						},
+					},
+				},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "input.$.audioVideo",
+					Value: map[string]api.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+							Audio:      stringP("hdmi2"),
+						},
+						"other": {
+							AudioVideo: stringP("hdmi2"),
+						},
+					},
+					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
 }
 
 func TestSetState(t *testing.T) {
@@ -517,6 +815,8 @@ func TestSetState(t *testing.T) {
 				gs.logger = zap.NewExample()
 			}
 
+			ctx = api.WithRequestID(ctx, "ID")
+
 			// get the state of this room
 			resp, err := gs.Set(ctx, room, tt.req)
 			if tt.err != nil {
@@ -531,4 +831,54 @@ func TestSetState(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSetWrongDriver(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	req := api.StateRequest{
+		Devices: map[api.DeviceID]api.DeviceState{
+			"ITB-1101-D1": {},
+		},
+	}
+	errWanted := errors.New("unknown driver: bad driver")
+
+	t.Run("", func(t *testing.T) {
+		room := api.Room{
+			Devices: make(map[api.DeviceID]api.Device),
+		}
+
+		apiDev := api.Device{
+			Address: "ITB-1101-D1",
+			Driver:  "bad driver",
+		}
+		room.Devices[api.DeviceID("ITB-1101-D1")] = apiDev
+
+		fakeDriver := drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D2": &mock.Device{},
+			},
+		}
+
+		server := drivertest.NewServer(fakeDriver.NewDeviceFunc())
+		conn, err := server.GRPCClientConn(ctx)
+		if err != nil {
+			t.Fatalf("unable to get grpc client connection: %s", err)
+		}
+
+		gs := &getSetter{
+			logger: zap.NewNop(),
+			drivers: map[string]drivers.DriverClient{
+				"": drivers.NewDriverClient(conn),
+			},
+		}
+
+		_, err = gs.Set(ctx, room, req)
+		if err != nil {
+			if diff := cmp.Diff(errWanted.Error(), err.Error()); diff != "" {
+				t.Fatalf("generated incorrect error (-want, +got):\n%s", diff)
+			}
+		}
+	})
 }

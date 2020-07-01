@@ -2,6 +2,7 @@ package couch
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"testing"
 
@@ -92,5 +93,50 @@ func TestRoom(t *testing.T) {
 
 	if diff := cmp.Diff(expected, room); diff != "" {
 		t.Errorf("generated incorrect mapping (-want, +got):\n%s", diff)
+	}
+}
+
+func TestBadRoom(t *testing.T) {
+	errWanted := errors.New("unable to get/scan room: doc doesn't exist")
+	client, mock, err := kivikmock.New()
+	if err != nil {
+		t.Fatalf("unable to create kivik mock: %s", err)
+	}
+
+	ds := &DataService{
+		client:       client,
+		database:     _defaultDatabase,
+		mappingDocID: _defaultMappingDocID,
+		environment:  "default",
+	}
+
+	db := mock.NewDB()
+	mock.ExpectDB().WithName(ds.database).WillReturn(db)
+	db.ExpectGet().WithDocID("ITB-1101").WillReturnError(errors.New("doc doesn't exist"))
+
+	_, err = ds.Room(context.Background(), "ITB-1101")
+	if err == nil {
+		t.Fatalf("did not get error back")
+	}
+
+	if diff := cmp.Diff(errWanted.Error(), err.Error()); diff != "" {
+		t.Errorf("generated incorrect error (-want, +got):\n%s", diff)
+	}
+}
+
+func TestRoomConvertFail(t *testing.T) {
+	errWanted := errors.New(`unable to parse proxy url: parse ":foo": missing protocol scheme`)
+	r := room{
+		ID:    "ITB-1101",
+		Proxy: ":foo",
+	}
+
+	_, err := r.convert()
+	if err == nil {
+		t.Fatalf("no error converting room")
+	}
+
+	if diff := cmp.Diff(errWanted.Error(), err.Error()); diff != "" {
+		t.Errorf("generated incorrect error (-want, +got):\n%s", diff)
 	}
 }

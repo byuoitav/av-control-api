@@ -85,18 +85,15 @@ func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateReques
 		}()
 	}
 
-	if expectedResps > 0 {
-		for resp := range resps {
-			expectedResps--
+	for resp := range resps {
+		expectedResps--
 
-			stateResp.Devices[resp.id] = resp.state
-			stateResp.Errors = append(stateResp.Errors, resp.errors...)
+		stateResp.Devices[resp.id] = resp.state
+		stateResp.Errors = append(stateResp.Errors, resp.errors...)
 
-			if expectedResps == 0 {
-				break
-			}
+		if expectedResps == 0 {
+			break
 		}
-	} else {
 	}
 
 	close(resps)
@@ -129,6 +126,18 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 			ID:    req.id,
 			Error: fmt.Sprintf("unable to get capabilities: %s", status.Convert(err).Message()),
 		})
+
+		if len(resp.state.Inputs) == 0 {
+			resp.state.Inputs = nil
+		}
+
+		if len(resp.state.Volumes) == 0 {
+			resp.state.Volumes = nil
+		}
+
+		if len(resp.state.Mutes) == 0 {
+			resp.state.Mutes = nil
+		}
 
 		return resp
 	}
@@ -363,7 +372,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 				resp.state.Blanked = &blankReq.Blank.Blanked
 			}()
 		} else {
-			driverErr("blanked", *req.state.PoweredOn, ErrNotCapable)
+			driverErr("blanked", *req.state.Blanked, ErrNotCapable)
 		}
 	}
 
