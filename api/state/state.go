@@ -4,11 +4,13 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"time"
 
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/drivers"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -32,7 +34,17 @@ func New(ctx context.Context, ds api.DataService, logger *zap.Logger) (api.State
 	var grpcCreds credentials.TransportCredentials
 
 	for driver, config := range mapping {
-		var opts []grpc.DialOption
+		opts := []grpc.DialOption{
+			grpc.WithConnectParams(grpc.ConnectParams{
+				Backoff: backoff.Config{
+					BaseDelay:  1 * time.Second,
+					Multiplier: 1.4,
+					Jitter:     0.2,
+					MaxDelay:   30 * time.Second,
+				},
+				MinConnectTimeout: 7500 * time.Millisecond,
+			}),
+		}
 
 		if config.SSL {
 			if grpcCreds == nil {
