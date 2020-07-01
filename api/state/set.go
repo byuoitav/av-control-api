@@ -52,7 +52,7 @@ func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateReques
 		}
 	}
 
-	id := api.RequestID(ctx)
+	id := api.CtxRequestID(ctx)
 	log := gs.logger
 	if len(id) > 0 {
 		log = gs.logger.With(zap.String("requestID", id))
