@@ -6,7 +6,9 @@ require (
 	github.com/byuoitav/av-control-api v0.3.9
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kivik/couchdb/v3 v3.1.0
+	github.com/go-kivik/kivik v2.0.0+incompatible // indirect
 	github.com/go-kivik/kivik/v3 v3.1.1
+	github.com/go-kivik/kivikmock v2.0.0+incompatible
 	github.com/go-kivik/kivikmock/v3 v3.1.1
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
 	github.com/goccy/go-graphviz v0.0.5

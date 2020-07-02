@@ -33,10 +33,15 @@ github.com/gin-gonic/gin v1.6.3/go.mod h1:75u5sXoLsGZoRN5Sgbi1eraJ4GU3++wFwWzhwv
 github.com/go-kivik/couchdb/v3 v3.0.0/go.mod h1:eTGmiw9fnA30gdqQCgH3vNrW+glhl+48RbvZga8/wLk=
 github.com/go-kivik/couchdb/v3 v3.1.0 h1:6GTn44kb2UcLFxH2GjlspRkhiY+oK/yCwVZf66RNEcc=
 github.com/go-kivik/couchdb/v3 v3.1.0/go.mod h1:K6KDJAjqcgnCMvDbWWwYzWU+d71p+kbvLK934qAvJdk=
+github.com/go-kivik/kivik v1.8.1 h1:GScP1mS5wP2km2awszvKzPEjC21lYjQGr3GY+4a/o2U=
+github.com/go-kivik/kivik v2.0.0+incompatible h1:/7hgr29DKv/vlaJsUoyRlOFq0K+3ikz0wTbu+cIs7QY=
+github.com/go-kivik/kivik v2.0.0+incompatible/go.mod h1:nIuJ8z4ikBrVUSk3Ua8NoDqYKULPNjuddjqRvlSUyyQ=
 github.com/go-kivik/kivik/v3 v3.0.0/go.mod h1:7tmQDvkta/pcijpUjLMsQ9HJUELiKD5zm6jQ3Gb9cxE=
 github.com/go-kivik/kivik/v3 v3.0.1/go.mod h1:7tmQDvkta/pcijpUjLMsQ9HJUELiKD5zm6jQ3Gb9cxE=
 github.com/go-kivik/kivik/v3 v3.1.1 h1:Rz111JKpj+4hIcQyn2dZvASJWoPQNT2wpSsbN2muwk4=
 github.com/go-kivik/kivik/v3 v3.1.1/go.mod h1:chqVuHKAU9j2C7qL0cAH2FCO26oL+0B4aIBeCRMnLa8=
+github.com/go-kivik/kivikmock v2.0.0+incompatible h1:OwVOjPOzlXRiCdAw0+zUd4pi9ZQHFabgiexH2z5HVGo=
+github.com/go-kivik/kivikmock v2.0.0+incompatible/go.mod h1:ZhBCIjnJV+y2zSzMBX1rWkTDoHxVk4z34b8jDABNXjI=
 github.com/go-kivik/kivikmock/v3 v3.1.1 h1:/EDCv5nkHzWiUVySbs85R7YCOWO6vA66PNENx5IW/m0=
 github.com/go-kivik/kivikmock/v3 v3.1.1/go.mod h1:mYeaXihQBfAYdKorGx/L0OFEs+w7OzGlHlIVhpMzbxY=
 github.com/go-kivik/kiviktest/v3 v3.0.0/go.mod h1:pLjkg/F61+X4Ks1BpbrTgbChjdPcINX2HysR8i7AfBM=

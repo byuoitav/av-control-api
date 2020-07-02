@@ -33,7 +33,6 @@ func (h *Handlers) RequestID(c *gin.Context) {
 			c.Abort()
 			return
 		}
-
 		id = uid.String()
 	}
 
