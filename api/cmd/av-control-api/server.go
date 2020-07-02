@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 
 	"net/http"
 	"os"
@@ -21,7 +22,7 @@ import (
 func main() {
 	var (
 		port     int
-		logLevel int8
+		logLevel string
 
 		host string
 		env  string
@@ -37,7 +38,7 @@ func main() {
 	)
 
 	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
-	pflag.Int8VarP(&logLevel, "log-level", "L", 0, "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
+	pflag.StringVarP(&logLevel, "log-level", "L", "", "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
 	pflag.StringVarP(&env, "env", "e", "default", "The deployment environment for the API")
 	pflag.StringVarP(&host, "host", "h", "", "host of this server. necessary to proxy requests")
 	pflag.StringVar(&authAddr, "auth-addr", "", "address of the auth server")
@@ -49,8 +50,14 @@ func main() {
 	pflag.BoolVar(&dbInsecure, "db-insecure", false, "don't use SSL in database connection")
 	pflag.Parse()
 
+	var level zapcore.Level
+	if err := level.Set(logLevel); err != nil {
+		fmt.Printf("invalid log level: %s\n", err.Error())
+		os.Exit(1)
+	}
+
 	config := zap.Config{
-		Level: zap.NewAtomicLevelAt(zapcore.Level(logLevel)),
+		Level: zap.NewAtomicLevelAt(level),
 		Sampling: &zap.SamplingConfig{
 			Initial:    100,
 			Thereafter: 100,
@@ -85,6 +92,10 @@ func main() {
 		log.Fatal("--host is required. use --help for more details")
 	}
 
+	// context for setup
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	// build the data service
 	if dbInsecure {
 		dbAddr = "http://" + dbAddr
@@ -100,13 +111,13 @@ func main() {
 		dsOpts = append(dsOpts, couch.WithBasicAuth(dbUsername, dbPassword))
 	}
 
-	ds, err := couch.New(context.TODO(), dbAddr, dsOpts...)
+	ds, err := couch.New(ctx, dbAddr, dsOpts...)
 	if err != nil {
 		log.Fatal("unable to connect to data service", zap.Error(err))
 	}
 
 	// build the getsetter
-	gs, err := state.New(context.TODO(), ds, log)
+	gs, err := state.New(ctx, ds, log)
 	if err != nil {
 		log.Fatal("unable to build state get/setter", zap.Error(err))
 	}
@@ -119,15 +130,29 @@ func main() {
 		State:       gs,
 	}
 
-	// TODO add log level endpoint
 	// TODO add auth
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	r.GET("/healthz", func(c *gin.Context) {
+	debug := r.Group("/debug")
+	debug.GET("/healthz", func(c *gin.Context) {
 		c.String(http.StatusOK, "healthy")
 	})
-	r.GET("/statsz", handlers.Stats)
+	debug.GET("/statsz", handlers.Stats)
+	debug.GET("/logz", func(c *gin.Context) {
+		c.String(http.StatusOK, config.Level.String())
+	})
+	debug.GET("/logz/:level", func(c *gin.Context) {
+		var level zapcore.Level
+		if err := level.Set(c.Param("level")); err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		fmt.Printf("***\n\tSetting log level to %s\n***\n", level.String())
+		config.Level.SetLevel(level)
+		c.String(http.StatusOK, config.Level.String())
+	})
 
 	api := r.Group("/v1", handlers.RequestID, handlers.Log)
 
