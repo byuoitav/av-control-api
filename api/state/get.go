@@ -32,6 +32,10 @@ type getDeviceStateResponse struct {
 }
 
 func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
+	if len(room.Devices) == 0 {
+		return api.StateResponse{}, nil
+	}
+
 	stateResp := api.StateResponse{
 		Devices: make(map[api.DeviceID]api.DeviceState),
 	}
@@ -52,7 +56,6 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 
 	resps := make(chan getDeviceStateResponse)
 
-	// TODO handle 0 devices in room
 	for id, dev := range room.Devices {
 		req := getDeviceStateRequest{
 			id:     id,
@@ -82,9 +85,9 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 	return stateResp, nil
 }
 
-func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse {
+func (req *getDeviceStateRequest) do(ctx context.Context) (resp getDeviceStateResponse) {
 	var respMu sync.Mutex
-	resp := getDeviceStateResponse{
+	resp = getDeviceStateResponse{
 		id: req.id,
 		state: api.DeviceState{
 			Inputs:  make(map[string]api.Input),
@@ -92,6 +95,21 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			Mutes:   make(map[string]bool),
 		},
 	}
+
+	defer func() {
+		// reset maps if they weren't used
+		if len(resp.state.Inputs) == 0 {
+			resp.state.Inputs = nil
+		}
+
+		if len(resp.state.Volumes) == 0 {
+			resp.state.Volumes = nil
+		}
+
+		if len(resp.state.Mutes) == 0 {
+			resp.state.Mutes = nil
+		}
+	}()
 
 	deviceInfo := &drivers.DeviceInfo{
 		Address: req.device.Address,
@@ -339,19 +357,6 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 
 	wg.Wait()
 
-	// reset maps if they weren't used
-	if len(resp.state.Inputs) == 0 {
-		resp.state.Inputs = nil
-	}
-
-	if len(resp.state.Volumes) == 0 {
-		resp.state.Volumes = nil
-	}
-
-	if len(resp.state.Mutes) == 0 {
-		resp.state.Mutes = nil
-	}
-
 	req.log.Info("Finished getting state")
-	return resp
+	return
 }

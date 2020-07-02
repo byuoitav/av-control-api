@@ -14,12 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type contextKey int
-
-const (
-	_keyRequestID contextKey = iota
-)
-
 type getStateTest struct {
 	name    string
 	log     bool
@@ -145,21 +139,20 @@ var getTests = []getStateTest{
 	},
 	{
 		name: "VideoSwitcherSeparateInputs",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
 					AudioInputs: map[string]string{
 						"1": "in1",
 						"2": "in2",
-						//"3": "in3",
-						//"4": "in4",
+						"3": "in3",
+						"4": "in4",
 					},
 					VideoInputs: map[string]string{
 						"1": "in4",
 						"2": "in3",
-						//"3": "in2",
-						//"4": "in1",
+						"3": "in2",
+						"4": "in1",
 					},
 				},
 			},
@@ -176,6 +169,14 @@ var getTests = []getStateTest{
 							Audio: stringP("in2"),
 							Video: stringP("in3"),
 						},
+						"3": {
+							Audio: stringP("in3"),
+							Video: stringP("in2"),
+						},
+						"4": {
+							Audio: stringP("in4"),
+							Video: stringP("in1"),
+						},
 					},
 				},
 			},
@@ -183,7 +184,6 @@ var getTests = []getStateTest{
 	},
 	{
 		name: "SimpleSeparateInput",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
@@ -235,7 +235,6 @@ var getTests = []getStateTest{
 	},
 	{
 		name: "6x2SeparateInput",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				//Projector
@@ -314,7 +313,6 @@ var getTests = []getStateTest{
 	},
 	{
 		name: "JustAddPower",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
@@ -430,7 +428,6 @@ var getTests = []getStateTest{
 	},
 	{
 		name: "JRCB-205",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"JRCB-205-D1": &mock.Device{
@@ -614,7 +611,6 @@ var getTests = []getStateTest{
 	},
 	{
 		name: "Errors!",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
@@ -638,11 +634,7 @@ var getTests = []getStateTest{
 			Devices: map[api.DeviceID]api.DeviceState{
 				"ITB-1101-D1": {},
 				"ITB-1101-D2": {},
-				"ITB-1101-D3": {
-					Inputs:  map[string]api.Input{},
-					Volumes: map[string]int{},
-					Mutes:   map[string]bool{},
-				},
+				"ITB-1101-D3": {},
 			},
 			Errors: []api.DeviceStateError{
 				{
@@ -690,6 +682,11 @@ var getTests = []getStateTest{
 				},
 			},
 		},
+	},
+	{
+		name:    "EmptyRoom",
+		driver:  drivertest.Driver{},
+		apiResp: api.StateResponse{},
 	},
 }
 

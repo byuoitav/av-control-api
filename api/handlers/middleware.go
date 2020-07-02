@@ -24,7 +24,6 @@ const (
 func (h *Handlers) RequestID(c *gin.Context) {
 	var id string
 	if c.GetHeader(_hRequestID) != "" {
-		// TODO validate that this is a valid request id?
 		id = c.GetHeader(_hRequestID)
 	} else {
 		uid, err := ksuid.NewRandom()
@@ -74,7 +73,6 @@ func (h *Handlers) Room(c *gin.Context) {
 
 	room, err := h.DataService.Room(ctx, roomID)
 	switch {
-	// TODO case room not exists
 	case err != nil:
 		c.String(http.StatusInternalServerError, "unable to get room %s", err)
 		c.Abort()

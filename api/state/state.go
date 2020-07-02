@@ -17,7 +17,8 @@ import (
 type getSetter struct {
 	logger *zap.Logger
 
-	drivers map[string]drivers.DriverClient
+	drivers      map[string]drivers.DriverClient
+	driverStates []func() (string, string)
 }
 
 func New(ctx context.Context, ds api.DataService, logger *zap.Logger) (api.StateGetSetter, error) {
@@ -69,7 +70,23 @@ func New(ctx context.Context, ds api.DataService, logger *zap.Logger) (api.State
 		}
 
 		gs.drivers[driver] = drivers.NewDriverClient(conn)
+
+		saved := driver
+		gs.driverStates = append(gs.driverStates, func() (string, string) {
+			return saved, conn.GetState().String()
+		})
 	}
 
 	return gs, nil
+}
+
+func (gs *getSetter) DriverStates(ctx context.Context) (map[string]string, error) {
+	states := make(map[string]string)
+
+	for i := range gs.driverStates {
+		driver, state := gs.driverStates[i]()
+		states[driver] = state
+	}
+
+	return states, nil
 }

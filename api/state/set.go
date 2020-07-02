@@ -16,6 +16,7 @@ import (
 var (
 	ErrInvalidDevice = errors.New("device is invalid in this room")
 	ErrNotCapable    = errors.New("can't set this field on this device")
+	ErrInvalidBlock  = errors.New("invalid block")
 )
 
 type setDeviceStateRequest struct {
@@ -127,18 +128,9 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 			Error: fmt.Sprintf("unable to get capabilities: %s", status.Convert(err).Message()),
 		})
 
-		if len(resp.state.Inputs) == 0 {
-			resp.state.Inputs = nil
-		}
-
-		if len(resp.state.Volumes) == 0 {
-			resp.state.Volumes = nil
-		}
-
-		if len(resp.state.Mutes) == 0 {
-			resp.state.Mutes = nil
-		}
-
+		resp.state.Inputs = nil
+		resp.state.Volumes = nil
+		resp.state.Mutes = nil
 		return resp
 	}
 
@@ -376,10 +368,16 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 		}
 	}
 
-	// TODO should we validate blocks from ports?
 	if len(req.state.Volumes) > 0 {
 		if hasCapability(drivers.CapabilityVolume) {
+			validBlocks := req.device.Ports.OfType("volume").Names()
+
 			for block, vol := range req.state.Volumes {
+				if !containsString(validBlocks, block) {
+					driverErr(fmt.Sprintf("volumes.%s", block), int32(vol), ErrInvalidBlock)
+					continue
+				}
+
 				volReq := &drivers.SetVolumeRequest{
 					Info:  deviceInfo,
 					Block: block,
@@ -409,10 +407,16 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 		}
 	}
 
-	// TODO should we validate blocks from ports?
 	if len(req.state.Mutes) > 0 {
 		if hasCapability(drivers.CapabilityMute) {
+			validBlocks := req.device.Ports.OfType("mute").Names()
+
 			for block, muted := range req.state.Mutes {
+				if !containsString(validBlocks, block) {
+					driverErr(fmt.Sprintf("mutes.%s", block), muted, ErrInvalidBlock)
+					continue
+				}
+
 				muteReq := &drivers.SetMuteRequest{
 					Info:  deviceInfo,
 					Block: block,
@@ -456,6 +460,8 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	if len(resp.state.Mutes) == 0 {
 		resp.state.Mutes = nil
 	}
+
+	sortErrors(resp.errors)
 
 	req.log.Info("Finished setting state")
 	return resp
