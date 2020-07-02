@@ -24,7 +24,6 @@ const (
 func (h *Handlers) RequestID(c *gin.Context) {
 	var id string
 	if c.GetHeader(_hRequestID) != "" {
-		// TODO validate that this is a valid request id?
 		id = c.GetHeader(_hRequestID)
 	} else {
 		uid, err := ksuid.NewRandom()

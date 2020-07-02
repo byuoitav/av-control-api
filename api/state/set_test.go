@@ -373,7 +373,7 @@ var setTests = []setStateTest{
 		},
 	},
 	{
-		name: "Errors!1",
+		name: "Errors",
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
@@ -418,31 +418,25 @@ var setTests = []setStateTest{
 			Errors: []api.DeviceStateError{
 				{
 					ID:    "ITB-1101-D1",
-					Field: "poweredOn",
-					Value: true,
-					Error: "power error",
-				},
-				{
-					ID:    "ITB-1101-D1",
 					Field: "blanked",
 					Value: false,
 					Error: "blank error",
 				},
 				{
 					ID:    "ITB-1101-D1",
+					Field: "poweredOn",
+					Value: true,
+					Error: "power error",
+				},
+				{
+					ID:    "ITB-1101-D1",
 					Field: "volumes.",
 					Value: int32(30),
-					Error: "this output does not exist",
+					Error: ErrInvalidBlock.Error(),
 				},
 				{
 					ID:    "ITB-1101-D2",
 					Field: "input..audio",
-					Value: "hdmi2",
-					Error: "this output does not exist",
-				},
-				{
-					ID:    "ITB-1101-D2",
-					Field: "input..video",
 					Value: "hdmi2",
 					Error: "this output does not exist",
 				},
@@ -454,9 +448,15 @@ var setTests = []setStateTest{
 				},
 				{
 					ID:    "ITB-1101-D2",
+					Field: "input..video",
+					Value: "hdmi2",
+					Error: "this output does not exist",
+				},
+				{
+					ID:    "ITB-1101-D2",
 					Field: "mutes.",
 					Value: true,
-					Error: "this output does not exist",
+					Error: ErrInvalidBlock.Error(),
 				},
 			},
 		},
@@ -745,6 +745,92 @@ var setTests = []setStateTest{
 						},
 					},
 					Error: "can't set this field on this device",
+				},
+			},
+		},
+	},
+	{
+		name: "AudioInvalidBlockError",
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D1": &mock.Device{
+					Volumes: map[string]int{
+						"": 30,
+					},
+					Mutes: map[string]bool{
+						"": false,
+					},
+				},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {
+					Volumes: map[string]int{"invalid": 77},
+					Mutes:   map[string]bool{"invalid": false},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D1",
+					Field: "mutes.invalid",
+					Value: false,
+					Error: ErrInvalidBlock.Error(),
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "volumes.invalid",
+					Value: int32(77),
+					Error: ErrInvalidBlock.Error(),
+				},
+			},
+		},
+	},
+	{
+		name: "AudioSetError",
+		driver: drivertest.Driver{
+			Devices: map[string]drivers.Device{
+				"ITB-1101-D1": &mock.Device{
+					SetVolumeError: errors.New("no"),
+					SetMuteError:   errors.New("i won't do it"),
+					Volumes: map[string]int{
+						"headphones": 30,
+					},
+					Mutes: map[string]bool{
+						"headphones": false,
+					},
+				},
+			},
+		},
+		req: api.StateRequest{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {
+					Volumes: map[string]int{"headphones": 77},
+					Mutes:   map[string]bool{"headphones": false},
+				},
+			},
+		},
+		resp: api.StateResponse{
+			Devices: map[api.DeviceID]api.DeviceState{
+				"ITB-1101-D1": {},
+			},
+			Errors: []api.DeviceStateError{
+				{
+					ID:    "ITB-1101-D1",
+					Field: "mutes.headphones",
+					Value: false,
+					Error: "i won't do it",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "volumes.headphones",
+					Value: int32(77),
+					Error: "no",
 				},
 			},
 		},
