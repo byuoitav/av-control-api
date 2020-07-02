@@ -26,9 +26,6 @@ type Input struct {
 	AudioVideo *string `json:"audioVideo,omitempty"`
 	Audio      *string `json:"audio,omitempty"`
 	Video      *string `json:"video,omitempty"`
-
-	// TODO ?
-	// AvailableInputs []DeviceID `json:"availableInputs,omitempty"`
 }
 
 type DeviceStateError struct {

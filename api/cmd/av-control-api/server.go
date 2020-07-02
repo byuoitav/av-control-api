@@ -119,7 +119,6 @@ func main() {
 		State:       gs,
 	}
 
-	// TODO maybe check the database health check
 	// TODO add log level endpoint
 	// TODO add auth
 	r := gin.New()
