@@ -689,6 +689,11 @@ var getTests = []getStateTest{
 			},
 		},
 	},
+	{
+		name:    "EmptyRoom",
+		driver:  drivertest.Driver{},
+		apiResp: api.StateResponse{},
+	},
 }
 
 func TestGetState(t *testing.T) {

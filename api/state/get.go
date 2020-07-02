@@ -32,6 +32,10 @@ type getDeviceStateResponse struct {
 }
 
 func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
+	if len(room.Devices) == 0 {
+		return api.StateResponse{}, nil
+	}
+
 	stateResp := api.StateResponse{
 		Devices: make(map[api.DeviceID]api.DeviceState),
 	}
@@ -52,7 +56,6 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 
 	resps := make(chan getDeviceStateResponse)
 
-	// TODO handle 0 devices in room
 	for id, dev := range room.Devices {
 		req := getDeviceStateRequest{
 			id:     id,
