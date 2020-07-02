@@ -463,7 +463,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "NoCapabilitiesError",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D3": &mock.Device{
@@ -490,7 +489,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "CantSetPower",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D4": &mock.Device{},
@@ -519,7 +517,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "CantSetBlank",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D4": &mock.Device{},
@@ -548,7 +545,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "CantSetVolumes",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D4": &mock.Device{},
@@ -577,7 +573,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "CantSetMutes",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D4": &mock.Device{},
@@ -606,7 +601,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "CantSetAudioInputs",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D4": &mock.Device{VideoInputs: map[string]string{"": "hdmi2"}},
@@ -657,7 +651,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "CantSetVideoInputs",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D4": &mock.Device{AudioVideoInputs: map[string]string{"": "hdmi2"}},
@@ -708,7 +701,6 @@ var setTests = []setStateTest{
 	},
 	{
 		name: "CantSetAudioVideoInputs",
-		log:  true,
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D4": &mock.Device{AudioInputs: map[string]string{"": "hdmi2"}},
