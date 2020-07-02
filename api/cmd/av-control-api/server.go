@@ -85,7 +85,9 @@ func main() {
 		fmt.Printf("unable to build logger: %s", err)
 		os.Exit(1)
 	}
-	defer log.Sync()
+	defer func() {
+		_ = log.Sync()
+	}()
 
 	// validate flags
 	if host == "" {

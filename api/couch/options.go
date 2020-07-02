@@ -5,7 +5,6 @@ import "github.com/go-kivik/couchdb/v3"
 const (
 	_defaultDatabase     = "av-control-api"
 	_defaultMappingDocID = "#driverMapping"
-	_defaultEnvironment  = "default"
 )
 
 type options struct {

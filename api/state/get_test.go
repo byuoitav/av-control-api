@@ -14,12 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type contextKey int
-
-const (
-	_keyRequestID contextKey = iota
-)
-
 type getStateTest struct {
 	name    string
 	log     bool
