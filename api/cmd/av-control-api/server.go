@@ -127,6 +127,7 @@ func main() {
 	r.GET("/healthz", func(c *gin.Context) {
 		c.String(http.StatusOK, "healthy")
 	})
+	r.GET("/statsz", handlers.Stats)
 
 	api := r.Group("/v1", handlers.RequestID, handlers.Log)
 
