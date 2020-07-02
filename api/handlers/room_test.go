@@ -37,7 +37,7 @@ func (g *goodGS) Set(ctx context.Context, room api.Room, req api.StateRequest) (
 }
 
 func (g *goodGS) DriverStates(context.Context) (map[string]string, error) {
-	return nil, nil
+	return map[string]string{"key": "val"}, nil
 }
 
 func (g *badGS) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
@@ -49,7 +49,7 @@ func (g *badGS) Set(ctx context.Context, room api.Room, req api.StateRequest) (a
 }
 
 func (g *badGS) DriverStates(context.Context) (map[string]string, error) {
-	return nil, nil
+	return nil, errors.New("no states to get")
 }
 
 func TestGetRoomConfiguration(t *testing.T) {
