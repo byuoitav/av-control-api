@@ -97,6 +97,8 @@ func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateReques
 		}
 	}
 
+	sortErrors(stateResp.Errors)
+
 	close(resps)
 	return stateResp, nil
 }
@@ -460,8 +462,6 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	if len(resp.state.Mutes) == 0 {
 		resp.state.Mutes = nil
 	}
-
-	sortErrors(resp.errors)
 
 	req.log.Info("Finished setting state")
 	return resp

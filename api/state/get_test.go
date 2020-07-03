@@ -610,7 +610,7 @@ var getTests = []getStateTest{
 		},
 	},
 	{
-		name: "Errors!",
+		name: "Errors",
 		driver: drivertest.Driver{
 			Devices: map[string]drivers.Device{
 				"ITB-1101-D1": &mock.Device{
@@ -638,13 +638,8 @@ var getTests = []getStateTest{
 			},
 			Errors: []api.DeviceStateError{
 				{
-					ID:    "ITB-1101-D3",
-					Error: "unable to get capabilities: no capabilities",
-				},
-				{
 					ID:    "ITB-1101-D1",
-					Field: "power",
-					Error: "power error",
+					Error: "unknown capability unknown",
 				},
 				{
 					ID:    "ITB-1101-D1",
@@ -653,7 +648,8 @@ var getTests = []getStateTest{
 				},
 				{
 					ID:    "ITB-1101-D1",
-					Error: "unknown capability unknown",
+					Field: "power",
+					Error: "power error",
 				},
 				{
 					ID:    "ITB-1101-D1",
@@ -667,18 +663,22 @@ var getTests = []getStateTest{
 				},
 				{
 					ID:    "ITB-1101-D2",
-					Field: "inputs.$.video",
-					Error: "video error",
-				},
-				{
-					ID:    "ITB-1101-D2",
 					Field: "inputs.$.audioVideo",
 					Error: "av error",
 				},
 				{
 					ID:    "ITB-1101-D2",
+					Field: "inputs.$.video",
+					Error: "video error",
+				},
+				{
+					ID:    "ITB-1101-D2",
 					Field: "mutes",
 					Error: "mutes error",
+				},
+				{
+					ID:    "ITB-1101-D3",
+					Error: "unable to get capabilities: no capabilities",
 				},
 			},
 		},

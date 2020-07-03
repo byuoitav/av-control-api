@@ -36,8 +36,12 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 		return api.StateResponse{}, nil
 	}
 
-	stateResp := api.StateResponse{
-		Devices: make(map[api.DeviceID]api.DeviceState),
+	// make sure the driver for every device in the room exists
+	for _, dev := range room.Devices {
+		_, ok := gs.drivers[dev.Driver]
+		if !ok {
+			return api.StateResponse{}, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
+		}
 	}
 
 	id := api.CtxRequestID(ctx)
@@ -46,12 +50,8 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 		log = gs.logger.With(zap.String("requestID", id))
 	}
 
-	// make sure the driver for every device in the room exists
-	for _, dev := range room.Devices {
-		_, ok := gs.drivers[dev.Driver]
-		if !ok {
-			return stateResp, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
-		}
+	stateResp := api.StateResponse{
+		Devices: make(map[api.DeviceID]api.DeviceState),
 	}
 
 	resps := make(chan getDeviceStateResponse)
@@ -80,6 +80,8 @@ func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse,
 			break
 		}
 	}
+
+	sortErrors(stateResp.Errors)
 
 	close(resps)
 	return stateResp, nil
