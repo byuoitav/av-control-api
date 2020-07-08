@@ -13,9 +13,16 @@ import (
 )
 
 func main() {
-	var port int
-	var logLevel string
-	pflag.IntVarP(&port, "port", "p", 8080, "port to run the server on")
+	var (
+		port     int
+		logLevel string
+		username string
+		password string
+	)
+
+	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
+	pflag.StringVarP(&username, "username", "u", "", "username to login to device")
+	pflag.StringVarP(&password, "password", "p", "", "password to login to device")
 	pflag.StringVarP(&logLevel, "log-level", "l", "info", "log level")
 	pflag.Parse()
 
@@ -33,7 +40,9 @@ func main() {
 
 	create := func(ctx context.Context, addr string) (drivers.DSP, error) {
 		return &atlona.Amp60{
-			Address: addr,
+			Username: username,
+			Password: password,
+			Address:  addr,
 		}, nil
 	}
 

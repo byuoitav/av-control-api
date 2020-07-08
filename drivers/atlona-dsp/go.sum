@@ -13,6 +13,8 @@ github.com/byuoitav/common v0.0.0-20191009134525-e6882d6c07f5/go.mod h1:YTDTFEme
 github.com/byuoitav/endpoint-authorization-controller v0.0.0-20190306172901-dd51e868d6df/go.mod h1:CQ4byB9NvP3rx434/7W2Rqm55p3o9J0Mv081B9dBTns=
 github.com/byuoitav/wspool v0.0.2 h1:z5pZdWaDLBw4DWIhRwGoMcefF091m1qI0JXXC+dnp88=
 github.com/byuoitav/wspool v0.0.2/go.mod h1:X5fAYVDvdxfAVBULIlTAqlsTXz/AKG7InOtrM7q5xso=
+github.com/byuoitav/wspool v0.1.0 h1:JuONUF8lKTNP82liKV2vvIpuSmJtl8VBVphswKfrRwY=
+github.com/byuoitav/wspool v0.1.0/go.mod h1:X5fAYVDvdxfAVBULIlTAqlsTXz/AKG7InOtrM7q5xso=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
