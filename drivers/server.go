@@ -13,11 +13,6 @@ type Server interface {
 	Stop(ctx context.Context) error
 }
 
-func NewServer(newDev NewDeviceFunc) Server {
-	newDev = saveDevicesFunc(newDev)
-	return newGrpcServer(newDev)
-}
-
 func saveDevicesFunc(newDev NewDeviceFunc) NewDeviceFunc {
 	devs := make(map[string]Device)
 	devsMu := sync.RWMutex{}

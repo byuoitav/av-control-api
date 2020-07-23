@@ -40,7 +40,7 @@ func (gs *getSetter) Set(ctx context.Context, room api.Room, req api.StateReques
 
 	// make sure the driver for every device in the room exists
 	for _, dev := range room.Devices {
-		_, ok := gs.drivers[dev.Driver]
+		_, ok := drivers.Get(dev.Driver)
 		if !ok {
 			return api.StateResponse{}, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
 		}

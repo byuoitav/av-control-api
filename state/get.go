@@ -7,51 +7,51 @@ import (
 	"sync"
 	"time"
 
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/drivers"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/status"
 )
 
 var (
-	ErrNoStateGettable = errors.New("can't get the state of any devices in this room")
-	ErrUnknownDriver   = errors.New("unknown driver")
+	ErrNoStateGettable     = errors.New("can't get the state of any devices in this room")
+	ErrDriverNotRegistered = errors.New("driver not registered")
 )
 
 type getDeviceStateRequest struct {
-	id     api.DeviceID
-	device api.Device
-	driver drivers.DriverClient
+	id     avcontrol.DeviceID
+	device avcontrol.Device
+	driver drivers.Driver
 	log    *zap.Logger
 }
 
 type getDeviceStateResponse struct {
-	id     api.DeviceID
-	state  api.DeviceState
-	errors []api.DeviceStateError
+	id     avcontrol.DeviceID
+	state  avcontrol.DeviceState
+	errors []avcontrol.DeviceStateError
 }
 
-func (gs *getSetter) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
+func (gs *getSetter) Get(ctx context.Context, room avcontrol.Room) (avcontrol.StateResponse, error) {
 	if len(room.Devices) == 0 {
-		return api.StateResponse{}, nil
+		return avcontrol.StateResponse{}, nil
 	}
 
 	// make sure the driver for every device in the room exists
 	for _, dev := range room.Devices {
-		_, ok := gs.drivers[dev.Driver]
+		_, ok := drivers.Get(dev.Driver)
 		if !ok {
-			return api.StateResponse{}, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
+			return avcontrol.StateResponse{}, fmt.Errorf("%s: %w", dev.Driver, ErrDriverNotRegistered)
 		}
 	}
 
-	id := api.CtxRequestID(ctx)
+	id := avcontrol.CtxRequestID(ctx)
 	log := gs.logger
 	if len(id) > 0 {
 		log = gs.logger.With(zap.String("requestID", id))
 	}
 
-	stateResp := api.StateResponse{
-		Devices: make(map[api.DeviceID]api.DeviceState),
+	stateResp := avcontrol.StateResponse{
+		Devices: make(map[avcontrol.DeviceID]avcontrol.DeviceState),
 	}
 
 	resps := make(chan getDeviceStateResponse)
@@ -91,12 +91,14 @@ func (req *getDeviceStateRequest) do(ctx context.Context) (resp getDeviceStateRe
 	var respMu sync.Mutex
 	resp = getDeviceStateResponse{
 		id: req.id,
-		state: api.DeviceState{
-			Inputs:  make(map[string]api.Input),
+		state: avcontrol.DeviceState{
+			Inputs:  make(map[string]avcontrol.Input),
 			Volumes: make(map[string]int),
 			Mutes:   make(map[string]bool),
 		},
 	}
+
+	req.log.Info("Getting state")
 
 	defer func() {
 		// reset maps if they weren't used
@@ -113,40 +115,32 @@ func (req *getDeviceStateRequest) do(ctx context.Context) (resp getDeviceStateRe
 		}
 	}()
 
-	deviceInfo := &drivers.DeviceInfo{
-		Address: req.device.Address,
-	}
+	driver, _ := drivers.Get(req.device.Driver)
 
-	req.log.Info("Getting state")
-	req.log.Debug("Getting capabilities")
+	req.log.Debug("Getting device")
 
-	caps, err := req.driver.GetCapabilities(ctx, deviceInfo)
+	dev, err := driver.GetDevice(ctx, req.device.Address)
 	if err != nil {
-		req.log.Warn("unable to get capabilities", zap.Error(err))
-
-		resp.errors = append(resp.errors, api.DeviceStateError{
+		req.log.Warn("unable to get device", zap.Error(err))
+		resp.errors = append(resp.errors, avcontrol.DeviceStateError{
 			ID:    req.id,
-			Error: fmt.Sprintf("unable to get capabilities: %s", status.Convert(err).Message()),
+			Error: fmt.Sprintf("unable to get device: %s", err),
 		})
-
 		return resp
 	}
+
+	// TODO support getting capabilities a different way?
 
 	driverErr := func(field string, err error) {
 		req.log.Warn("unable to get "+field, zap.Error(err))
 
-		msg := err.Error()
-		if err, ok := status.FromError(err); ok {
-			msg = err.Message()
-		}
-
 		respMu.Lock()
 		defer respMu.Unlock()
 
-		resp.errors = append(resp.errors, api.DeviceStateError{
+		resp.errors = append(resp.errors, avcontrol.DeviceStateError{
 			ID:    req.id,
 			Field: field,
-			Error: msg,
+			Error: err.Error(),
 		})
 	}
 
@@ -160,7 +154,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) (resp getDeviceStateRe
 		time.Sleep(25 * time.Millisecond)
 	}
 
-	req.log.Debug("Got capabilities", zap.Strings("capabilities", caps.GetCapabilities()))
+	// req.log.Debug("Got capabilities", zap.Strings("capabilities", caps.GetCapabilities()))
 	wg := sync.WaitGroup{}
 
 	for _, capability := range caps.GetCapabilities() {

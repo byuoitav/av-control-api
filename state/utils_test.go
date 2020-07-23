@@ -7,6 +7,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func boolP(b bool) *bool {
+	return &b
+}
+
 type sortErrorsTest struct {
 	name string
 	in   []api.DeviceStateError
