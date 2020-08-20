@@ -6,6 +6,8 @@ github.com/byuoitav/connpool v0.4.1 h1:pYqy5iEWY18Hwub+q9wuJgzIzRA4263s9UkjQbC0x
 github.com/byuoitav/connpool v0.4.1/go.mod h1:9jVn2IL91Wp6eHEymqxZ5v7zPy07FtIWp/JIfDCMGQY=
 github.com/byuoitav/epson-driver v0.1.1 h1:ie2//X1CtIm+1Ncc+BMh7jCYm+JiO3CDU7+pE71tomQ=
 github.com/byuoitav/epson-driver v0.1.1/go.mod h1:cUE9NFF02l0l5oM0D57NYNyQyxXFHsvgDVf4+VCDM+A=
+github.com/byuoitav/epson-driver v0.1.2 h1:YIkMUIEomHC6zpaUiLwAqJTSRE/cWYu1WwDCAtQ7PBM=
+github.com/byuoitav/epson-driver v0.1.2/go.mod h1:cUE9NFF02l0l5oM0D57NYNyQyxXFHsvgDVf4+VCDM+A=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
