@@ -15,6 +15,8 @@ const (
 	CapabilityInfo            Capability = "Info"
 )
 
+type GetDeviceFunc func(context.Context, string) (Device, error)
+
 // NewDeviceFunc is passed to NewServer and is called to create a new Device struct whenever the Server needs to control with a new Device.
 type NewDeviceFunc func(context.Context, string) (Device, error)
 
