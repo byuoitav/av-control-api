@@ -12,7 +12,6 @@ import (
 	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/av-control-api/couch"
 	"github.com/byuoitav/av-control-api/drivers"
-	"github.com/byuoitav/av-control-api/drivers/adcp"
 	"github.com/byuoitav/av-control-api/handlers"
 	"github.com/byuoitav/av-control-api/state"
 	"github.com/gin-gonic/gin"
@@ -56,7 +55,8 @@ func main() {
 		log.Fatal("--host is required. use --help for more details")
 	}
 
-	registerDrivers()
+	drivers := drivers.New()
+	registerDrivers(drivers)
 
 	// ctx for setup
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -144,13 +144,6 @@ func dataService(ctx context.Context, config dbConfig) avcontrol.DataService {
 	}
 
 	return ds
-}
-
-// TODO wrap new functions
-func registerDrivers() {
-	drivers.Register("SonyADCP", drivers.Driver{
-		New: adcp.NewDevice,
-	})
 }
 
 func logger(logLevel string) (zap.Config, *zap.Logger) {
