@@ -3,7 +3,7 @@ package state
 import (
 	"sort"
 
-	"github.com/byuoitav/av-control-api/api"
+	avcontrol "github.com/byuoitav/av-control-api"
 )
 
 // containsString checks if the given slice of strings contains the provided string.
@@ -21,7 +21,7 @@ func containsString(slice []string, s string) bool {
 //   1. ID
 //   2. Field
 //   3. Error
-func sortErrors(errors []api.DeviceStateError) {
+func sortErrors(errors []avcontrol.DeviceStateError) {
 	sort.Slice(errors, func(i, j int) bool {
 		if errors[i].ID != errors[j].ID {
 			return errors[i].ID < errors[j].ID

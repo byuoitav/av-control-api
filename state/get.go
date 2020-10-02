@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"time"
 
 	avcontrol "github.com/byuoitav/av-control-api"
-	"github.com/byuoitav/av-control-api/api"
 	"github.com/byuoitav/av-control-api/drivers"
 	"go.uber.org/zap"
 )
@@ -21,7 +19,7 @@ var (
 type getDeviceStateRequest struct {
 	id     avcontrol.DeviceID
 	device avcontrol.Device
-	driver drivers.Driver
+	driver *avcontrol.Driver
 	log    *zap.Logger
 }
 
@@ -29,38 +27,39 @@ type getDeviceStateResponse struct {
 	id     avcontrol.DeviceID
 	state  avcontrol.DeviceState
 	errors []avcontrol.DeviceStateError
+	sync.Mutex
 }
 
-func (gs *getSetter) Get(ctx context.Context, room avcontrol.Room) (avcontrol.StateResponse, error) {
+func (gs *GetSetter) Get(ctx context.Context, room avcontrol.Room) (avcontrol.StateResponse, error) {
 	if len(room.Devices) == 0 {
 		return avcontrol.StateResponse{}, nil
 	}
 
 	// make sure the driver for every device in the room exists
 	for _, dev := range room.Devices {
-		_, ok := drivers.Get(dev.Driver)
-		if !ok {
+		if gs.Drivers.Get(dev.Driver) == nil {
 			return avcontrol.StateResponse{}, fmt.Errorf("%s: %w", dev.Driver, ErrDriverNotRegistered)
 		}
 	}
 
 	id := avcontrol.CtxRequestID(ctx)
-	log := gs.logger
+	log := gs.Logger
 	if len(id) > 0 {
-		log = gs.logger.With(zap.String("requestID", id))
+		log = gs.Logger.With(zap.String("requestID", id))
 	}
+
+	resps := make(chan getDeviceStateResponse)
+	defer close(resps)
 
 	stateResp := avcontrol.StateResponse{
 		Devices: make(map[avcontrol.DeviceID]avcontrol.DeviceState),
 	}
 
-	resps := make(chan getDeviceStateResponse)
-
 	for id, dev := range room.Devices {
 		req := getDeviceStateRequest{
 			id:     id,
 			device: dev,
-			driver: gs.drivers[dev.Driver],
+			driver: gs.Drivers.Get(dev.Driver),
 			log:    log.With(zap.String("deviceID", string(id))),
 		}
 
@@ -82,44 +81,18 @@ func (gs *getSetter) Get(ctx context.Context, room avcontrol.Room) (avcontrol.St
 	}
 
 	sortErrors(stateResp.Errors)
-
-	close(resps)
 	return stateResp, nil
 }
 
-func (req *getDeviceStateRequest) do(ctx context.Context) (resp getDeviceStateResponse) {
-	var respMu sync.Mutex
-	resp = getDeviceStateResponse{
+func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse {
+	resp := getDeviceStateResponse{
 		id: req.id,
-		state: avcontrol.DeviceState{
-			Inputs:  make(map[string]avcontrol.Input),
-			Volumes: make(map[string]int),
-			Mutes:   make(map[string]bool),
-		},
 	}
 
 	req.log.Info("Getting state")
-
-	defer func() {
-		// reset maps if they weren't used
-		if len(resp.state.Inputs) == 0 {
-			resp.state.Inputs = nil
-		}
-
-		if len(resp.state.Volumes) == 0 {
-			resp.state.Volumes = nil
-		}
-
-		if len(resp.state.Mutes) == 0 {
-			resp.state.Mutes = nil
-		}
-	}()
-
-	driver, _ := drivers.Get(req.device.Driver)
-
 	req.log.Debug("Getting device")
 
-	dev, err := driver.GetDevice(ctx, req.device.Address)
+	dev, err := req.driver.GetDevice(ctx, req.device.Address)
 	if err != nil {
 		req.log.Warn("unable to get device", zap.Error(err))
 		resp.errors = append(resp.errors, avcontrol.DeviceStateError{
@@ -129,13 +102,13 @@ func (req *getDeviceStateRequest) do(ctx context.Context) (resp getDeviceStateRe
 		return resp
 	}
 
-	// TODO support getting capabilities a different way?
+	req.log.Debug("Got device")
 
-	driverErr := func(field string, err error) {
+	handleErr := func(field string, err error) {
 		req.log.Warn("unable to get "+field, zap.Error(err))
 
-		respMu.Lock()
-		defer respMu.Unlock()
+		resp.Lock()
+		defer resp.Unlock()
 
 		resp.errors = append(resp.errors, avcontrol.DeviceStateError{
 			ID:    req.id,
@@ -144,215 +117,187 @@ func (req *getDeviceStateRequest) do(ctx context.Context) (resp getDeviceStateRe
 		})
 	}
 
-	i := 0
-	spreadRequests := func() {
-		defer func() { i++ }()
-		if i == 0 {
-			return
-		}
-
-		time.Sleep(25 * time.Millisecond)
-	}
-
-	// req.log.Debug("Got capabilities", zap.Strings("capabilities", caps.GetCapabilities()))
 	wg := sync.WaitGroup{}
 
-	for _, capability := range caps.GetCapabilities() {
-		switch drivers.Capability(capability) {
-		case drivers.CapabilityPower:
-			wg.Add(1)
-			spreadRequests()
+	if dev, ok := dev.(drivers.DeviceWithPower); ok {
+		wg.Add(1)
 
-			go func() {
-				req.log.Info("Getting power")
-				defer wg.Done()
+		go func() {
+			req.log.Info("Getting power")
+			defer wg.Done()
 
-				power, err := req.driver.GetPower(ctx, deviceInfo)
-				if err != nil {
-					driverErr("power", err)
-					return
-				}
+			power, err := dev.GetPower(ctx)
+			if err != nil {
+				handleErr("power", err)
+				return
+			}
 
-				on := power.GetOn()
-				req.log.Info("Got power", zap.Bool("on", on))
+			req.log.Info("Got power", zap.Bool("poweredOn", power))
 
-				respMu.Lock()
-				defer respMu.Unlock()
-				resp.state.PoweredOn = &on
-			}()
-		case drivers.CapabilityAudioInput:
-			wg.Add(1)
-			spreadRequests()
+			resp.Lock()
+			defer resp.Unlock()
+			resp.state.PoweredOn = &power
+		}()
+	}
 
-			go func() {
-				req.log.Info("Getting audio inputs")
-				defer wg.Done()
+	if dev, ok := dev.(drivers.DeviceWithAudioInput); ok {
+		wg.Add(1)
 
-				inputs, err := req.driver.GetAudioInputs(ctx, deviceInfo)
-				if err != nil {
-					driverErr("inputs.$.audio", err)
-					return
-				}
+		go func() {
+			req.log.Info("Getting audio inputs")
+			defer wg.Done()
 
-				req.log.Info("Got audio inputs", zap.Any("inputs", inputs.GetInputs()))
+			inputs, err := dev.GetAudioInputs(ctx)
+			if err != nil {
+				handleErr("inputs.$.audio", err)
+				return
+			}
 
-				respMu.Lock()
-				defer respMu.Unlock()
+			req.log.Info("Got audio inputs", zap.Any("inputs", inputs))
 
-				for out, in := range inputs.GetInputs() {
-					input := resp.state.Inputs[out]
-					save := in
-					input.Audio = &save
-					resp.state.Inputs[out] = input
-				}
-			}()
-		case drivers.CapabilityVideoInput:
-			wg.Add(1)
-			spreadRequests()
+			resp.Lock()
+			defer resp.Unlock()
 
-			go func() {
-				req.log.Info("Getting video inputs")
-				defer wg.Done()
+			if resp.state.Inputs == nil {
+				resp.state.Inputs = make(map[string]avcontrol.Input)
+			}
 
-				inputs, err := req.driver.GetVideoInputs(ctx, deviceInfo)
-				if err != nil {
-					driverErr("inputs.$.video", err)
-					return
-				}
+			for out, in := range inputs {
+				input := resp.state.Inputs[out]
+				save := in
+				input.Audio = &save
+				resp.state.Inputs[out] = input
+			}
+		}()
+	}
 
-				req.log.Info("Got video inputs", zap.Any("inputs", inputs.GetInputs()))
+	if dev, ok := dev.(drivers.DeviceWithVideoInput); ok {
+		wg.Add(1)
 
-				respMu.Lock()
-				defer respMu.Unlock()
+		go func() {
+			req.log.Info("Getting video inputs")
+			defer wg.Done()
 
-				for out, in := range inputs.GetInputs() {
-					input := resp.state.Inputs[out]
-					save := in
-					input.Video = &save
-					resp.state.Inputs[out] = input
-				}
-			}()
-		case drivers.CapabilityAudioVideoInput:
-			wg.Add(1)
-			spreadRequests()
+			inputs, err := dev.GetVideoInputs(ctx)
+			if err != nil {
+				handleErr("inputs.$.video", err)
+				return
+			}
 
-			go func() {
-				req.log.Info("Getting audioVideo inputs")
-				defer wg.Done()
+			req.log.Info("Got video inputs", zap.Any("inputs", inputs))
 
-				inputs, err := req.driver.GetAudioVideoInputs(ctx, deviceInfo)
-				if err != nil {
-					driverErr("inputs.$.audioVideo", err)
-					return
-				}
+			resp.Lock()
+			defer resp.Unlock()
 
-				req.log.Info("Got audioVideo inputs", zap.Any("inputs", inputs.GetInputs()))
+			if resp.state.Inputs == nil {
+				resp.state.Inputs = make(map[string]avcontrol.Input)
+			}
 
-				respMu.Lock()
-				defer respMu.Unlock()
+			for out, in := range inputs {
+				input := resp.state.Inputs[out]
+				save := in
+				input.Video = &save
+				resp.state.Inputs[out] = input
+			}
+		}()
+	}
 
-				for out, in := range inputs.GetInputs() {
-					input := resp.state.Inputs[out]
-					save := in
-					input.AudioVideo = &save
-					resp.state.Inputs[out] = input
-				}
-			}()
-		case drivers.CapabilityBlank:
-			wg.Add(1)
-			spreadRequests()
+	if dev, ok := dev.(drivers.DeviceWithAudioVideoInput); ok {
+		wg.Add(1)
 
-			go func() {
-				req.log.Info("Getting blank")
-				defer wg.Done()
+		go func() {
+			req.log.Info("Getting audioVideo inputs")
+			defer wg.Done()
 
-				blank, err := req.driver.GetBlank(ctx, deviceInfo)
-				if err != nil {
-					driverErr("blank", err)
-					return
-				}
+			inputs, err := dev.GetAudioVideoInputs(ctx)
+			if err != nil {
+				handleErr("inputs.$.audioVideo", err)
+				return
+			}
 
-				blanked := blank.GetBlanked()
-				req.log.Info("Got blank", zap.Bool("blanked", blanked))
+			req.log.Info("Got audioVideo inputs", zap.Any("inputs", inputs))
 
-				respMu.Lock()
-				defer respMu.Unlock()
-				resp.state.Blanked = &blanked
-			}()
-		case drivers.CapabilityVolume:
-			wg.Add(1)
-			spreadRequests()
+			resp.Lock()
+			defer resp.Unlock()
 
-			go func() {
-				req.log.Info("Getting volumes")
-				defer wg.Done()
+			if resp.state.Inputs == nil {
+				resp.state.Inputs = make(map[string]avcontrol.Input)
+			}
 
-				audioInfo := &drivers.GetAudioInfo{
-					Info:   deviceInfo,
-					Blocks: req.device.Ports.OfType("volume").Names(),
-				}
+			for out, in := range inputs {
+				input := resp.state.Inputs[out]
+				save := in
+				input.AudioVideo = &save
+				resp.state.Inputs[out] = input
+			}
+		}()
+	}
 
-				vols, err := req.driver.GetVolumes(ctx, audioInfo)
-				if err != nil {
-					driverErr("volumes", err)
-					return
-				}
+	if dev, ok := dev.(drivers.DeviceWithBlank); ok {
+		wg.Add(1)
 
-				req.log.Info("Got volumes", zap.Any("vols", vols.GetVolumes()))
+		go func() {
+			req.log.Info("Getting blank")
+			defer wg.Done()
 
-				respMu.Lock()
-				defer respMu.Unlock()
+			blank, err := dev.GetBlank(ctx)
+			if err != nil {
+				handleErr("blank", err)
+				return
+			}
 
-				for block, vol := range vols.GetVolumes() {
-					resp.state.Volumes[block] = int(vol)
-				}
-			}()
-		case drivers.CapabilityMute:
-			wg.Add(1)
-			spreadRequests()
+			req.log.Info("Got blank", zap.Bool("blank", blank))
 
-			go func() {
-				req.log.Info("Getting mutes")
-				defer wg.Done()
+			resp.Lock()
+			defer resp.Unlock()
+			resp.state.Blanked = &blank
+		}()
+	}
 
-				audioInfo := &drivers.GetAudioInfo{
-					Info:   deviceInfo,
-					Blocks: req.device.Ports.OfType("mute").Names(),
-				}
+	if dev, ok := dev.(drivers.DeviceWithVolume); ok {
+		wg.Add(1)
 
-				mutes, err := req.driver.GetMutes(ctx, audioInfo)
-				if err != nil {
-					driverErr("mutes", err)
-					return
-				}
+		go func() {
+			req.log.Info("Getting volumes")
+			defer wg.Done()
 
-				req.log.Info("Got mutes", zap.Any("mutes", mutes.GetMutes()))
+			vols, err := dev.GetVolumes(ctx, req.device.Ports.OfType("volume").Names())
+			if err != nil {
+				handleErr("volumes", err)
+				return
+			}
 
-				respMu.Lock()
-				defer respMu.Unlock()
+			req.log.Info("Got volumes", zap.Any("volumes", vols))
 
-				for block, muted := range mutes.GetMutes() {
-					resp.state.Mutes[block] = muted
-				}
-			}()
-		case drivers.CapabilityInfo:
-			// we don't do anything with info
-		default:
-			req.log.Warn("unknown capability", zap.String("capability", capability))
+			resp.Lock()
+			defer resp.Unlock()
+			resp.state.Volumes = vols
+		}()
+	}
 
-			respMu.Lock()
-			resp.errors = append(resp.errors, api.DeviceStateError{
-				ID:    req.id,
-				Error: fmt.Sprintf("unknown capability %s", capability),
-			})
-			respMu.Unlock()
+	if dev, ok := dev.(drivers.DeviceWithMute); ok {
+		wg.Add(1)
 
-			continue
-		}
+		go func() {
+			req.log.Info("Getting mutes")
+			defer wg.Done()
+
+			mutes, err := dev.GetMutes(ctx, req.device.Ports.OfType("mute").Names())
+			if err != nil {
+				handleErr("mutes", err)
+				return
+			}
+
+			req.log.Info("Got mutes", zap.Any("mutes", mutes))
+
+			resp.Lock()
+			defer resp.Unlock()
+			resp.state.Mutes = mutes
+		}()
 	}
 
 	wg.Wait()
 
 	req.log.Info("Finished getting state")
-	return
+	return resp
 }

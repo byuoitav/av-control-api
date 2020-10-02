@@ -1,31 +1,26 @@
 package drivers
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	sync "sync"
+
+	avcontrol "github.com/byuoitav/av-control-api"
 )
 
 type Drivers struct {
-	drivers   map[string]*Driver
+	drivers   map[string]*avcontrol.Driver
 	driversMu sync.RWMutex
 }
 
-func New() *Drivers {
+func New() avcontrol.Drivers {
 	return &Drivers{
-		drivers: make(map[string]*Driver),
+		drivers: make(map[string]*avcontrol.Driver),
 	}
 }
 
-type GetDeviceFunc func(context.Context, string) (Device, error)
-
-type Driver struct {
-	GetDevice GetDeviceFunc
-}
-
 // Register registers a driver with the given name. Name must not be empty.
-func (d *Drivers) Register(name string, driver *Driver) error {
+func (d *Drivers) Register(name string, driver *avcontrol.Driver) error {
 	if name == "" {
 		return errors.New("driver must have a name")
 	}
@@ -43,7 +38,7 @@ func (d *Drivers) Register(name string, driver *Driver) error {
 }
 
 // MustRegister is like Register but panics if there is an error registering the driver.
-func (d *Drivers) MustRegister(name string, driver *Driver) {
+func (d *Drivers) MustRegister(name string, driver *avcontrol.Driver) {
 	if err := d.Register(name, driver); err != nil {
 		panic(err)
 	}
@@ -51,7 +46,7 @@ func (d *Drivers) MustRegister(name string, driver *Driver) {
 
 // Get returns the driver that was registered with name.
 // Returns nil if a matching driver has not been registered.
-func (d *Drivers) Get(name string) *Driver {
+func (d *Drivers) Get(name string) *avcontrol.Driver {
 	d.driversMu.RLock()
 	defer d.driversMu.RUnlock()
 

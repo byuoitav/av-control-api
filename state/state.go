@@ -1,9 +1,11 @@
 package state
 
 import (
+	avcontrol "github.com/byuoitav/av-control-api"
 	"go.uber.org/zap"
 )
 
-type getSetter struct {
-	logger *zap.Logger
+type GetSetter struct {
+	Logger  *zap.Logger
+	Drivers avcontrol.Drivers
 }

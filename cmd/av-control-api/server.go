@@ -66,7 +66,7 @@ func main() {
 	ds := dataService(ctx, dataServiceConfig)
 
 	// build the getsetter
-	//gs, err := state.New(ctx, ds, log)
+	// gs, err := state.New(ctx, ds, log)
 	//if err != nil {
 	//	log.Fatal("unable to build state get/setter", zap.Error(err))
 	//}
