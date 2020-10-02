@@ -2,6 +2,7 @@ package couch
 
 import "testing"
 
+// TODO validate things are being set
 func TestOptions(t *testing.T) {
 	opts := []Option{
 		WithBasicAuth("user", "pass"),

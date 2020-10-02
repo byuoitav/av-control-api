@@ -6,10 +6,12 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/byuoitav/av-control-api/api"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/go-kivik/kivikmock/v3"
 	"github.com/google/go-cmp/cmp"
 )
+
+// TODO use testify - require
 
 func TestRoom(t *testing.T) {
 	client, mock, err := kivikmock.New()
@@ -62,22 +64,22 @@ func TestRoom(t *testing.T) {
 
 	expectedURL, _ := url.Parse("http://ITB-1101-CP1.byu.edu:17000")
 
-	expected := api.Room{
+	expected := avcontrol.Room{
 		ID:    "ITB-1101",
 		Proxy: expectedURL,
-		Devices: map[api.DeviceID]api.Device{
-			"ITB-1101-D1": api.Device{
+		Devices: map[avcontrol.DeviceID]avcontrol.Device{
+			"ITB-1101-D1": avcontrol.Device{
 				Driver:  "Sony Bravia",
 				Address: "ITB-1101-D1.byu.edu",
 			},
-			"ITB-1101-D2": api.Device{
+			"ITB-1101-D2": avcontrol.Device{
 				Driver:  "Sony ADCP",
 				Address: "ITB-1101-D2.byu.edu",
 			},
-			"ITB-1101-DSP1": api.Device{
+			"ITB-1101-DSP1": avcontrol.Device{
 				Driver:  "QSC",
 				Address: "ITB-1101-DSP1.byu.edu",
-				Ports: api.Ports{
+				Ports: avcontrol.Ports{
 					{
 						Name: "Mic1Gain",
 						Type: "volume",

@@ -13,7 +13,6 @@ import (
 	"github.com/byuoitav/av-control-api/couch"
 	"github.com/byuoitav/av-control-api/drivers"
 	"github.com/byuoitav/av-control-api/handlers"
-	"github.com/byuoitav/av-control-api/state"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -55,6 +54,7 @@ func main() {
 		log.Fatal("--host is required. use --help for more details")
 	}
 
+	// register all of the drivers
 	drivers := drivers.New()
 	registerDrivers(drivers)
 
@@ -66,10 +66,10 @@ func main() {
 	ds := dataService(ctx, dataServiceConfig)
 
 	// build the getsetter
-	gs, err := state.New(ctx, ds, log)
-	if err != nil {
-		log.Fatal("unable to build state get/setter", zap.Error(err))
-	}
+	//gs, err := state.New(ctx, ds, log)
+	//if err != nil {
+	//	log.Fatal("unable to build state get/setter", zap.Error(err))
+	//}
 
 	// build http stuff
 	handlers := handlers.Handlers{
@@ -124,7 +124,7 @@ func main() {
 	}
 }
 
-func dataService(ctx context.Context, config dbConfig) avcontrol.DataService {
+func dataService(ctx context.Context, config dataServiceConfig) avcontrol.DataService {
 	var opts []couch.Option
 	var url string
 

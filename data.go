@@ -6,19 +6,9 @@ import (
 	"strings"
 )
 
-// DataService is used by the API to get information about rooms and drivers that it should use.
+// DataService is used by to get information about rooms.
 type DataService interface {
 	Room(ctx context.Context, id string) (Room, error)
-	DriverMapping(ctx context.Context) (DriverMapping, error)
-}
-
-// DriverMapping is a map of a driver name -> DriverConfig
-type DriverMapping map[string]DriverConfig
-
-// DriverConfig contains all the information necessary to connect to a driver
-type DriverConfig struct {
-	Address string
-	SSL     bool
 }
 
 // Room is the configuration a room as perceived by the av-control-api.
@@ -40,8 +30,8 @@ type Device struct {
 	// Address is the Hostname or IP address of the device
 	Address string `json:"address"`
 
-	// Driver should match a driver in in the DriverMapping. That driver will be used to
-	// communicate with this device.
+	// Driver should match with a driver that has been registered with the API. The matching driver will be used to
+	// communicate with this device. If no drivers with this name have been registered, requests will fail.
 	Driver string `json:"driver"`
 
 	// Ports are logical ports that the API must know about to be able to control. For a DSP,
