@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	avcontrol "github.com/byuoitav/av-control-api"
-	"github.com/byuoitav/av-control-api/drivers"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +20,7 @@ type setDeviceStateRequest struct {
 	id     avcontrol.DeviceID
 	device avcontrol.DeviceConfig
 	state  avcontrol.DeviceState
-	driver *drivers.Driver
+	driver avcontrol.Driver
 	log    *zap.Logger
 }
 
@@ -39,7 +38,7 @@ func (gs *GetSetter) Set(ctx context.Context, room avcontrol.RoomConfig, req avc
 
 	// make sure the driver for every device in the room exists
 	for _, dev := range room.Devices {
-		if gs.Drivers.Get(dev.Driver) == nil {
+		if gs.DriverRegistry.Get(dev.Driver) == nil {
 			return avcontrol.StateResponse{}, fmt.Errorf("%s: %w", dev.Driver, ErrDriverNotRegistered)
 		}
 	}
@@ -76,7 +75,7 @@ func (gs *GetSetter) Set(ctx context.Context, room avcontrol.RoomConfig, req avc
 			id:     id,
 			device: dev,
 			state:  state,
-			driver: gs.Drivers.Get(dev.Driver),
+			driver: gs.DriverRegistry.Get(dev.Driver),
 			log:    log.With(zap.String("deviceID", string(id))),
 		}
 
@@ -108,7 +107,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	req.log.Info("Setting state")
 	req.log.Debug("Getting device")
 
-	dev, err := req.driver.GetDevice(ctx, req.device.Address)
+	dev, err := req.driver.CreateDevice(ctx, req.device.Address)
 	if err != nil {
 		req.log.Warn("unable to get device", zap.Error(err))
 		resp.errors = append(resp.errors, avcontrol.DeviceStateError{
@@ -138,7 +137,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	wg := sync.WaitGroup{}
 
 	if req.state.PoweredOn != nil {
-		if dev, ok := dev.(drivers.DeviceWithPower); ok {
+		if dev, ok := dev.(avcontrol.DeviceWithPower); ok {
 			wg.Add(1)
 
 			go func() {
@@ -178,7 +177,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	}
 
 	if setAudioInput {
-		if dev, ok := dev.(drivers.DeviceWithAudioInput); ok {
+		if dev, ok := dev.(avcontrol.DeviceWithAudioInput); ok {
 			for output, input := range req.state.Inputs {
 				if input.Audio == nil {
 					continue
@@ -214,7 +213,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	}
 
 	if setVideoInput {
-		if dev, ok := dev.(drivers.DeviceWithVideoInput); ok {
+		if dev, ok := dev.(avcontrol.DeviceWithVideoInput); ok {
 			for output, input := range req.state.Inputs {
 				if input.Video == nil {
 					continue
@@ -250,7 +249,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	}
 
 	if setAudioVideoInput {
-		if dev, ok := dev.(drivers.DeviceWithAudioVideoInput); ok {
+		if dev, ok := dev.(avcontrol.DeviceWithAudioVideoInput); ok {
 			for output, input := range req.state.Inputs {
 				if input.AudioVideo == nil {
 					continue
@@ -286,7 +285,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	}
 
 	if req.state.Blanked != nil {
-		if dev, ok := dev.(drivers.DeviceWithBlank); ok {
+		if dev, ok := dev.(avcontrol.DeviceWithBlank); ok {
 			wg.Add(1)
 
 			go func() {
@@ -310,7 +309,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	}
 
 	if len(req.state.Volumes) > 0 {
-		if dev, ok := dev.(drivers.DeviceWithVolume); ok {
+		if dev, ok := dev.(avcontrol.DeviceWithVolume); ok {
 			validBlocks := req.device.Ports.OfType("volume").Names()
 			for block, vol := range req.state.Volumes {
 				if !containsString(validBlocks, block) {
@@ -346,7 +345,7 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	}
 
 	if len(req.state.Mutes) > 0 {
-		if dev, ok := dev.(drivers.DeviceWithMute); ok {
+		if dev, ok := dev.(avcontrol.DeviceWithMute); ok {
 			validBlocks := req.device.Ports.OfType("mute").Names()
 			for block, muted := range req.state.Mutes {
 				if !containsString(validBlocks, block) {

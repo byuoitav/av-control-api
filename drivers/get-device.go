@@ -1,12 +1,7 @@
 package drivers
 
-import (
-	"context"
-	sync "sync"
-
-	"golang.org/x/sync/singleflight"
-)
-
+// TODO build into the the driver registry
+/*
 func CacheDevices(get GetDeviceFunc) GetDeviceFunc {
 	devs := make(map[string]Device)
 	devsMu := sync.RWMutex{}
@@ -48,3 +43,4 @@ func CacheDevices(get GetDeviceFunc) GetDeviceFunc {
 		return val.(Device), nil
 	}
 }
+*/

@@ -3,7 +3,7 @@ package avcontrol
 import "context"
 
 type DriverRegistry interface {
-	Register(string, Driver)
+	Register(string, Driver) error
 	MustRegister(string, Driver)
 	Get(string) Driver
 	List() []string

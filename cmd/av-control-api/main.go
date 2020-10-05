@@ -54,8 +54,8 @@ func main() {
 	}
 
 	// register all of the drivers
-	drivers := drivers.New()
-	registerDrivers(drivers)
+	registry := drivers.New()
+	registerDrivers(registry)
 
 	// ctx for setup
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -66,8 +66,8 @@ func main() {
 
 	// build the getsetter
 	gs := &state.GetSetter{
-		Logger:  log,
-		Drivers: drivers,
+		Logger:         log,
+		DriverRegistry: registry,
 	}
 
 	// build http stuff

@@ -15,7 +15,7 @@ type drivers struct {
 
 func New() avcontrol.DriverRegistry {
 	return &drivers{
-		drivers: make(map[string]Driver),
+		drivers: make(map[string]avcontrol.Driver),
 	}
 }
 
