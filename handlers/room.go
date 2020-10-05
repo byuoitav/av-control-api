@@ -11,12 +11,12 @@ import (
 )
 
 func (h *Handlers) GetRoomConfiguration(c *gin.Context) {
-	room := c.MustGet(_cRoom).(avcontrol.Room)
+	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	c.JSON(http.StatusOK, room)
 }
 
 func (h *Handlers) GetRoomState(c *gin.Context) {
-	room := c.MustGet(_cRoom).(avcontrol.Room)
+	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	id := c.GetString(_cRequestID)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)
@@ -48,7 +48,7 @@ func (h *Handlers) SetRoomState(c *gin.Context) {
 		return
 	}
 
-	room := c.MustGet(_cRoom).(avcontrol.Room)
+	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	id := c.GetString(_cRequestID)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)

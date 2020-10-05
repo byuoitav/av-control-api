@@ -71,7 +71,7 @@ func (h *Handlers) Room(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
 	defer cancel()
 
-	room, err := h.DataService.Room(ctx, roomID)
+	room, err := h.DataService.RoomConfig(ctx, roomID)
 	switch {
 	case err != nil:
 		c.String(http.StatusInternalServerError, "unable to get room %s", err)

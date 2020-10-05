@@ -8,17 +8,17 @@ import (
 
 var portNamesTests = []struct {
 	name  string
-	ports Ports
+	ports PortConfigs
 	names []string
 }{
 	{
 		name:  "Empty",
-		ports: Ports{},
+		ports: PortConfigs{},
 		names: nil,
 	},
 	{
 		name: "Normal",
-		ports: Ports{
+		ports: PortConfigs{
 			{"1", "audio"},
 			{"2", "video"},
 			{"3", "audioVideo"},
@@ -40,32 +40,32 @@ func TestPortNames(t *testing.T) {
 
 var portTypeTests = []struct {
 	name string
-	in   Ports
+	in   PortConfigs
 	typ  string
-	out  Ports
+	out  PortConfigs
 }{
 	{
 		typ: "audio",
-		in: Ports{
+		in: PortConfigs{
 			{"1", "audio"},
 			{"2", "video"},
 			{"3", "audioVideo"},
 			{"4", ""},
 		},
-		out: Ports{
+		out: PortConfigs{
 			{"1", "audio"},
 			{"3", "audioVideo"},
 		},
 	},
 	{
 		typ: "video",
-		in: Ports{
+		in: PortConfigs{
 			{"1", "audio"},
 			{"2", "video"},
 			{"3", "audio-video"},
 			{"4", ""},
 		},
-		out: Ports{
+		out: PortConfigs{
 			{"2", "video"},
 			{"3", "audio-video"},
 		},

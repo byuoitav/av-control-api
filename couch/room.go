@@ -25,28 +25,28 @@ type port struct {
 	Type string `json:"type"`
 }
 
-// Room gets a room
-func (d *DataService) Room(ctx context.Context, id string) (avcontrol.Room, error) {
+// RoomConfig gets a room
+func (d *DataService) RoomConfig(ctx context.Context, id string) (avcontrol.RoomConfig, error) {
 	var room room
 
 	db := d.client.DB(ctx, d.database)
 	if err := db.Get(ctx, id).ScanDoc(&room); err != nil {
-		return avcontrol.Room{}, fmt.Errorf("unable to get/scan room: %w", err)
+		return avcontrol.RoomConfig{}, fmt.Errorf("unable to get/scan room: %w", err)
 	}
 
 	return room.convert()
 }
 
-func (r room) convert() (avcontrol.Room, error) {
+func (r room) convert() (avcontrol.RoomConfig, error) {
 	url, err := url.Parse(r.Proxy)
 	if err != nil {
-		return avcontrol.Room{}, fmt.Errorf("unable to parse proxy url: %w", err)
+		return avcontrol.RoomConfig{}, fmt.Errorf("unable to parse proxy url: %w", err)
 	}
 
-	room := avcontrol.Room{
+	room := avcontrol.RoomConfig{
 		ID:      r.ID,
 		Proxy:   url,
-		Devices: make(map[avcontrol.DeviceID]avcontrol.Device),
+		Devices: make(map[avcontrol.DeviceID]avcontrol.DeviceConfig),
 	}
 
 	for id, dev := range r.Devices {
@@ -56,8 +56,8 @@ func (r room) convert() (avcontrol.Room, error) {
 	return room, nil
 }
 
-func (d device) convert() avcontrol.Device {
-	dev := avcontrol.Device{
+func (d device) convert() avcontrol.DeviceConfig {
+	dev := avcontrol.DeviceConfig{
 		Address: d.Address,
 		Driver:  d.Driver,
 	}
@@ -69,8 +69,8 @@ func (d device) convert() avcontrol.Device {
 	return dev
 }
 
-func (p port) convert() avcontrol.Port {
-	return avcontrol.Port{
+func (p port) convert() avcontrol.PortConfig {
+	return avcontrol.PortConfig{
 		Name: p.Name,
 		Type: p.Type,
 	}

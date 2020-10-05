@@ -13,7 +13,7 @@ import (
 )
 
 func (h *Handlers) Proxy(c *gin.Context) {
-	room := c.MustGet(_cRoom).(avcontrol.Room)
+	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 
 	if room.Proxy.Host == "" || h.Host == "" || strings.EqualFold(h.Host, room.Proxy.Host) {
 		c.Next()

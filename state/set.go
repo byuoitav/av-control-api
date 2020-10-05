@@ -19,7 +19,7 @@ var (
 
 type setDeviceStateRequest struct {
 	id     avcontrol.DeviceID
-	device avcontrol.Device
+	device avcontrol.DeviceConfig
 	state  avcontrol.DeviceState
 	driver *drivers.Driver
 	log    *zap.Logger
@@ -32,7 +32,7 @@ type setDeviceStateResponse struct {
 	sync.Mutex
 }
 
-func (gs *GetSetter) Set(ctx context.Context, room avcontrol.Room, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
+func (gs *GetSetter) Set(ctx context.Context, room avcontrol.RoomConfig, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
 	if len(room.Devices) == 0 {
 		return avcontrol.StateResponse{}, nil
 	}
