@@ -3,8 +3,11 @@ package state
 import (
 	"context"
 	"errors"
+	"fmt"
+	"sync"
 
 	avcontrol "github.com/byuoitav/av-control-api"
+	"github.com/byuoitav/av-control-api/drivers"
 	"go.uber.org/zap"
 )
 
@@ -18,450 +21,368 @@ type setDeviceStateRequest struct {
 	id     avcontrol.DeviceID
 	device avcontrol.Device
 	state  avcontrol.DeviceState
-	// driver drivers.DriverClient
-	log *zap.Logger
+	driver *avcontrol.Driver
+	log    *zap.Logger
 }
 
 type setDeviceStateResponse struct {
 	id     avcontrol.DeviceID
 	state  avcontrol.DeviceState
 	errors []avcontrol.DeviceStateError
+	sync.Mutex
 }
 
 func (gs *GetSetter) Set(ctx context.Context, room avcontrol.Room, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
-	/*
-				if len(req.Devices) == 0 {
-					return api.StateResponse{}, nil
+	if len(room.Devices) == 0 {
+		return avcontrol.StateResponse{}, nil
+	}
+
+	// make sure the driver for every device in the room exists
+	for _, dev := range room.Devices {
+		if gs.Drivers.Get(dev.Driver) == nil {
+			return avcontrol.StateResponse{}, fmt.Errorf("%s: %w", dev.Driver, ErrDriverNotRegistered)
+		}
+	}
+
+	// make sure each of the devices in the request are in this room
+	for id := range req.Devices {
+		if _, ok := room.Devices[id]; !ok {
+			return avcontrol.StateResponse{}, fmt.Errorf("%s: %w", id, ErrInvalidDevice)
+		}
+	}
+
+	id := avcontrol.CtxRequestID(ctx)
+	log := gs.Logger
+	if len(id) > 0 {
+		log = gs.Logger.With(zap.String("requestID", id))
+	}
+
+	expectedResps := 0
+	resps := make(chan setDeviceStateResponse)
+	defer close(resps)
+
+	stateResp := avcontrol.StateResponse{
+		Devices: make(map[avcontrol.DeviceID]avcontrol.DeviceState),
+	}
+
+	for id, dev := range room.Devices {
+		state, ok := req.Devices[id]
+		if !ok {
+			continue
+		}
+
+		expectedResps++
+		req := setDeviceStateRequest{
+			id:     id,
+			device: dev,
+			state:  state,
+			driver: gs.Drivers.Get(dev.Driver),
+			log:    log.With(zap.String("deviceID", string(id))),
+		}
+
+		go func() {
+			resps <- req.do(ctx)
+		}()
+	}
+
+	for resp := range resps {
+		expectedResps--
+
+		stateResp.Devices[resp.id] = resp.state
+		stateResp.Errors = append(stateResp.Errors, resp.errors...)
+
+		if expectedResps == 0 {
+			break
+		}
+	}
+
+	sortErrors(stateResp.Errors)
+	return stateResp, nil
+}
+
+func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse {
+	resp := setDeviceStateResponse{
+		id: req.id,
+	}
+
+	req.log.Info("Setting state")
+	req.log.Debug("Getting device")
+
+	dev, err := req.driver.GetDevice(ctx, req.device.Address)
+	if err != nil {
+		req.log.Warn("unable to get device", zap.Error(err))
+		resp.errors = append(resp.errors, avcontrol.DeviceStateError{
+			ID:    req.id,
+			Error: fmt.Sprintf("unable to get device: %s", err),
+		})
+		return resp
+	}
+
+	req.log.Debug("Got device")
+
+	handleErr := func(field string, value interface{}, err error) {
+		req.log.Warn("unable to set "+field, zap.Any("to", value), zap.Error(err))
+
+		resp.Lock()
+		defer resp.Unlock()
+
+		resp.errors = append(resp.errors, avcontrol.DeviceStateError{
+			ID:    req.id,
+			Field: field,
+			Value: value,
+			Error: err.Error(),
+		})
+	}
+
+	// set every field in req.state
+	wg := sync.WaitGroup{}
+
+	if req.state.PoweredOn != nil {
+		if dev, ok := dev.(drivers.DeviceWithPower); ok {
+			wg.Add(1)
+
+			go func() {
+				req.log.Info("Setting power", zap.Bool("poweredOn", *req.state.PoweredOn))
+				defer wg.Done()
+
+				if err := dev.SetPower(ctx, *req.state.PoweredOn); err != nil {
+					handleErr("poweredOn", *req.state.PoweredOn, err)
+					return
 				}
 
-				// make sure the driver for every device in the room exists
-				for _, dev := range room.Devices {
-					_, ok := drivers.Get(dev.Driver)
-					if !ok {
-						return api.StateResponse{}, fmt.Errorf("%w: %s", ErrUnknownDriver, dev.Driver)
-					}
+				req.log.Info("Set power")
+
+				resp.Lock()
+				defer resp.Unlock()
+				resp.state.PoweredOn = req.state.PoweredOn
+			}()
+		} else {
+			handleErr("poweredOn", *req.state.PoweredOn, ErrNotCapable)
+		}
+	}
+
+	// figure out which inputs we set
+	var setAudioInput, setVideoInput, setAudioVideoInput bool
+	for _, input := range req.state.Inputs {
+		if input.Audio != nil {
+			setAudioInput = true
+		}
+
+		if input.Video != nil {
+			setVideoInput = true
+		}
+
+		if input.AudioVideo != nil {
+			setAudioVideoInput = true
+		}
+	}
+
+	if setAudioInput {
+		if dev, ok := dev.(drivers.DeviceWithAudioInput); ok {
+			for output, input := range req.state.Inputs {
+				if input.Audio == nil {
+					continue
 				}
 
-				// make sure each of the devices in the request are in this room
-				for id := range req.Devices {
-					if _, ok := room.Devices[id]; !ok {
-						return api.StateResponse{}, fmt.Errorf("%s: %w", id, ErrInvalidDevice)
-					}
-				}
+				wg.Add(1)
+				go func(output, input string) {
+					req.log.Info("Setting audio input", zap.String("output", output), zap.String("input", input))
+					defer wg.Done()
 
-				id := api.CtxRequestID(ctx)
-				log := gs.logger
-				if len(id) > 0 {
-					log = gs.logger.With(zap.String("requestID", id))
-				}
-
-				stateResp := api.StateResponse{
-					Devices: make(map[api.DeviceID]api.DeviceState),
-				}
-
-				resps := make(chan setDeviceStateResponse)
-				expectedResps := 0
-
-				for id, dev := range room.Devices {
-					state, ok := req.Devices[id]
-					if !ok {
-						continue
-					}
-
-					expectedResps++
-					req := setDeviceStateRequest{
-						id:     id,
-						device: dev,
-						state:  state,
-						driver: gs.drivers[dev.Driver],
-						log:    log.With(zap.String("deviceID", string(id))),
-					}
-
-					go func() {
-						resps <- req.do(ctx)
-					}()
-				}
-
-				for resp := range resps {
-					expectedResps--
-
-					stateResp.Devices[resp.id] = resp.state
-					stateResp.Errors = append(stateResp.Errors, resp.errors...)
-
-					if expectedResps == 0 {
-						break
-					}
-				}
-
-				sortErrors(stateResp.Errors)
-
-				close(resps)
-				return stateResp, nil
-			}
-
-			func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse {
-				var respMu sync.Mutex
-				resp := setDeviceStateResponse{
-					id: req.id,
-					state: api.DeviceState{
-						Inputs:  make(map[string]api.Input),
-						Volumes: make(map[string]int),
-						Mutes:   make(map[string]bool),
-					},
-				}
-
-				deviceInfo := &drivers.DeviceInfo{
-					Address: req.device.Address,
-				}
-
-				req.log.Info("Setting state")
-				req.log.Debug("Getting capabilities")
-
-				caps, err := req.driver.GetCapabilities(ctx, deviceInfo)
-				if err != nil {
-					req.log.Warn("unable to get capabilities", zap.Error(err))
-
-					resp.errors = append(resp.errors, api.DeviceStateError{
-						ID:    req.id,
-						Error: fmt.Sprintf("unable to get capabilities: %s", status.Convert(err).Message()),
-					})
-
-					resp.state.Inputs = nil
-					resp.state.Volumes = nil
-					resp.state.Mutes = nil
-					return resp
-				}
-
-				hasCapability := func(c drivers.Capability) bool {
-					for _, ability := range caps.GetCapabilities() {
-						if ability == string(c) {
-							return true
-						}
-					}
-
-					return false
-				}
-
-				driverErr := func(field string, value interface{}, err error) {
-					req.log.Warn("unable to set "+field, zap.Any("to", value), zap.Error(err))
-
-					msg := err.Error()
-					if err, ok := status.FromError(err); ok {
-						msg = err.Message()
-					}
-
-					respMu.Lock()
-					defer respMu.Unlock()
-
-					resp.errors = append(resp.errors, api.DeviceStateError{
-						ID:    req.id,
-						Field: field,
-						Value: value,
-						Error: msg,
-					})
-				}
-
-				i := 0
-				spreadRequests := func() {
-					defer func() { i++ }()
-					if i == 0 {
+					if err := dev.SetAudioInput(ctx, output, input); err != nil {
+						handleErr(fmt.Sprintf("input.%s.audio", output), input, err)
 						return
 					}
 
-					time.Sleep(25 * time.Millisecond)
-				}
+					req.log.Info("Set audio input", zap.String("output", output))
 
-				req.log.Debug("Got capabilities", zap.Strings("capabilities", caps.GetCapabilities()))
-				wg := sync.WaitGroup{}
+					resp.Lock()
+					defer resp.Unlock()
 
-				// try to set each of the fields that were passed in
-				if req.state.PoweredOn != nil {
-					if hasCapability(drivers.CapabilityPower) {
-						powerReq := &drivers.SetPowerRequest{
-							Info: deviceInfo,
-							Power: &drivers.Power{
-								On: *req.state.PoweredOn,
-							},
-						}
-
-						wg.Add(1)
-						spreadRequests()
-						go func() {
-							req.log.Info("Setting power", zap.Bool("on", powerReq.Power.On))
-							defer wg.Done()
-
-							if _, err := req.driver.SetPower(ctx, powerReq); err != nil {
-								driverErr("poweredOn", powerReq.Power.On, err)
-								return
-							}
-
-							req.log.Info("Set power")
-
-							respMu.Lock()
-							defer respMu.Unlock()
-							resp.state.PoweredOn = &powerReq.Power.On
-						}()
-					} else {
-						driverErr("poweredOn", *req.state.PoweredOn, ErrNotCapable)
-					}
-				}
-
-				var setAudioInput, setVideoInput, setAudioVideoInput bool
-				for _, input := range req.state.Inputs {
-					if input.Audio != nil {
-						setAudioInput = true
+					if resp.state.Inputs == nil {
+						resp.state.Inputs = make(map[string]avcontrol.Input)
 					}
 
-					if input.Video != nil {
-						setVideoInput = true
+					in := resp.state.Inputs[output]
+					in.Audio = &input
+					resp.state.Inputs[output] = in
+				}(output, *input.Audio)
+			}
+		} else {
+			handleErr("input.$.audio", req.state.Inputs, ErrNotCapable)
+		}
+	}
+
+	if setVideoInput {
+		if dev, ok := dev.(drivers.DeviceWithVideoInput); ok {
+			for output, input := range req.state.Inputs {
+				if input.Video == nil {
+					continue
+				}
+
+				wg.Add(1)
+				go func(output, input string) {
+					req.log.Info("Setting video input", zap.String("output", output), zap.String("input", input))
+					defer wg.Done()
+
+					if err := dev.SetVideoInput(ctx, output, input); err != nil {
+						handleErr(fmt.Sprintf("input.%s.video", output), input, err)
+						return
 					}
 
-					if input.AudioVideo != nil {
-						setAudioVideoInput = true
+					req.log.Info("Set video input", zap.String("output", output))
+
+					resp.Lock()
+					defer resp.Unlock()
+
+					if resp.state.Inputs == nil {
+						resp.state.Inputs = make(map[string]avcontrol.Input)
 					}
+
+					in := resp.state.Inputs[output]
+					in.Video = &input
+					resp.state.Inputs[output] = in
+				}(output, *input.Video)
+			}
+		} else {
+			handleErr("input.$.video", req.state.Inputs, ErrNotCapable)
+		}
+	}
+
+	if setAudioVideoInput {
+		if dev, ok := dev.(drivers.DeviceWithAudioVideoInput); ok {
+			for output, input := range req.state.Inputs {
+				if input.AudioVideo == nil {
+					continue
 				}
 
-				if setAudioInput {
-					if hasCapability(drivers.CapabilityAudioInput) {
-						for output, input := range req.state.Inputs {
-							if input.Audio == nil {
-								continue
-							}
+				wg.Add(1)
+				go func(output, input string) {
+					req.log.Info("Setting audioVideo input", zap.String("output", output), zap.String("input", input))
+					defer wg.Done()
 
-							inputReq := &drivers.SetInputRequest{
-								Info:   deviceInfo,
-								Output: output,
-								Input:  *input.Audio,
-							}
-
-							wg.Add(1)
-							spreadRequests()
-							go func() {
-								req.log.Info("Setting audio input", zap.String("output", inputReq.Output), zap.String("input", inputReq.Input))
-								defer wg.Done()
-
-								if _, err := req.driver.SetAudioInput(ctx, inputReq); err != nil {
-									driverErr(fmt.Sprintf("input.%s.audio", inputReq.Output), inputReq.Input, err)
-									return
-								}
-
-								req.log.Info("Set audio input", zap.String("output", inputReq.Output))
-
-								respMu.Lock()
-								defer respMu.Unlock()
-								in := resp.state.Inputs[inputReq.Output]
-								in.Audio = &inputReq.Input
-								resp.state.Inputs[inputReq.Output] = in
-							}()
-						}
-					} else {
-						driverErr("input.$.audio", req.state.Inputs, ErrNotCapable)
+					if err := dev.SetAudioVideoInput(ctx, output, input); err != nil {
+						handleErr(fmt.Sprintf("input.%s.audioVideo", output), input, err)
+						return
 					}
-				}
 
-				if setVideoInput {
-					if hasCapability(drivers.CapabilityVideoInput) {
-						for output, input := range req.state.Inputs {
-							if input.Video == nil {
-								continue
-							}
+					req.log.Info("Set audioVideo input", zap.String("output", output))
 
-							inputReq := &drivers.SetInputRequest{
-								Info:   deviceInfo,
-								Output: output,
-								Input:  *input.Video,
-							}
+					resp.Lock()
+					defer resp.Unlock()
 
-							wg.Add(1)
-							spreadRequests()
-							go func() {
-								req.log.Info("Setting video input", zap.String("output", inputReq.Output), zap.String("input", inputReq.Input))
-								defer wg.Done()
-
-								if _, err := req.driver.SetVideoInput(ctx, inputReq); err != nil {
-									driverErr(fmt.Sprintf("input.%s.video", inputReq.Output), inputReq.Input, err)
-									return
-								}
-
-								req.log.Info("Set video input", zap.String("output", inputReq.Output))
-
-								respMu.Lock()
-								defer respMu.Unlock()
-								in := resp.state.Inputs[inputReq.Output]
-								in.Video = &inputReq.Input
-								resp.state.Inputs[inputReq.Output] = in
-							}()
-						}
-					} else {
-						driverErr("input.$.video", req.state.Inputs, ErrNotCapable)
+					if resp.state.Inputs == nil {
+						resp.state.Inputs = make(map[string]avcontrol.Input)
 					}
+
+					in := resp.state.Inputs[output]
+					in.AudioVideo = &input
+					resp.state.Inputs[output] = in
+				}(output, *input.AudioVideo)
+			}
+		} else {
+			handleErr("input.$.audioVideo", req.state.Inputs, ErrNotCapable)
+		}
+	}
+
+	if req.state.Blanked != nil {
+		if dev, ok := dev.(drivers.DeviceWithBlank); ok {
+			wg.Add(1)
+
+			go func() {
+				req.log.Info("Setting blank", zap.Bool("blanked", *req.state.Blanked))
+				defer wg.Done()
+
+				if err := dev.SetBlank(ctx, *req.state.Blanked); err != nil {
+					handleErr("blanked", *req.state.Blanked, err)
+					return
 				}
 
-				if setAudioVideoInput {
-					if hasCapability(drivers.CapabilityAudioVideoInput) {
-						for output, input := range req.state.Inputs {
-							if input.AudioVideo == nil {
-								continue
-							}
+				req.log.Info("Set blank")
 
-							inputReq := &drivers.SetInputRequest{
-								Info:   deviceInfo,
-								Output: output,
-								Input:  *input.AudioVideo,
-							}
+				resp.Lock()
+				defer resp.Unlock()
+				resp.state.Blanked = req.state.Blanked
+			}()
+		} else {
+			handleErr("blanked", *req.state.Blanked, ErrNotCapable)
+		}
+	}
 
-							wg.Add(1)
-							spreadRequests()
-							go func() {
-								req.log.Info("Setting audioVideo input", zap.String("output", inputReq.Output), zap.String("input", inputReq.Input))
-								defer wg.Done()
+	if len(req.state.Volumes) > 0 {
+		if dev, ok := dev.(drivers.DeviceWithVolume); ok {
+			validBlocks := req.device.Ports.OfType("volume").Names()
+			for block, vol := range req.state.Volumes {
+				if !containsString(validBlocks, block) {
+					handleErr(fmt.Sprintf("volumes.%s", block), vol, ErrInvalidBlock)
+					continue
+				}
 
-								if _, err := req.driver.SetAudioVideoInput(ctx, inputReq); err != nil {
-									driverErr(fmt.Sprintf("input.%s.audioVideo", inputReq.Output), inputReq.Input, err)
-									return
-								}
+				wg.Add(1)
+				go func(block string, vol int) {
+					req.log.Info("Setting volume", zap.String("block", block), zap.Int("level", vol))
+					defer wg.Done()
 
-								req.log.Info("Set audioVideo input", zap.String("output", inputReq.Output))
-
-								respMu.Lock()
-								defer respMu.Unlock()
-								in := resp.state.Inputs[inputReq.Output]
-								in.AudioVideo = &inputReq.Input
-								resp.state.Inputs[inputReq.Output] = in
-							}()
-						}
-					} else {
-						driverErr("input.$.audioVideo", req.state.Inputs, ErrNotCapable)
+					if err := dev.SetVolume(ctx, block, vol); err != nil {
+						handleErr(fmt.Sprintf("volumes.%s", block), vol, err)
+						return
 					}
-				}
 
-				if req.state.Blanked != nil {
-					if hasCapability(drivers.CapabilityBlank) {
-						blankReq := &drivers.SetBlankRequest{
-							Info: deviceInfo,
-							Blank: &drivers.Blank{
-								Blanked: *req.state.Blanked,
-							},
-						}
+					req.log.Info("Set volume", zap.String("block", block))
 
-						wg.Add(1)
-						spreadRequests()
-						go func() {
-							req.log.Info("Setting blank", zap.Bool("blanked", blankReq.Blank.Blanked))
-							defer wg.Done()
+					resp.Lock()
+					defer resp.Unlock()
 
-							if _, err := req.driver.SetBlank(ctx, blankReq); err != nil {
-								driverErr("blanked", blankReq.Blank.Blanked, err)
-								return
-							}
-
-							req.log.Info("Set blank")
-
-							respMu.Lock()
-							defer respMu.Unlock()
-							resp.state.Blanked = &blankReq.Blank.Blanked
-						}()
-					} else {
-						driverErr("blanked", *req.state.Blanked, ErrNotCapable)
+					if resp.state.Volumes == nil {
+						resp.state.Volumes = make(map[string]int)
 					}
+
+					resp.state.Volumes[block] = vol
+				}(block, vol)
+			}
+		} else {
+			handleErr("volumes", req.state.Volumes, ErrNotCapable)
+		}
+	}
+
+	if len(req.state.Mutes) > 0 {
+		if dev, ok := dev.(drivers.DeviceWithMute); ok {
+			validBlocks := req.device.Ports.OfType("mute").Names()
+			for block, muted := range req.state.Mutes {
+				if !containsString(validBlocks, block) {
+					handleErr(fmt.Sprintf("mutes.%s", block), muted, ErrInvalidBlock)
+					continue
 				}
 
-				if len(req.state.Volumes) > 0 {
-					if hasCapability(drivers.CapabilityVolume) {
-						validBlocks := req.device.Ports.OfType("volume").Names()
+				wg.Add(1)
+				go func(block string, muted bool) {
+					req.log.Info("Setting mute", zap.String("block", block), zap.Bool("muted", muted))
+					defer wg.Done()
 
-						for block, vol := range req.state.Volumes {
-							if !containsString(validBlocks, block) {
-								driverErr(fmt.Sprintf("volumes.%s", block), int32(vol), ErrInvalidBlock)
-								continue
-							}
-
-							volReq := &drivers.SetVolumeRequest{
-								Info:  deviceInfo,
-								Block: block,
-								Level: int32(vol),
-							}
-
-							wg.Add(1)
-							spreadRequests()
-							go func() {
-								req.log.Info("Setting volume", zap.String("block", volReq.Block), zap.Int32("level", volReq.Level))
-								defer wg.Done()
-
-								if _, err := req.driver.SetVolume(ctx, volReq); err != nil {
-									driverErr(fmt.Sprintf("volumes.%s", volReq.Block), volReq.Level, err)
-									return
-								}
-
-								req.log.Info("Set volume", zap.String("block", volReq.Block))
-
-								respMu.Lock()
-								defer respMu.Unlock()
-								resp.state.Volumes[volReq.Block] = int(volReq.Level)
-							}()
-						}
-					} else {
-						driverErr("volumes", req.state.Volumes, ErrNotCapable)
+					if err := dev.SetMute(ctx, block, muted); err != nil {
+						handleErr(fmt.Sprintf("mutes.%s", block), muted, err)
+						return
 					}
-				}
 
-				if len(req.state.Mutes) > 0 {
-					if hasCapability(drivers.CapabilityMute) {
-						validBlocks := req.device.Ports.OfType("mute").Names()
+					req.log.Info("Set mute", zap.String("block", block))
 
-						for block, muted := range req.state.Mutes {
-							if !containsString(validBlocks, block) {
-								driverErr(fmt.Sprintf("mutes.%s", block), muted, ErrInvalidBlock)
-								continue
-							}
+					resp.Lock()
+					defer resp.Unlock()
 
-							muteReq := &drivers.SetMuteRequest{
-								Info:  deviceInfo,
-								Block: block,
-								Muted: muted,
-							}
-
-							wg.Add(1)
-							spreadRequests()
-							go func() {
-								req.log.Info("Setting mute", zap.String("block", muteReq.Block), zap.Bool("muted", muteReq.Muted))
-								defer wg.Done()
-
-								if _, err := req.driver.SetMute(ctx, muteReq); err != nil {
-									driverErr(fmt.Sprintf("mutes.%s", muteReq.Block), muteReq.Muted, err)
-									return
-								}
-
-								req.log.Info("Set mute", zap.String("block", muteReq.Block))
-
-								respMu.Lock()
-								defer respMu.Unlock()
-								resp.state.Mutes[muteReq.Block] = muteReq.Muted
-							}()
-						}
-					} else {
-						driverErr("mutes", req.state.Mutes, ErrNotCapable)
+					if resp.state.Mutes == nil {
+						resp.state.Mutes = make(map[string]bool)
 					}
-				}
 
-				wg.Wait()
+					resp.state.Mutes[block] = muted
+				}(block, muted)
+			}
+		} else {
+			handleErr("mutes", req.state.Mutes, ErrNotCapable)
+		}
+	}
 
-				// reset maps if they weren't used
-				if len(resp.state.Inputs) == 0 {
-					resp.state.Inputs = nil
-				}
+	wg.Wait()
 
-				if len(resp.state.Volumes) == 0 {
-					resp.state.Volumes = nil
-				}
-
-				if len(resp.state.Mutes) == 0 {
-					resp.state.Mutes = nil
-				}
-
-				req.log.Info("Finished setting state")
-		return resp
-	*/
-
-	return avcontrol.StateResponse{}, nil
+	req.log.Info("Finished setting state")
+	return resp
 }

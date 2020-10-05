@@ -117,6 +117,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 		})
 	}
 
+	// get every field possible
 	wg := sync.WaitGroup{}
 
 	if dev, ok := dev.(drivers.DeviceWithPower); ok {

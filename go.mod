@@ -18,7 +18,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.uber.org/zap v1.14.0
 	golang.org/x/crypto v0.0.0-20200204104054-c9f3fb736b72 // indirect
-	golang.org/x/mod v0.0.0-20190513183733-4bf6d317e70e
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
