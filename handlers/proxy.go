@@ -15,7 +15,7 @@ import (
 func (h *Handlers) Proxy(c *gin.Context) {
 	room := c.MustGet(_cRoom).(avcontrol.Room)
 
-	if h.Host == "" || strings.EqualFold(h.Host, room.Proxy.Host) {
+	if room.Proxy.Host == "" || h.Host == "" || strings.EqualFold(h.Host, room.Proxy.Host) {
 		c.Next()
 		return
 	}
