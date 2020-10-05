@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/byuoitav/av-control-api/api"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 func (h *Handlers) Proxy(c *gin.Context) {
-	room := c.MustGet(_cRoom).(api.Room)
+	room := c.MustGet(_cRoom).(avcontrol.Room)
 
 	if h.Host == "" || strings.EqualFold(h.Host, room.Proxy.Host) {
 		c.Next()

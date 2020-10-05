@@ -10,5 +10,7 @@ type Driver struct {
 }
 
 type Drivers interface {
+	MustRegister(string, *Driver)
 	Get(string) *Driver
+	List() []string
 }

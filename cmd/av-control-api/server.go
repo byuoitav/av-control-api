@@ -13,6 +13,7 @@ import (
 	"github.com/byuoitav/av-control-api/couch"
 	"github.com/byuoitav/av-control-api/drivers"
 	"github.com/byuoitav/av-control-api/handlers"
+	"github.com/byuoitav/av-control-api/state"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -66,10 +67,10 @@ func main() {
 	ds := dataService(ctx, dataServiceConfig)
 
 	// build the getsetter
-	// gs, err := state.New(ctx, ds, log)
-	//if err != nil {
-	//	log.Fatal("unable to build state get/setter", zap.Error(err))
-	//}
+	gs := &state.GetSetter{
+		Logger:  log,
+		Drivers: drivers,
+	}
 
 	// build http stuff
 	handlers := handlers.Handlers{
@@ -87,7 +88,8 @@ func main() {
 	debug.GET("/healthz", func(c *gin.Context) {
 		c.String(http.StatusOK, "healthy")
 	})
-	debug.GET("/statsz", handlers.Stats)
+	debug.GET("/statz", handlers.Stats)
+	debug.GET("/infoz", handlers.Info)
 	debug.GET("/logz", func(c *gin.Context) {
 		c.String(http.StatusOK, config.Level.String())
 	})

@@ -52,3 +52,16 @@ func (d *Drivers) Get(name string) *avcontrol.Driver {
 
 	return d.drivers[name]
 }
+
+// List returns the list of names that have been registered.
+func (d *Drivers) List() []string {
+	d.driversMu.RLock()
+	defer d.driversMu.RUnlock()
+
+	var list []string
+	for k := range d.drivers {
+		list = append(list, k)
+	}
+
+	return list
+}

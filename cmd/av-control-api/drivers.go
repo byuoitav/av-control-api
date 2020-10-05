@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/byuoitav/av-control-api/drivers"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/av-control-api/drivers/adcp"
 )
 
 // TODO wrap new functions
-func registerDrivers(d *drivers.Drivers) {
-	d.Register("sonyADCP", &drivers.Driver{
+func registerDrivers(d avcontrol.Drivers) {
+	d.MustRegister("sonyADCP", &avcontrol.Driver{
 		GetDevice: adcp.NewDevice,
 	})
 }

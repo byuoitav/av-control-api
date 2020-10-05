@@ -5,18 +5,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/byuoitav/av-control-api/api"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 func (h *Handlers) GetRoomConfiguration(c *gin.Context) {
-	room := c.MustGet(_cRoom).(api.Room)
+	room := c.MustGet(_cRoom).(avcontrol.Room)
 	c.JSON(http.StatusOK, room)
 }
 
 func (h *Handlers) GetRoomState(c *gin.Context) {
-	room := c.MustGet(_cRoom).(api.Room)
+	room := c.MustGet(_cRoom).(avcontrol.Room)
 	id := c.GetString(_cRequestID)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)
@@ -24,7 +24,7 @@ func (h *Handlers) GetRoomState(c *gin.Context) {
 
 	log := h.Logger
 	if len(id) > 0 {
-		ctx = api.WithRequestID(ctx, id)
+		ctx = avcontrol.WithRequestID(ctx, id)
 		log = log.With(zap.String("requestID", id))
 	}
 
@@ -42,13 +42,13 @@ func (h *Handlers) GetRoomState(c *gin.Context) {
 }
 
 func (h *Handlers) SetRoomState(c *gin.Context) {
-	var stateReq api.StateRequest
+	var stateReq avcontrol.StateRequest
 	if err := c.Bind(&stateReq); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	room := c.MustGet(_cRoom).(api.Room)
+	room := c.MustGet(_cRoom).(avcontrol.Room)
 	id := c.GetString(_cRequestID)
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 20*time.Second)
@@ -56,7 +56,7 @@ func (h *Handlers) SetRoomState(c *gin.Context) {
 
 	log := h.Logger
 	if len(id) > 0 {
-		ctx = api.WithRequestID(ctx, id)
+		ctx = avcontrol.WithRequestID(ctx, id)
 		log = log.With(zap.String("requestID", id))
 	}
 
