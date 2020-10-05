@@ -19,7 +19,7 @@ var (
 type getDeviceStateRequest struct {
 	id     avcontrol.DeviceID
 	device avcontrol.Device
-	driver *avcontrol.Driver
+	driver *drivers.Driver
 	log    *zap.Logger
 }
 

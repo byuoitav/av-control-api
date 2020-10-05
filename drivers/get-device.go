@@ -1,12 +1,13 @@
 package drivers
 
-/*
-type Server interface {
-	Serve(lis net.Listener) error
-	Stop(ctx context.Context) error
-}
+import (
+	"context"
+	sync "sync"
 
-func saveDevicesFunc(newDev avcontrol.GetDeviceFunc) avcontrol.GetDeviceFunc {
+	"golang.org/x/sync/singleflight"
+)
+
+func CacheDevices(get GetDeviceFunc) GetDeviceFunc {
 	devs := make(map[string]Device)
 	devsMu := sync.RWMutex{}
 	single := singleflight.Group{}
@@ -29,7 +30,7 @@ func saveDevicesFunc(newDev avcontrol.GetDeviceFunc) avcontrol.GetDeviceFunc {
 				return dev, nil
 			}
 
-			dev, err := newDev(ctx, addr)
+			dev, err := get(ctx, addr)
 			if err != nil {
 				return nil, err
 			}
@@ -47,4 +48,3 @@ func saveDevicesFunc(newDev avcontrol.GetDeviceFunc) avcontrol.GetDeviceFunc {
 		return val.(Device), nil
 	}
 }
-*/

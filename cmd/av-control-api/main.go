@@ -44,8 +44,6 @@ func main() {
 	pflag.BoolVar(&dataServiceConfig.Insecure, "db-insecure", false, "don't use SSL in database connection")
 	pflag.Parse()
 
-	fmt.Printf("dataServiceConfig: %+v\n", dataServiceConfig)
-
 	// build a logger
 	config, log := logger(logLevel)
 	defer log.Sync() // nolint:errcheck

@@ -21,7 +21,7 @@ type setDeviceStateRequest struct {
 	id     avcontrol.DeviceID
 	device avcontrol.Device
 	state  avcontrol.DeviceState
-	driver *avcontrol.Driver
+	driver *drivers.Driver
 	log    *zap.Logger
 }
 

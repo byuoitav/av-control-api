@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	avcontrol "github.com/byuoitav/av-control-api"
+	"github.com/byuoitav/av-control-api/drivers"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -13,7 +14,7 @@ type Handlers struct {
 	DataService avcontrol.DataService
 	Logger      *zap.Logger
 	State       avcontrol.StateGetSetter
-	Drivers     avcontrol.Drivers
+	Drivers     drivers.Drivers
 }
 
 func (h *Handlers) Stats(c *gin.Context) {

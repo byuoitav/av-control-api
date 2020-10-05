@@ -2,22 +2,6 @@ package drivers
 
 import "context"
 
-//type Capability string
-//
-//const (
-//	CapabilityPower           Capability = "Power"
-//	CapabilityAudioInput      Capability = "AudioInput"
-//	CapabilityVideoInput      Capability = "VideoInput"
-//	CapabilityAudioVideoInput Capability = "AudioVideoInput"
-//	CapabilityBlank           Capability = "Blank"
-//	CapabilityVolume          Capability = "Volume"
-//	CapabilityMute            Capability = "Mute"
-//	CapabilityInfo            Capability = "Info"
-//)
-
-// NewDeviceFunc is passed to NewServer and is called to create a new Device struct whenever the Server needs to control with a new Device.
-// type NewDeviceFunc func(context.Context, string) (Device, error)
-
 type Device interface{}
 
 type DeviceWithCapabilities interface {
