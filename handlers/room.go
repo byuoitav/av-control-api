@@ -37,6 +37,12 @@ func (h *Handlers) GetRoomState(c *gin.Context) {
 		return
 	}
 
+	if len(resp.Errors) > 0 {
+		log.Info("Got room state", zap.Int("numErrors", len(resp.Errors)))
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+
 	log.Info("Got room state")
 	c.JSON(http.StatusOK, resp)
 }
@@ -66,6 +72,12 @@ func (h *Handlers) SetRoomState(c *gin.Context) {
 	if err != nil {
 		log.Warn("failed to set room state", zap.Error(err))
 		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(resp.Errors) > 0 {
+		log.Info("Set room state", zap.Int("numErrors", len(resp.Errors)))
+		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 

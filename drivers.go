@@ -1,6 +1,8 @@
 package avcontrol
 
-import "context"
+import (
+	"context"
+)
 
 type DriverRegistry interface {
 	Register(string, Driver) error
@@ -11,4 +13,5 @@ type DriverRegistry interface {
 
 type Driver interface {
 	CreateDevice(context.Context, string) (Device, error)
+	ParseConfig(map[string]interface{}) error
 }

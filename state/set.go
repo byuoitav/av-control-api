@@ -136,25 +136,17 @@ func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse
 	// set every field in req.state
 	wg := sync.WaitGroup{}
 
+	// setting power happens before everything else is run
 	if req.state.PoweredOn != nil {
 		if dev, ok := dev.(avcontrol.DeviceWithPower); ok {
-			wg.Add(1)
+			req.log.Info("Setting power", zap.Bool("poweredOn", *req.state.PoweredOn))
 
-			go func() {
-				req.log.Info("Setting power", zap.Bool("poweredOn", *req.state.PoweredOn))
-				defer wg.Done()
-
-				if err := dev.SetPower(ctx, *req.state.PoweredOn); err != nil {
-					handleErr("poweredOn", *req.state.PoweredOn, err)
-					return
-				}
-
+			if err := dev.SetPower(ctx, *req.state.PoweredOn); err != nil {
+				handleErr("poweredOn", *req.state.PoweredOn, err)
+			} else {
 				req.log.Info("Set power")
-
-				resp.Lock()
-				defer resp.Unlock()
 				resp.state.PoweredOn = req.state.PoweredOn
-			}()
+			}
 		} else {
 			handleErr("poweredOn", *req.state.PoweredOn, ErrNotCapable)
 		}
