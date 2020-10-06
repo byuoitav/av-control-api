@@ -10,6 +10,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// TODO this should test the deviceCache
 func TestSavingDevices(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 

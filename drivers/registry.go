@@ -8,58 +8,63 @@ import (
 	avcontrol "github.com/byuoitav/av-control-api"
 )
 
-type drivers struct {
+type registry struct {
 	drivers   map[string]avcontrol.Driver
 	driversMu sync.RWMutex
 }
 
 func New() avcontrol.DriverRegistry {
-	return &drivers{
+	return &registry{
 		drivers: make(map[string]avcontrol.Driver),
 	}
 }
 
 // Register registers a driver with the given name. Name must not be empty.
-func (d *drivers) Register(name string, driver avcontrol.Driver) error {
+func (r *registry) Register(name string, driver avcontrol.Driver) error {
 	if name == "" {
 		return errors.New("driver must have a name")
 	}
 
-	d.driversMu.Lock()
-	defer d.driversMu.Unlock()
+	r.driversMu.Lock()
+	defer r.driversMu.Unlock()
 
 	// make sure this isn't a duplicate
-	if _, ok := d.drivers[name]; ok {
+	if _, ok := r.drivers[name]; ok {
 		return fmt.Errorf("driver %q already registered", name)
 	}
 
-	d.drivers[name] = driver
+	// wrap this driver with the deviceCache
+	r.drivers[name] = &deviceCache{
+		Driver: driver,
+		cache:  make(map[string]avcontrol.Device),
+	}
+
 	return nil
 }
 
 // MustRegister is like Register but panics if there is an error registering the driver.
-func (d *drivers) MustRegister(name string, driver avcontrol.Driver) {
-	if err := d.Register(name, driver); err != nil {
+func (r *registry) MustRegister(name string, driver avcontrol.Driver) {
+	if err := r.Register(name, driver); err != nil {
 		panic(err)
 	}
 }
 
 // Get returns the driver that was registered with name.
 // Returns nil if a matching driver has not been registered.
-func (d *drivers) Get(name string) avcontrol.Driver {
-	d.driversMu.RLock()
-	defer d.driversMu.RUnlock()
+func (r *registry) Get(name string) avcontrol.Driver {
+	r.driversMu.RLock()
+	defer r.driversMu.RUnlock()
 
-	return d.drivers[name]
+	return r.drivers[name]
 }
 
 // List returns the list of names that have been registered.
-func (d *drivers) List() []string {
-	d.driversMu.RLock()
-	defer d.driversMu.RUnlock()
+func (r *registry) List() []string {
+	r.driversMu.RLock()
+	defer r.driversMu.RUnlock()
 
 	var list []string
-	for k := range d.drivers {
+	for k := range r.drivers {
 		list = append(list, k)
 	}
 
