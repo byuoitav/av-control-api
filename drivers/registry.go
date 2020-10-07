@@ -3,20 +3,36 @@ package drivers
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	sync "sync"
 
 	avcontrol "github.com/byuoitav/av-control-api"
+	"gopkg.in/yaml.v2"
 )
 
 type registry struct {
+	configs map[string]map[string]interface{}
+
 	drivers   map[string]avcontrol.Driver
 	driversMu sync.RWMutex
 }
 
-func New() avcontrol.DriverRegistry {
-	return &registry{
+func New(configPath string) (avcontrol.DriverRegistry, error) {
+	r := &registry{
+		configs: make(map[string]map[string]interface{}),
 		drivers: make(map[string]avcontrol.Driver),
 	}
+
+	buf, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to read file: %w", err)
+	}
+
+	if err := yaml.Unmarshal(buf, &r.configs); err != nil {
+		return nil, fmt.Errorf("unable to parse config: %w", err)
+	}
+
+	return r, nil
 }
 
 // Register registers a driver with the given name. Name must not be empty.
@@ -30,7 +46,11 @@ func (r *registry) Register(name string, driver avcontrol.Driver) error {
 
 	// make sure this isn't a duplicate
 	if _, ok := r.drivers[name]; ok {
-		return fmt.Errorf("driver %q already registered", name)
+		return fmt.Errorf("driver/%s: already registered", name)
+	}
+
+	if err := driver.ParseConfig(r.configs[name]); err != nil {
+		return fmt.Errorf("driver/%s: unable to parse config: %w", name, err)
 	}
 
 	// wrap this driver with the deviceCache

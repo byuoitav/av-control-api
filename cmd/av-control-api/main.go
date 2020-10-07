@@ -27,10 +27,10 @@ type dataServiceConfig struct {
 
 func main() {
 	var (
-		port     int
-		logLevel string
-
-		host string
+		port             int
+		logLevel         string
+		host             string
+		driverConfigPath string
 
 		dataServiceConfig dataServiceConfig
 	)
@@ -38,6 +38,7 @@ func main() {
 	pflag.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.StringVarP(&logLevel, "log-level", "L", "", "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
 	pflag.StringVarP(&host, "host", "h", "", "host of this server. necessary to proxy requests")
+	pflag.StringVarP(&driverConfigPath, "driver-config", "c", "driver-config.yaml", "path to the driver config file")
 	pflag.StringVar(&dataServiceConfig.Addr, "db-address", "", "database address")
 	pflag.StringVar(&dataServiceConfig.Username, "db-username", "", "database username")
 	pflag.StringVar(&dataServiceConfig.Password, "db-password", "", "database password")
@@ -53,9 +54,14 @@ func main() {
 		log.Fatal("--host is required. use --help for more details")
 	}
 
-	// register all of the drivers
-	registry := drivers.New()
+	// build the driver registry
+	registry, err := drivers.New(driverConfigPath)
+	if err != nil {
+		log.Fatal("unable to create driver registry", zap.Error(err))
+	}
 	registerDrivers(registry)
+
+	log.Info("Registered drivers", zap.Strings("drivers", registry.List()))
 
 	// ctx for setup
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
