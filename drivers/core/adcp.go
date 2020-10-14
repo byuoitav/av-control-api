@@ -4,14 +4,16 @@ import (
 	"context"
 
 	"github.com/byuoitav/adcp-driver"
-	"github.com/byuoitav/av-control-api/drivers"
+	avcontrol "github.com/byuoitav/av-control-api"
 )
 
-func ParseADCPConfig(config map[string]interface{}) error {
+type SonyADCPDriver struct{}
+
+func (s *SonyADCPDriver) ParseConfig(config map[string]interface{}) error {
 	return nil
 }
 
-func GetADCPDevice(ctx context.Context, addr string) (drivers.Device, error) {
+func (s *SonyADCPDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
 	return &adcp.Projector{
 		Address: addr,
 	}, nil

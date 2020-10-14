@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/byuoitav/atlona-driver"
-	"github.com/byuoitav/av-control-api/drivers"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/wspool"
 )
 
@@ -15,22 +15,20 @@ import (
 // 	}, nil
 // }
 
-type atlonaBoy struct {
+type AtlonaDriver struct {
 	Username string
 	Password string
 	// lol i don't think we can get a logger
 	Log wspool.Logger
 }
 
-var bestBoy atlonaBoy
-
-func ParseConfig(config map[string]interface{}) error {
+func (a *AtlonaDriver) ParseConfig(config map[string]interface{}) error {
 	if username, ok := config["username"].(string); ok {
 		if username == "" {
 			return errors.New("given empty username")
 		}
 
-		bestBoy.Username = username
+		a.Username = username
 	}
 
 	if password, ok := config["password"].(string); ok {
@@ -38,7 +36,7 @@ func ParseConfig(config map[string]interface{}) error {
 			return errors.New("given empty password")
 		}
 
-		bestBoy.Password = password
+		a.Password = password
 	}
 
 	//something something logger
@@ -46,6 +44,6 @@ func ParseConfig(config map[string]interface{}) error {
 	return nil
 }
 
-func GetAtlonaDevice(ctx context.Context, addr, username, password string, log wspool.Logger) (drivers.Device, error) {
-	return atlona.CreateVideoSwitcher(ctx, addr, bestBoy.Username, bestBoy.Password, log)
+func (a *AtlonaDriver) CreateDevice(ctx context.Context, addr, username, password string, log wspool.Logger) (avcontrol.Device, error) {
+	return atlona.CreateVideoSwitcher(ctx, addr, a.Username, a.Password, log)
 }

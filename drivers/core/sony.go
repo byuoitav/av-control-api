@@ -4,31 +4,29 @@ import (
 	"context"
 	"errors"
 
-	"github.com/byuoitav/av-control-api/drivers"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/sonyrest-driver"
 )
 
-type sonyBoy struct {
+type SonyDriver struct {
 	PSK string
 }
 
-var otherBoy sonyBoy
-
-func ParseSonyConfig(config map[string]interface{}) error {
+func (s *SonyDriver) ParseConfig(config map[string]interface{}) error {
 	if psk, ok := config["psk"].(string); ok {
 		if psk == "" {
 			return errors.New("given empty psk")
 		}
 
-		otherBoy.PSK = psk
+		s.PSK = psk
 	}
 
 	return nil
 }
 
-func GetSonyDevice(ctx context.Context, addr string) (drivers.Device, error) {
+func (s *SonyDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
 	return &sonyrest.TV{
 		Address: addr,
-		PSK:     otherBoy.PSK,
+		PSK:     s.PSK,
 	}, nil
 }

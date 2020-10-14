@@ -3,15 +3,17 @@ package core
 import (
 	"context"
 
-	"github.com/byuoitav/av-control-api/drivers"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/justaddpower-driver"
 )
 
-func ParseJAPConfig(config map[string]interface{}) error {
+type JAPDriver struct{}
+
+func (j *JAPDriver) ParseConfig(config map[string]interface{}) error {
 	return nil
 }
 
-func GetJAPDevice(ctx context.Context, addr string) (drivers.Device, error) {
+func (j *JAPDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
 	return &justaddpower.JustAddPowerReciever{
 		Address: addr,
 	}, nil
