@@ -4,7 +4,16 @@ go 1.14
 
 require (
 	github.com/byuoitav/adcp-driver v0.1.1
+	github.com/byuoitav/atlona-driver v1.5.7
 	github.com/byuoitav/av-control-api/api v0.0.0-20200824162301-775202bed269
+	github.com/byuoitav/justaddpower-driver v0.1.3
+	github.com/byuoitav/keydigital-driver v0.0.9
+	github.com/byuoitav/kramer-driver v0.1.12
+	github.com/byuoitav/london-driver v0.1.2
+	github.com/byuoitav/nec-driver v1.0.0
+	github.com/byuoitav/qsc-driver v0.1.6
+	github.com/byuoitav/sonyrest-driver v0.1.8
+	github.com/byuoitav/wspool v0.1.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kivik/couchdb/v3 v3.1.0
 	github.com/go-kivik/kivik/v3 v3.1.1
@@ -23,5 +32,5 @@ require (
 	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 )
