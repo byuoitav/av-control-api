@@ -7,7 +7,11 @@ import (
 	"github.com/byuoitav/justaddpower-driver"
 )
 
-func GetJustAddPowerDevice(ctx context.Context, addr string) (drivers.Device, error) {
+func ParseJAPConfig(config map[string]interface{}) error {
+	return nil
+}
+
+func GetJAPDevice(ctx context.Context, addr string) (drivers.Device, error) {
 	return &justaddpower.JustAddPowerReciever{
 		Address: addr,
 	}, nil

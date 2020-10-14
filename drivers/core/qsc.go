@@ -7,6 +7,10 @@ import (
 	"github.com/byuoitav/qsc-driver"
 )
 
+func ParseQSCConfig(config map[string]interface{}) error {
+	return nil
+}
+
 func GetQSCDevice(ctx context.Context, addr string) (drivers.Device, error) {
 	return &qsc.DSP{
 		Address: addr,
