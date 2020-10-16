@@ -3,9 +3,11 @@ package main
 import (
 	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/av-control-api/drivers/adcp"
+	"go.uber.org/zap"
 )
 
-// TODO wrap new functions
-func registerDrivers(d avcontrol.DriverRegistry) {
-	d.MustRegister("sonyADCP", &adcp.SonyADCPDriver{})
+func registerDrivers(d avcontrol.DriverRegistry, log *zap.Logger) {
+	d.MustRegister("sonyADCP", &adcp.SonyADCPDriver{
+		Log: log.Named("drivers/sonyADCP"),
+	})
 }

@@ -6,9 +6,11 @@ import (
 
 	"github.com/byuoitav/adcp-driver"
 	avcontrol "github.com/byuoitav/av-control-api"
+	"go.uber.org/zap"
 )
 
 type SonyADCPDriver struct {
+	Log      *zap.Logger
 	username string
 }
 

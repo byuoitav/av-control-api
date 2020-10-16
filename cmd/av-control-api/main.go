@@ -59,7 +59,7 @@ func main() {
 	if err != nil {
 		log.Fatal("unable to create driver registry", zap.Error(err))
 	}
-	registerDrivers(registry)
+	registerDrivers(registry, log)
 
 	log.Info("Registered drivers", zap.Strings("drivers", registry.List()))
 
