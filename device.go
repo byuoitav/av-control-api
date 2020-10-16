@@ -2,6 +2,7 @@ package avcontrol
 
 import "context"
 
+// TODO all of these interfaces should delete the `Get` prefix
 type (
 	Device interface{}
 
@@ -38,5 +39,10 @@ type (
 	DeviceWithMute interface {
 		GetMutes(ctx context.Context, blocks []string) (map[string]bool, error)
 		SetMute(context.Context, string, bool) error
+	}
+
+	DeviceWithHealth interface {
+		// Healthy returns a nil error if the device is healthy.
+		Healthy(context.Context) error
 	}
 )

@@ -67,16 +67,11 @@ func (gs *GetSetter) Get(ctx context.Context, room avcontrol.RoomConfig) (avcont
 		}()
 	}
 
-	received := 0
-	for resp := range resps {
-		received++
+	for i := 0; i < len(room.Devices); i++ {
+		resp := <-resps
 
 		stateResp.Devices[resp.id] = resp.state
 		stateResp.Errors = append(stateResp.Errors, resp.errors...)
-
-		if received == len(room.Devices) {
-			break
-		}
 	}
 
 	sortErrors(stateResp.Errors)

@@ -9,4 +9,7 @@ type StateGetSetter interface {
 
 	// Set sets the state for the given Room, based on the data in the StateRequest.
 	Set(context.Context, RoomConfig, StateRequest) (StateResponse, error)
+
+	// GetHealth returns the health status of the room
+	GetHealth(context.Context, RoomConfig) (RoomHealth, error)
 }

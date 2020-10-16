@@ -114,6 +114,7 @@ func main() {
 	room := api.Group("/room", handlers.Room, handlers.Proxy)
 	room.GET("/:room", handlers.GetRoomConfiguration)
 	room.GET("/:room/state", handlers.GetRoomState)
+	room.GET("/:room/health", handlers.GetRoomHealth)
 	room.PUT("/:room/state", handlers.SetRoomState)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
