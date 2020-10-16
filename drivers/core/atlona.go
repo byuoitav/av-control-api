@@ -44,6 +44,6 @@ func (a *AtlonaDriver) ParseConfig(config map[string]interface{}) error {
 	return nil
 }
 
-func (a *AtlonaDriver) CreateDevice(ctx context.Context, addr, username, password string, log wspool.Logger) (avcontrol.Device, error) {
-	return atlona.CreateVideoSwitcher(ctx, addr, a.Username, a.Password, log)
+func (a *AtlonaDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
+	return atlona.CreateVideoSwitcher(ctx, addr, a.Username, a.Password, a.Log)
 }
