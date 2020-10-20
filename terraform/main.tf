@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket     = "terraform-state-storage-586877430255"
-    lock_table = "terraform-state-lock-586877430255"
+    dynamodb_table = "terraform-state-lock-586877430255"
     region     = "us-west-2"
 
     // THIS MUST BE UNIQUE
