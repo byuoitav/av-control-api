@@ -14,7 +14,7 @@ func registerDrivers(d avcontrol.DriverRegistry, log *zap.Logger) {
 	// d.MustRegister("Atlona", &core.AtlonaDriver{})
 	d.MustRegister("JAP", &core.JAPDriver{})
 	// d.MustRegister("KeyDigital", &core.KeyDigitalDriver{})
-	d.MustRegister("kramer", &core.KramerDriver{})
+	d.MustRegister("kramer/protocol3000", &core.KramerProtocol3000Driver{})
 	// d.MustRegister("London", &core.LondonDriver{})
 	// d.MustRegister("NEC", &core.NECDriver{})
 	d.MustRegister("QSC", &core.QSCDriver{})
