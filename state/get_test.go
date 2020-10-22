@@ -11,6 +11,7 @@ import (
 	"github.com/byuoitav/av-control-api/drivers/drivertest"
 	"github.com/byuoitav/av-control-api/drivers/mock"
 	"github.com/google/go-cmp/cmp"
+	"github.com/matryer/is"
 	"go.uber.org/zap"
 )
 
@@ -696,6 +697,8 @@ func TestGetState(t *testing.T) {
 
 	for _, tt := range getTests {
 		t.Run(tt.name, func(t *testing.T) {
+			is := is.New(t)
+
 			// build the room from the driver config
 			room := api.Room{
 				Devices: make(map[api.DeviceID]api.Device),
@@ -730,9 +733,7 @@ func TestGetState(t *testing.T) {
 			// start a driver server
 			server := drivertest.NewServer(tt.driver.NewDeviceFunc())
 			conn, err := server.GRPCClientConn(ctx)
-			if err != nil {
-				t.Fatalf("unable to get grpc client connection: %s", err)
-			}
+			is.NoErr(err)
 
 			// build the getSetter
 			gs := &getSetter{
@@ -750,14 +751,8 @@ func TestGetState(t *testing.T) {
 
 			// get the state of this room
 			resp, err := gs.Get(ctx, room)
-			if err != nil {
-				t.Fatalf("unable to get room state: %s", err)
-			}
-
-			// compare the expected response to what we got
-			if diff := cmp.Diff(tt.apiResp, resp); diff != "" {
-				t.Errorf("generated incorrect response (-want, +got):\n%s", diff)
-			}
+			is.NoErr(err)
+			is.Equal(tt.apiResp, resp)
 		})
 	}
 }

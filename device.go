@@ -45,4 +45,16 @@ type (
 		// Healthy returns a nil error if the device is healthy.
 		Healthy(context.Context) error
 	}
+
+	DeviceWithInfo interface {
+		// Info returns a struct of info about the device.
+		Info(context.Context) (interface{}, error)
+	}
+
+	/* TODO gotta figure out what we want from active signal - video, audio...?
+	DeviceWithActiveSignal interface {
+		// ActiveVideoSignal returns true if the current
+		ActiveVideoSignal(context.Context) (map[string]bool, error)
+	}
+	*/
 )
