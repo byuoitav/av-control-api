@@ -121,7 +121,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			req.log.Info("Getting power")
 			defer wg.Done()
 
-			power, err := dev.GetPower(ctx)
+			power, err := dev.Power(ctx)
 			if err != nil {
 				handleErr("power", err)
 				return
@@ -142,7 +142,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			req.log.Info("Getting audio inputs")
 			defer wg.Done()
 
-			inputs, err := dev.GetAudioInputs(ctx)
+			inputs, err := dev.AudioInputs(ctx)
 			if err != nil {
 				handleErr("inputs.$.audio", err)
 				return
@@ -173,7 +173,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			req.log.Info("Getting video inputs")
 			defer wg.Done()
 
-			inputs, err := dev.GetVideoInputs(ctx)
+			inputs, err := dev.VideoInputs(ctx)
 			if err != nil {
 				handleErr("inputs.$.video", err)
 				return
@@ -204,7 +204,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			req.log.Info("Getting audioVideo inputs")
 			defer wg.Done()
 
-			inputs, err := dev.GetAudioVideoInputs(ctx)
+			inputs, err := dev.AudioVideoInputs(ctx)
 			if err != nil {
 				handleErr("inputs.$.audioVideo", err)
 				return
@@ -235,7 +235,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			req.log.Info("Getting blank")
 			defer wg.Done()
 
-			blank, err := dev.GetBlank(ctx)
+			blank, err := dev.Blank(ctx)
 			if err != nil {
 				handleErr("blank", err)
 				return
@@ -256,7 +256,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			req.log.Info("Getting volumes")
 			defer wg.Done()
 
-			vols, err := dev.GetVolumes(ctx, req.device.Ports.OfType("volume").Names())
+			vols, err := dev.Volumes(ctx, req.device.Ports.OfType("volume").Names())
 			if err != nil {
 				handleErr("volumes", err)
 				return
@@ -277,7 +277,7 @@ func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse
 			req.log.Info("Getting mutes")
 			defer wg.Done()
 
-			mutes, err := dev.GetMutes(ctx, req.device.Ports.OfType("mute").Names())
+			mutes, err := dev.Mutes(ctx, req.device.Ports.OfType("mute").Names())
 			if err != nil {
 				handleErr("mutes", err)
 				return
