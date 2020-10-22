@@ -3,7 +3,7 @@ package state
 import (
 	"testing"
 
-	"github.com/byuoitav/av-control-api/api"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -11,10 +11,14 @@ func boolP(b bool) *bool {
 	return &b
 }
 
+func stringP(s string) *string {
+	return &s
+}
+
 type sortErrorsTest struct {
 	name string
-	in   []api.DeviceStateError
-	out  []api.DeviceStateError
+	in   []avcontrol.DeviceStateError
+	out  []avcontrol.DeviceStateError
 }
 
 type containsStringTest struct {
@@ -30,7 +34,7 @@ var sortErrorsTests = []sortErrorsTest{
 	},
 	{
 		name: "ID",
-		in: []api.DeviceStateError{
+		in: []avcontrol.DeviceStateError{
 			{
 				ID: "ITB-1101-D3",
 			},
@@ -44,7 +48,7 @@ var sortErrorsTests = []sortErrorsTest{
 				ID: "ITB-1101-D2",
 			},
 		},
-		out: []api.DeviceStateError{
+		out: []avcontrol.DeviceStateError{
 			{
 				ID: "ITB-1101-D1",
 			},
@@ -61,7 +65,7 @@ var sortErrorsTests = []sortErrorsTest{
 	},
 	{
 		name: "IDAndField",
-		in: []api.DeviceStateError{
+		in: []avcontrol.DeviceStateError{
 			{
 				ID:    "ITB-1101-D2",
 				Field: "volumes.aux",
@@ -79,7 +83,7 @@ var sortErrorsTests = []sortErrorsTest{
 				Field: "volumes.aux",
 			},
 		},
-		out: []api.DeviceStateError{
+		out: []avcontrol.DeviceStateError{
 			{
 				ID:    "ITB-1101-D1",
 				Field: "mutes.aux",
@@ -100,7 +104,7 @@ var sortErrorsTests = []sortErrorsTest{
 	},
 	{
 		name: "IDAndFieldAndError",
-		in: []api.DeviceStateError{
+		in: []avcontrol.DeviceStateError{
 			{
 				ID: "ITB-1101-D3",
 			},
@@ -123,7 +127,7 @@ var sortErrorsTests = []sortErrorsTest{
 				Field: "volumes.aux",
 			},
 		},
-		out: []api.DeviceStateError{
+		out: []avcontrol.DeviceStateError{
 			{
 				ID:    "ITB-1101-D1",
 				Field: "blank",
