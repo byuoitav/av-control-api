@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	avcontrol "github.com/byuoitav/av-control-api"
-	"github.com/byuoitav/sonyrest-driver"
+	"github.com/byuoitav/sony/bravia"
 )
 
 type SonyDriver struct {
@@ -25,7 +25,7 @@ func (s *SonyDriver) ParseConfig(config map[string]interface{}) error {
 }
 
 func (s *SonyDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
-	return &sonyrest.TV{
+	return &bravia.TV{
 		Address: addr,
 		PSK:     s.PSK,
 	}, nil

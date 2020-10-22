@@ -3,8 +3,8 @@ package core
 import (
 	"context"
 
-	"github.com/byuoitav/adcp-driver"
 	avcontrol "github.com/byuoitav/av-control-api"
+	"github.com/byuoitav/sony/adcp/commonrest"
 	"go.uber.org/zap"
 )
 

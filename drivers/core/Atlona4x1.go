@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/byuoitav/atlona-driver"
+	"github.com/byuoitav/atlona/AT-JUNO-451-HDBT"
 	avcontrol "github.com/byuoitav/av-control-api"
 	"go.uber.org/zap"
 )

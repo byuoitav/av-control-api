@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	avcontrol "github.com/byuoitav/av-control-api"
-	"github.com/byuoitav/kramer-driver"
+	"github.com/byuoitav/kramer/via"
 	"go.uber.org/zap"
 )
 
@@ -36,7 +36,7 @@ func (k *KramerViaDriver) ParseConfig(config map[string]interface{}) error {
 }
 
 func (k *KramerViaDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
-	return &kramer.Via{
+	return &via.Via{
 		Address:  addr,
 		Username: k.Username,
 		Password: k.Password,
