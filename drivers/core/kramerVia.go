@@ -1,0 +1,45 @@
+package core
+
+import (
+	"context"
+	"errors"
+
+	avcontrol "github.com/byuoitav/av-control-api"
+	"github.com/byuoitav/kramer-driver"
+	"go.uber.org/zap"
+)
+
+type KramerViaDriver struct {
+	Log      *zap.Logger
+	Username string
+	Password string
+}
+
+func (k *KramerViaDriver) ParseConfig(config map[string]interface{}) error {
+	if username, ok := config["username"].(string); ok {
+		if username == "" {
+			return errors.New("given empty username")
+		}
+
+		k.Username = username
+	}
+
+	if password, ok := config["password"].(string); ok {
+		if password == "" {
+			return errors.New("given empty password")
+		}
+
+		k.Password = password
+	}
+
+	return nil
+}
+
+func (k *KramerViaDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
+	return &kramer.Via{
+		Address:  addr,
+		Username: k.Username,
+		Password: k.Password,
+		Logger:   k.Log.Sugar(),
+	}, nil
+}

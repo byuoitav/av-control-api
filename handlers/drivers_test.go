@@ -44,7 +44,7 @@ func TestStatsPass(t *testing.T) {
 
 	err = json.Unmarshal(body, &states)
 	if err != nil {
-		t.Fatalf("error unmarshaling json: %s", err)
+		t.Fatalf("error unmarshaling json: %s %s", err, body)
 	}
 
 	if states["driverStates"]["key"] != "val" {
