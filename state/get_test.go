@@ -71,97 +71,125 @@ var getTests = []getStateTest{
 			},
 		},
 	},
-	/*
-		{
-			name: "SeparateVolumeMute",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					"ITB-1101-D1": &mock.Device{
-						On: boolP(false),
-						AudioVideoInputs: map[string]string{
-							"out": "hdmi3",
-						},
-						Blanked: boolP(true),
-						Volumes: map[string]int{
-							"headphones": 12,
-						},
-						Mutes: map[string]bool{
-							"aux": true,
+	{
+		name: "SeparateVolumeMute",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D1": mock.TV{
+					WithPower: mock.WithPower{
+						PoweredOn: false,
+					},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"out": "hdmi1",
 						},
 					},
-				},
-			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"ITB-1101-D1": {
-						PoweredOn: boolP(false),
-						Inputs: map[string]api.Input{
-							"out": {
-								AudioVideo: stringP("hdmi3"),
-							},
+					WithBlank: mock.WithBlank{
+						Blanked: false,
+					},
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"headphones": 42,
 						},
-						Blanked: boolP(true),
-						Volumes: map[string]int{
-							"headphones": 12,
-						},
-						Mutes: map[string]bool{
-							"aux": true,
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"aux": false,
 						},
 					},
 				},
 			},
 		},
-		{
-			name: "SimpleSeparateInput",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					"ITB-1101-D1": &mock.Device{
-						On:          boolP(true),
-						AudioInputs: map[string]string{"": "hdmi2"},
-						VideoInputs: map[string]string{"": "hdmi4"},
-						Blanked:     boolP(false),
-						Volumes: map[string]int{
-							"": 77,
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D1": {
+					PoweredOn: boolP(false),
+					Inputs: map[string]avcontrol.Input{
+						"out": {
+							AudioVideo: stringP("hdmi1"),
 						},
-						Mutes: map[string]bool{
-							"": false,
-						},
+					},
+					Blanked: boolP(false),
+					Volumes: map[string]int{
+						"headphones": 42,
+					},
+					Mutes: map[string]bool{
+						"aux": false,
 					},
 				},
 			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"ITB-1101-D1": {
-						PoweredOn: boolP(true),
-						Inputs: map[string]api.Input{
-							"": {
-								Audio: stringP("hdmi2"),
-								Video: stringP("hdmi4"),
-							},
+		},
+	},
+	{
+		name: "SimpleSeparateInput",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D1": mock.TVSeparateInput{
+					WithPower: mock.WithPower{
+						PoweredOn: true,
+					},
+					WithAudioInput: mock.WithAudioInput{
+						Inputs: map[string]string{
+							"": "hdmi2",
 						},
-						Blanked: boolP(false),
-						Volumes: map[string]int{
+					},
+					WithVideoInput: mock.WithVideoInput{
+						Inputs: map[string]string{
+							"": "hdmi4",
+						},
+					},
+					WithBlank: mock.WithBlank{
+						Blanked: false,
+					},
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
 							"": 77,
 						},
-						Mutes: map[string]bool{
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
 							"": false,
 						},
 					},
 				},
 			},
 		},
-		{
-			name: "VideoSwitcherSeparateInputs",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					"ITB-1101-D1": &mock.Device{
-						AudioInputs: map[string]string{
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D1": {
+					PoweredOn: boolP(true),
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							Audio: stringP("hdmi2"),
+							Video: stringP("hdmi4"),
+						},
+					},
+					Blanked: boolP(false),
+					Volumes: map[string]int{
+						"": 77,
+					},
+					Mutes: map[string]bool{
+						"": false,
+					},
+				},
+			},
+		},
+	},
+	{
+		name: "VideoSwitcherSeparateInputs",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-SW1": mock.VideoSwitcher{
+					WithAudioInput: mock.WithAudioInput{
+						Inputs: map[string]string{
 							"1": "in1",
 							"2": "in2",
 							"3": "in3",
 							"4": "in4",
 						},
-						VideoInputs: map[string]string{
+					},
+					WithVideoInput: mock.WithVideoInput{
+						Inputs: map[string]string{
 							"1": "in4",
 							"2": "in3",
 							"3": "in2",
@@ -170,31 +198,33 @@ var getTests = []getStateTest{
 					},
 				},
 			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"ITB-1101-D1": {
-						Inputs: map[string]api.Input{
-							"1": {
-								Audio: stringP("in1"),
-								Video: stringP("in4"),
-							},
-							"2": {
-								Audio: stringP("in2"),
-								Video: stringP("in3"),
-							},
-							"3": {
-								Audio: stringP("in3"),
-								Video: stringP("in2"),
-							},
-							"4": {
-								Audio: stringP("in4"),
-								Video: stringP("in1"),
-							},
+		},
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-SW1": {
+					Inputs: map[string]avcontrol.Input{
+						"1": {
+							Audio: stringP("in1"),
+							Video: stringP("in4"),
+						},
+						"2": {
+							Audio: stringP("in2"),
+							Video: stringP("in3"),
+						},
+						"3": {
+							Audio: stringP("in3"),
+							Video: stringP("in2"),
+						},
+						"4": {
+							Audio: stringP("in4"),
+							Video: stringP("in1"),
 						},
 					},
 				},
 			},
 		},
+	},
+	/*
 		{
 			name: "SimpleSeparateInput",
 			driver: drivertest.Driver{

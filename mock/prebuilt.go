@@ -8,6 +8,15 @@ type TV struct {
 	WithMute
 }
 
+type TVSeparateInput struct {
+	WithPower
+	WithAudioInput
+	WithVideoInput
+	WithBlank
+	WithVolume
+	WithMute
+}
+
 type Projector struct {
 	WithPower
 	WithAudioVideoInput
