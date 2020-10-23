@@ -19,7 +19,7 @@ func (d WithPower) SetPower(ctx context.Context, poweredOn bool) error {
 		d.PoweredOn = poweredOn
 	}
 
-	return d.Error
+	return d.SetError
 }
 
 type WithAudioInput struct {
@@ -91,7 +91,7 @@ func (d WithBlank) SetBlank(ctx context.Context, blanked bool) error {
 		d.Blanked = blanked
 	}
 
-	return d.Error
+	return d.SetError
 }
 
 type WithVolume struct {

@@ -32,7 +32,7 @@ type setDeviceStateResponse struct {
 }
 
 func (gs *GetSetter) Set(ctx context.Context, room avcontrol.RoomConfig, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
-	if len(room.Devices) == 0 {
+	if len(room.Devices) == 0 || len(req.Devices) == 0 {
 		return avcontrol.StateResponse{}, nil
 	}
 
