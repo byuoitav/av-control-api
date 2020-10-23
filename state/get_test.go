@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -224,177 +225,278 @@ var getTests = []getStateTest{
 			},
 		},
 	},
-	/*
-		{
-			name: "SimpleSeparateInput",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					"ITB-1101-D1": &mock.Device{
-						AudioVideoInputs: map[string]string{"": "hdmi1"},
-						On:               boolP(true),
-						Blanked:          boolP(false),
-						Volumes:          map[string]int{"": 50},
-						Mutes:            map[string]bool{"": false},
+	{
+		name: "BasicVideoSwitcherRoom",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D1": mock.TV{
+					WithPower: mock.WithPower{
+						PoweredOn: true,
 					},
-					"ITB-1101-SW1": &mock.Device{
-						AudioVideoInputs: map[string]string{
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "hdmi1",
+						},
+					},
+					WithBlank: mock.WithBlank{
+						Blanked: false,
+					},
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 50,
+						},
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": false,
+						},
+					},
+				},
+				"ITB-1101-SW1": mock.BasicVideoSwitcher{
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
 							"1": "hdmi1",
 						},
 					},
-					"ITB-1101-AMP1": &mock.Device{
-						Volumes: map[string]int{"": 30},
-						Mutes:   map[string]bool{"": false},
-					},
-					"ITB-1101-HDMI1": &mock.Device{},
 				},
-			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"ITB-1101-D1": {
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("hdmi1"),
-							},
-						},
-						PoweredOn: boolP(true),
-						Blanked:   boolP(false),
-						Volumes:   map[string]int{"": 50},
-						Mutes:     map[string]bool{"": false},
-					},
-					"ITB-1101-SW1": {
-						Inputs: map[string]api.Input{
-							"1": {
-								AudioVideo: stringP("hdmi1"),
-							},
+				"ITB-1101-AMP1": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 30,
 						},
 					},
-					"ITB-1101-AMP1": {
-						Volumes: map[string]int{"": 30},
-						Mutes:   map[string]bool{"": false},
-					},
-					"ITB-1101-HDMI1": {},
-				},
-			},
-		},
-		{
-			name: "6x2SeparateInput",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					//Projector
-					"ITB-1101-D1": &mock.Device{
-						On:               boolP(true),
-						AudioVideoInputs: map[string]string{"": "hdmi1"},
-						Blanked:          boolP(false),
-					},
-					"ITB-1101-D2": &mock.Device{
-						On:               boolP(true),
-						AudioVideoInputs: map[string]string{"": "hdbaset"},
-						Blanked:          boolP(true),
-					},
-					"ITB-1101-SW1": &mock.Device{
-						AudioInputs: map[string]string{
-							"1": "hdmi1",
-							"2": "hdbaset",
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": false,
 						},
-						VideoInputs: map[string]string{
-							"1": "hdbaset",
-							"2": "hdmi1",
-						},
-					},
-					"ITB-1101-VIA1": &mock.Device{
-						Volumes: map[string]int{"": 69},
-						Mutes:   map[string]bool{"": false},
-					},
-					"ITB-1101-HDMI1": &mock.Device{
-						Volumes: map[string]int{"": 50},
-						Mutes:   map[string]bool{"": true},
-					},
-				},
-			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"ITB-1101-D1": {
-						PoweredOn: boolP(true),
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("hdmi1"),
-							},
-						},
-						Blanked: boolP(false),
-					},
-					"ITB-1101-D2": {
-						PoweredOn: boolP(true),
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("hdbaset"),
-							},
-						},
-						Blanked: boolP(true),
-					},
-					"ITB-1101-SW1": {
-						Inputs: map[string]api.Input{
-							"1": {
-								Audio: stringP("hdmi1"),
-								Video: stringP("hdbaset"),
-							},
-							"2": {
-								Audio: stringP("hdbaset"),
-								Video: stringP("hdmi1"),
-							},
-						},
-					},
-					"ITB-1101-VIA1": {
-						Volumes: map[string]int{"": 69},
-						Mutes:   map[string]bool{"": false},
-					},
-					"ITB-1101-HDMI1": {
-						Volumes: map[string]int{"": 50},
-						Mutes:   map[string]bool{"": true},
 					},
 				},
 			},
 		},
-		{
-			name: "JustAddPower",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					"ITB-1101-D1": &mock.Device{
-						On:               boolP(true),
-						AudioVideoInputs: map[string]string{"": "hdmi1"},
-						Blanked:          boolP(true),
-						Volumes:          map[string]int{"": 50},
-						Mutes:            map[string]bool{"": true},
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D1": {
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi1"),
+						},
 					},
-					"ITB-1101-D2": &mock.Device{
-						On:               boolP(true),
-						AudioVideoInputs: map[string]string{"": "hdmi2"},
-						Blanked:          boolP(false),
-						Volumes:          map[string]int{"": 80},
-						Mutes:            map[string]bool{"": false},
+					PoweredOn: boolP(true),
+					Blanked:   boolP(false),
+					Volumes:   map[string]int{"": 50},
+					Mutes:     map[string]bool{"": false},
+				},
+				"ITB-1101-SW1": {
+					Inputs: map[string]avcontrol.Input{
+						"1": {
+							AudioVideo: stringP("hdmi1"),
+						},
 					},
-					"ITB-1101-D3": &mock.Device{
-						On: boolP(false),
+				},
+				"ITB-1101-AMP1": {
+					Volumes: map[string]int{"": 30},
+					Mutes:   map[string]bool{"": false},
+				},
+			},
+		},
+	},
+	{
+		name: "6x2SeparateInput",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D1": mock.Projector{
+					WithPower: mock.WithPower{
+						PoweredOn: true,
 					},
-					"ITB-1101-RX1": &mock.Device{
-						AudioVideoInputs: map[string]string{"": "10.66.78.155"},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "hdbaset",
+						},
 					},
-					"ITB-1101-RX2": &mock.Device{
-						AudioVideoInputs: map[string]string{"": "10.66.78.156"},
+					WithBlank: mock.WithBlank{
+						Blanked: false,
 					},
-					"ITB-1101-RX3": &mock.Device{
-						AudioVideoInputs: map[string]string{"": "10.66.78.157"},
+				},
+				"ITB-1101-D2": mock.Projector{
+					WithPower: mock.WithPower{
+						PoweredOn: true,
 					},
-					"ITB-1101-VIA1": &mock.Device{
-						Volumes: map[string]int{"": 60},
-						Mutes:   map[string]bool{"": false},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "hdmi1",
+						},
 					},
-					"ITB-1101-DSP1": &mock.Device{
-						Volumes: map[string]int{
+					WithBlank: mock.WithBlank{
+						Blanked: true,
+					},
+				},
+				"ITB-1101-SW1": mock.VideoSwitcher{
+					WithAudioInput: mock.WithAudioInput{
+						Inputs: map[string]string{
+							"hdmiOutA": "1",
+							"hdmiOutB": "2",
+						},
+					},
+					WithVideoInput: mock.WithVideoInput{
+						Inputs: map[string]string{
+							"hdmiOutA": "2",
+							"hdmiOutB": "1",
+						},
+					},
+				},
+				"ITB-1101-VIA1": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 69,
+						},
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": false,
+						},
+					},
+				},
+			},
+		},
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D1": {
+					PoweredOn: boolP(true),
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdbaset"),
+						},
+					},
+					Blanked: boolP(false),
+				},
+				"ITB-1101-D2": {
+					PoweredOn: boolP(true),
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi1"),
+						},
+					},
+					Blanked: boolP(true),
+				},
+				"ITB-1101-SW1": {
+					Inputs: map[string]avcontrol.Input{
+						"hdmiOutA": {
+							Audio: stringP("1"),
+							Video: stringP("2"),
+						},
+						"hdmiOutB": {
+							Audio: stringP("2"),
+							Video: stringP("1"),
+						},
+					},
+				},
+				"ITB-1101-VIA1": {
+					Volumes: map[string]int{"": 69},
+					Mutes:   map[string]bool{"": false},
+				},
+			},
+		},
+	},
+	{
+		name: "JustAddPower",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D1": mock.TV{
+					WithPower: mock.WithPower{
+						PoweredOn: true,
+					},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "hdmi1",
+						},
+					},
+					WithBlank: mock.WithBlank{
+						Blanked: true,
+					},
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 50,
+						},
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": true,
+						},
+					},
+				},
+				"ITB-1101-D2": mock.TV{
+					WithPower: mock.WithPower{
+						PoweredOn: true,
+					},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "hdmi2",
+						},
+					},
+					WithBlank: mock.WithBlank{
+						Blanked: false,
+					},
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 80,
+						},
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": false,
+						},
+					},
+				},
+				"ITB-1101-D3": struct {
+					mock.WithPower
+				}{
+					mock.WithPower{
+						PoweredOn: true,
+					},
+				},
+				"ITB-1101-RX1": mock.AVOverIPReceiver{
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "10.66.78.155",
+						},
+					},
+				},
+				"ITB-1101-RX2": mock.AVOverIPReceiver{
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "10.66.78.156",
+						},
+					},
+				},
+				"ITB-1101-RX3": mock.AVOverIPReceiver{
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "10.66.78.157",
+						},
+					},
+				},
+				"ITB-1101-VIA1": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 60,
+						},
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": false,
+						},
+					},
+				},
+				"ITB-1101-DSP1": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
 							"1": 70,
 							"2": 30,
 							"3": 45,
 						},
-						Mutes: map[string]bool{
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
 							"1": false,
 							"2": true,
 							"3": true,
@@ -402,93 +504,107 @@ var getTests = []getStateTest{
 					},
 				},
 			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"ITB-1101-D1": {
-						PoweredOn: boolP(true),
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("hdmi1"),
-							},
-						},
-						Blanked: boolP(true),
-						Volumes: map[string]int{"": 50},
-						Mutes:   map[string]bool{"": true},
-					},
-					"ITB-1101-D2": {
-						PoweredOn: boolP(true),
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("hdmi2"),
-							},
-						},
-						Blanked: boolP(false),
-						Volumes: map[string]int{"": 80},
-						Mutes:   map[string]bool{"": false},
-					},
-					"ITB-1101-D3": {
-						PoweredOn: boolP(false),
-					},
-					"ITB-1101-RX1": {
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("10.66.78.155"),
-							},
+		},
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D1": {
+					PoweredOn: boolP(true),
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi1"),
 						},
 					},
-					"ITB-1101-RX2": {
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("10.66.78.156"),
-							},
+					Blanked: boolP(true),
+					Volumes: map[string]int{"": 50},
+					Mutes:   map[string]bool{"": true},
+				},
+				"ITB-1101-D2": {
+					PoweredOn: boolP(true),
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
 						},
 					},
-					"ITB-1101-RX3": {
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("10.66.78.157"),
-							},
+					Blanked: boolP(false),
+					Volumes: map[string]int{"": 80},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-D3": {
+					PoweredOn: boolP(true),
+				},
+				"ITB-1101-RX1": {
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("10.66.78.155"),
 						},
 					},
-					"ITB-1101-VIA1": {
-						Volumes: map[string]int{"": 60},
-						Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-RX2": {
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("10.66.78.156"),
+						},
 					},
-					"ITB-1101-DSP1": {
-						Volumes: map[string]int{
-							"1": 70,
-							"2": 30,
-							"3": 45,
+				},
+				"ITB-1101-RX3": {
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("10.66.78.157"),
 						},
-						Mutes: map[string]bool{
-							"1": false,
-							"2": true,
-							"3": true,
-						},
+					},
+				},
+				"ITB-1101-VIA1": {
+					Volumes: map[string]int{"": 60},
+					Mutes:   map[string]bool{"": false},
+				},
+				"ITB-1101-DSP1": {
+					Volumes: map[string]int{
+						"1": 70,
+						"2": 30,
+						"3": 45,
+					},
+					Mutes: map[string]bool{
+						"1": false,
+						"2": true,
+						"3": true,
 					},
 				},
 			},
 		},
-		{
-			name: "JRCB-205",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					"JRCB-205-D1": &mock.Device{
-						On:               boolP(true),
-						AudioVideoInputs: map[string]string{"": "hdmi1"},
-						Blanked:          boolP(true),
-						Volumes:          map[string]int{"": 50},
-						Mutes:            map[string]bool{"": false},
+	},
+	{
+		name: "JRCB-205",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"JRCB-205-D1": mock.Projector{
+					WithPower: mock.WithPower{
+						PoweredOn: true,
 					},
-					"JRCB-205-D2": &mock.Device{
-						On:               boolP(false),
-						AudioVideoInputs: map[string]string{"": "hdmi1"},
-						Blanked:          boolP(false),
-						Volumes:          map[string]int{"": 42},
-						Mutes:            map[string]bool{"": true},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "hdmi1",
+						},
 					},
-					"JRCB-205-DSP1": &mock.Device{
-						Volumes: map[string]int{
+					WithBlank: mock.WithBlank{
+						Blanked: true,
+					},
+				},
+				"JRCB-205-D2": mock.Projector{
+					WithPower: mock.WithPower{
+						PoweredOn: false,
+					},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
+							"": "hdbaset",
+						},
+					},
+					WithBlank: mock.WithBlank{
+						Blanked: false,
+					},
+				},
+				"JRCB-205-DSP1": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
 							"1":  10,
 							"2":  15,
 							"3":  20,
@@ -507,7 +623,9 @@ var getTests = []getStateTest{
 							"16": 85,
 							"17": 90,
 						},
-						Mutes: map[string]bool{
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
 							"1":  true,
 							"2":  false,
 							"3":  true,
@@ -527,8 +645,10 @@ var getTests = []getStateTest{
 							"17": false,
 						},
 					},
-					"JRCB-205-SW1": &mock.Device{
-						AudioVideoInputs: map[string]string{
+				},
+				"JRCB-205-SW1": mock.BasicVideoSwitcher{
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Inputs: map[string]string{
 							"1": "1",
 							"2": "1",
 							"3": "4",
@@ -539,199 +659,212 @@ var getTests = []getStateTest{
 							"8": "10",
 						},
 					},
-					"JRCB-205-VIA1": &mock.Device{
-						Volumes: map[string]int{"": 40},
-						Mutes:   map[string]bool{"": true},
+				},
+				"JRCB-205-VIA1": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 40,
+						},
 					},
-					"JRCB-205-VIA2": &mock.Device{
-						Volumes: map[string]int{"": 30},
-						Mutes:   map[string]bool{"": false},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": true,
+						},
 					},
 				},
-			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"JRCB-205-D1": {
-						PoweredOn: boolP(true),
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("hdmi1"),
-							},
-						},
-						Blanked: boolP(true),
-						Volumes: map[string]int{"": 50},
-						Mutes:   map[string]bool{"": false},
-					},
-					"JRCB-205-D2": {
-						PoweredOn: boolP(false),
-						Inputs: map[string]api.Input{
-							"": {
-								AudioVideo: stringP("hdmi1"),
-							},
-						},
-						Blanked: boolP(false),
-						Volumes: map[string]int{"": 42},
-						Mutes:   map[string]bool{"": true},
-					},
-					"JRCB-205-DSP1": {
-						Volumes: map[string]int{
-							"1":  10,
-							"2":  15,
-							"3":  20,
-							"4":  25,
-							"5":  30,
-							"6":  35,
-							"7":  40,
-							"8":  45,
-							"9":  50,
-							"10": 55,
-							"11": 60,
-							"12": 65,
-							"13": 70,
-							"14": 75,
-							"15": 80,
-							"16": 85,
-							"17": 90,
-						},
-						Mutes: map[string]bool{
-							"1":  true,
-							"2":  false,
-							"3":  true,
-							"4":  false,
-							"5":  true,
-							"6":  false,
-							"7":  true,
-							"8":  false,
-							"9":  true,
-							"10": false,
-							"11": false,
-							"12": true,
-							"13": false,
-							"14": true,
-							"15": false,
-							"16": true,
-							"17": false,
+				"JRCB-205-VIA2": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"": 30,
 						},
 					},
-					"JRCB-205-SW1": {
-						Inputs: map[string]api.Input{
-							"1": {
-								AudioVideo: stringP("1"),
-							},
-							"2": {
-								AudioVideo: stringP("1"),
-							},
-							"3": {
-								AudioVideo: stringP("4"),
-							},
-							"4": {
-								AudioVideo: stringP("3"),
-							},
-							"5": {
-								AudioVideo: stringP("5"),
-							},
-							"6": {
-								AudioVideo: stringP("2"),
-							},
-							"7": {
-								AudioVideo: stringP("2"),
-							},
-							"8": {
-								AudioVideo: stringP("10"),
-							},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"": false,
 						},
-					},
-					"JRCB-205-VIA1": {
-						Volumes: map[string]int{"": 40},
-						Mutes:   map[string]bool{"": true},
-					},
-					"JRCB-205-VIA2": {
-						Volumes: map[string]int{"": 30},
-						Mutes:   map[string]bool{"": false},
 					},
 				},
 			},
 		},
-		{
-			name: "Errors",
-			driver: drivertest.Driver{
-				Devices: map[string]drivers.Device{
-					"ITB-1101-D1": &mock.Device{
-						GetPowerError:   errors.New("power error"),
-						GetVolumesError: errors.New("volume error"),
-						GetBlankError:   errors.New("blank error"),
-						UnknownCapError: errors.New("unknown error"),
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"JRCB-205-D1": {
+					PoweredOn: boolP(true),
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi1"),
+						},
 					},
-					"ITB-1101-D2": &mock.Device{
-						GetAudioVideoInputsError: errors.New("av error"),
-						GetAudioInputsError:      errors.New("audio error"),
-						GetVideoInputsError:      errors.New("video error"),
-						GetMutesError:            errors.New("mutes error"),
+					Blanked: boolP(true),
+				},
+				"JRCB-205-D2": {
+					PoweredOn: boolP(false),
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdbaset"),
+						},
 					},
-					"ITB-1101-D3": &mock.Device{
-						GetCapsError: errors.New("no capabilities"),
+					Blanked: boolP(false),
+				},
+				"JRCB-205-DSP1": {
+					Volumes: map[string]int{
+						"1":  10,
+						"2":  15,
+						"3":  20,
+						"4":  25,
+						"5":  30,
+						"6":  35,
+						"7":  40,
+						"8":  45,
+						"9":  50,
+						"10": 55,
+						"11": 60,
+						"12": 65,
+						"13": 70,
+						"14": 75,
+						"15": 80,
+						"16": 85,
+						"17": 90,
 					},
+					Mutes: map[string]bool{
+						"1":  true,
+						"2":  false,
+						"3":  true,
+						"4":  false,
+						"5":  true,
+						"6":  false,
+						"7":  true,
+						"8":  false,
+						"9":  true,
+						"10": false,
+						"11": false,
+						"12": true,
+						"13": false,
+						"14": true,
+						"15": false,
+						"16": true,
+						"17": false,
+					},
+				},
+				"JRCB-205-SW1": {
+					Inputs: map[string]avcontrol.Input{
+						"1": {
+							AudioVideo: stringP("1"),
+						},
+						"2": {
+							AudioVideo: stringP("1"),
+						},
+						"3": {
+							AudioVideo: stringP("4"),
+						},
+						"4": {
+							AudioVideo: stringP("3"),
+						},
+						"5": {
+							AudioVideo: stringP("5"),
+						},
+						"6": {
+							AudioVideo: stringP("2"),
+						},
+						"7": {
+							AudioVideo: stringP("2"),
+						},
+						"8": {
+							AudioVideo: stringP("10"),
+						},
+					},
+				},
+				"JRCB-205-VIA1": {
+					Volumes: map[string]int{"": 40},
+					Mutes:   map[string]bool{"": true},
+				},
+				"JRCB-205-VIA2": {
+					Volumes: map[string]int{"": 30},
+					Mutes:   map[string]bool{"": false},
 				},
 			},
-			apiResp: api.StateResponse{
-				Devices: map[api.DeviceID]api.DeviceState{
-					"ITB-1101-D1": {},
-					"ITB-1101-D2": {},
-					"ITB-1101-D3": {},
+		},
+	},
+	{
+		name: "Errors",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D1": mock.TV{
+					WithPower: mock.WithPower{
+						Error: errors.New("can't get power"),
+					},
+					WithAudioVideoInput: mock.WithAudioVideoInput{
+						Error: errors.New("can't get audio video inputs"),
+					},
+					WithBlank: mock.WithBlank{
+						Error: errors.New("can't get blank"),
+					},
+					WithVolume: mock.WithVolume{
+						Error: errors.New("can't get volumes"),
+					},
+					WithMute: mock.WithMute{
+						Error: errors.New("can't get mutes"),
+					},
 				},
-				Errors: []api.DeviceStateError{
-					{
-						ID:    "ITB-1101-D1",
-						Error: "unknown capability unknown",
+				"ITB-1101-SW1": mock.VideoSwitcher{
+					WithAudioInput: mock.WithAudioInput{
+						Error: errors.New("can't get audio inputs"),
 					},
-					{
-						ID:    "ITB-1101-D1",
-						Field: "blank",
-						Error: "blank error",
-					},
-					{
-						ID:    "ITB-1101-D1",
-						Field: "power",
-						Error: "power error",
-					},
-					{
-						ID:    "ITB-1101-D1",
-						Field: "volumes",
-						Error: "volume error",
-					},
-					{
-						ID:    "ITB-1101-D2",
-						Field: "inputs.$.audio",
-						Error: "audio error",
-					},
-					{
-						ID:    "ITB-1101-D2",
-						Field: "inputs.$.audioVideo",
-						Error: "av error",
-					},
-					{
-						ID:    "ITB-1101-D2",
-						Field: "inputs.$.video",
-						Error: "video error",
-					},
-					{
-						ID:    "ITB-1101-D2",
-						Field: "mutes",
-						Error: "mutes error",
-					},
-					{
-						ID:    "ITB-1101-D3",
-						Error: "unable to get capabilities: no capabilities",
+					WithVideoInput: mock.WithVideoInput{
+						Error: errors.New("can't get video inputs"),
 					},
 				},
 			},
 		},
-		{
-			name:    "EmptyRoom",
-			driver:  drivertest.Driver{},
-			apiResp: api.StateResponse{},
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D1":  {},
+				"ITB-1101-SW1": {},
+			},
+			Errors: []avcontrol.DeviceStateError{
+				{
+					ID:    "ITB-1101-D1",
+					Field: "blank",
+					Error: "can't get blank",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "inputs.$.audioVideo",
+					Error: "can't get audio video inputs",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "mutes",
+					Error: "can't get mutes",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "power",
+					Error: "can't get power",
+				},
+				{
+					ID:    "ITB-1101-D1",
+					Field: "volumes",
+					Error: "can't get volumes",
+				},
+				{
+					ID:    "ITB-1101-SW1",
+					Field: "inputs.$.audio",
+					Error: "can't get audio inputs",
+				},
+				{
+					ID:    "ITB-1101-SW1",
+					Field: "inputs.$.video",
+					Error: "can't get video inputs",
+				},
+			},
 		},
-	*/
+	},
+	{
+		name:   "EmptyRoom",
+		driver: &driverstest.Driver{},
+		resp:   avcontrol.StateResponse{},
+	},
 }
 
 func TestGetState(t *testing.T) {

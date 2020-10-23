@@ -38,3 +38,12 @@ type VideoSwitcherDSP struct {
 	WithVolume
 	WithMute
 }
+
+type DSP struct {
+	WithVolume
+	WithMute
+}
+
+type AVOverIPReceiver struct {
+	WithAudioVideoInput
+}
