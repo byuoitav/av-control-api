@@ -565,354 +565,152 @@ var setTests = []setStateTest{
 			},
 		},
 	},
-	//	{
-	//		name: "CantSetPower",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D4": &mock.Device{},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					PoweredOn: boolP(true),
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D4",
-	//					Field: "poweredOn",
-	//					Value: true,
-	//					Error: "can't set this field on this device",
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "CantSetBlank",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D4": &mock.Device{},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Blanked: boolP(true),
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D4",
-	//					Field: "blanked",
-	//					Value: true,
-	//					Error: "can't set this field on this device",
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "CantSetVolumes",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D4": &mock.Device{},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Volumes: map[string]int{"": 10},
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D4",
-	//					Field: "volumes",
-	//					Value: map[string]int{"": 10},
-	//					Error: "can't set this field on this device",
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "CantSetMutes",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D4": &mock.Device{},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Mutes: map[string]bool{"": true},
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D4",
-	//					Field: "mutes",
-	//					Value: map[string]bool{"": true},
-	//					Error: "can't set this field on this device",
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "CantSetAudioInputs",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D4": &mock.Device{VideoInputs: map[string]string{"": "hdmi2"}},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Inputs: map[string]api.Input{
-	//						"": {
-	//							Audio: stringP("hdmi2"),
-	//							Video: stringP("hdmi2"),
-	//						},
-	//						"other": {
-	//							Audio: stringP("hdmi2"),
-	//						},
-	//					},
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Inputs: map[string]api.Input{
-	//						"": {
-	//							Video: stringP("hdmi2"),
-	//						},
-	//					},
-	//				},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D4",
-	//					Field: "input.$.audio",
-	//					Value: map[string]api.Input{
-	//						"": {
-	//							Audio: stringP("hdmi2"),
-	//							Video: stringP("hdmi2"),
-	//						},
-	//						"other": {
-	//							Audio: stringP("hdmi2"),
-	//						},
-	//					},
-	//					Error: "can't set this field on this device",
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "CantSetVideoInputs",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D4": &mock.Device{AudioVideoInputs: map[string]string{"": "hdmi2"}},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Inputs: map[string]api.Input{
-	//						"": {
-	//							AudioVideo: stringP("hdmi2"),
-	//							Video:      stringP("hdmi2"),
-	//						},
-	//						"other": {
-	//							Video: stringP("hdmi2"),
-	//						},
-	//					},
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Inputs: map[string]api.Input{
-	//						"": {
-	//							AudioVideo: stringP("hdmi2"),
-	//						},
-	//					},
-	//				},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D4",
-	//					Field: "input.$.video",
-	//					Value: map[string]api.Input{
-	//						"": {
-	//							AudioVideo: stringP("hdmi2"),
-	//							Video:      stringP("hdmi2"),
-	//						},
-	//						"other": {
-	//							Video: stringP("hdmi2"),
-	//						},
-	//					},
-	//					Error: "can't set this field on this device",
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "CantSetAudioVideoInputs",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D4": &mock.Device{AudioInputs: map[string]string{"": "hdmi2"}},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Inputs: map[string]api.Input{
-	//						"": {
-	//							AudioVideo: stringP("hdmi2"),
-	//							Audio:      stringP("hdmi2"),
-	//						},
-	//						"other": {
-	//							AudioVideo: stringP("hdmi2"),
-	//						},
-	//					},
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D4": {
-	//					Inputs: map[string]api.Input{
-	//						"": {
-	//							Audio: stringP("hdmi2"),
-	//						},
-	//					},
-	//				},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D4",
-	//					Field: "input.$.audioVideo",
-	//					Value: map[string]api.Input{
-	//						"": {
-	//							AudioVideo: stringP("hdmi2"),
-	//							Audio:      stringP("hdmi2"),
-	//						},
-	//						"other": {
-	//							AudioVideo: stringP("hdmi2"),
-	//						},
-	//					},
-	//					Error: "can't set this field on this device",
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "AudioInvalidBlockError",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D1": &mock.Device{
-	//					Volumes: map[string]int{
-	//						"": 30,
-	//					},
-	//					Mutes: map[string]bool{
-	//						"": false,
-	//					},
-	//				},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D1": {
-	//					Volumes: map[string]int{"invalid": 77},
-	//					Mutes:   map[string]bool{"invalid": false},
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D1": {},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D1",
-	//					Field: "mutes.invalid",
-	//					Value: false,
-	//					Error: ErrInvalidBlock.Error(),
-	//				},
-	//				{
-	//					ID:    "ITB-1101-D1",
-	//					Field: "volumes.invalid",
-	//					Value: int32(77),
-	//					Error: ErrInvalidBlock.Error(),
-	//				},
-	//			},
-	//		},
-	//	},
-	//	{
-	//		name: "AudioSetError",
-	//		driver: drivertest.Driver{
-	//			Devices: map[string]drivers.Device{
-	//				"ITB-1101-D1": &mock.Device{
-	//					SetVolumeError: errors.New("no"),
-	//					SetMuteError:   errors.New("i won't do it"),
-	//					Volumes: map[string]int{
-	//						"headphones": 30,
-	//					},
-	//					Mutes: map[string]bool{
-	//						"headphones": false,
-	//					},
-	//				},
-	//			},
-	//		},
-	//		req: api.StateRequest{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D1": {
-	//					Volumes: map[string]int{"headphones": 77},
-	//					Mutes:   map[string]bool{"headphones": false},
-	//				},
-	//			},
-	//		},
-	//		resp: api.StateResponse{
-	//			Devices: map[api.DeviceID]api.DeviceState{
-	//				"ITB-1101-D1": {},
-	//			},
-	//			Errors: []api.DeviceStateError{
-	//				{
-	//					ID:    "ITB-1101-D1",
-	//					Field: "mutes.headphones",
-	//					Value: false,
-	//					Error: "i won't do it",
-	//				},
-	//				{
-	//					ID:    "ITB-1101-D1",
-	//					Field: "volumes.headphones",
-	//					Value: int32(77),
-	//					Error: "no",
-	//				},
-	//			},
-	//		},
-	//	},
+	{
+		name: "NotCapable",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D4": struct{}{},
+			},
+		},
+		req: avcontrol.StateRequest{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D4": {
+					PoweredOn: boolP(true),
+					Blanked:   boolP(false),
+					Volumes:   map[string]int{"block1": 10},
+					Mutes:     map[string]bool{"block2": true},
+					Inputs: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+						},
+						"hdmiOutA": {
+							Audio: stringP("1"),
+							Video: stringP("2"),
+						},
+					},
+				},
+			},
+		},
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-D4": {},
+			},
+			Errors: []avcontrol.DeviceStateError{
+				{
+					ID:    "ITB-1101-D4",
+					Field: "blanked",
+					Value: false,
+					Error: ErrNotCapable.Error(),
+				},
+				{
+					ID:    "ITB-1101-D4",
+					Field: "input.$.audio",
+					Value: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+						},
+						"hdmiOutA": {
+							Audio: stringP("1"),
+							Video: stringP("2"),
+						},
+					},
+					Error: ErrNotCapable.Error(),
+				},
+				{
+					ID:    "ITB-1101-D4",
+					Field: "input.$.audioVideo",
+					Value: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+						},
+						"hdmiOutA": {
+							Audio: stringP("1"),
+							Video: stringP("2"),
+						},
+					},
+					Error: ErrNotCapable.Error(),
+				},
+				{
+					ID:    "ITB-1101-D4",
+					Field: "input.$.video",
+					Value: map[string]avcontrol.Input{
+						"": {
+							AudioVideo: stringP("hdmi2"),
+						},
+						"hdmiOutA": {
+							Audio: stringP("1"),
+							Video: stringP("2"),
+						},
+					},
+					Error: ErrNotCapable.Error(),
+				},
+				{
+					ID:    "ITB-1101-D4",
+					Field: "mutes",
+					Value: map[string]bool{"block2": true},
+					Error: ErrNotCapable.Error(),
+				},
+				{
+					ID:    "ITB-1101-D4",
+					Field: "poweredOn",
+					Value: true,
+					Error: ErrNotCapable.Error(),
+				},
+				{
+					ID:    "ITB-1101-D4",
+					Field: "volumes",
+					Value: map[string]int{"block1": 10},
+					Error: ErrNotCapable.Error(),
+				},
+			},
+		},
+	},
+	{
+		name: "AudioInvalidBlockError",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-DSP1": mock.DSP{
+					WithVolume: mock.WithVolume{
+						Vols: map[string]int{
+							"valid": 30,
+						},
+					},
+					WithMute: mock.WithMute{
+						Ms: map[string]bool{
+							"valid": false,
+						},
+					},
+				},
+			},
+		},
+		req: avcontrol.StateRequest{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-DSP1": {
+					Volumes: map[string]int{"invalid": 77},
+					Mutes:   map[string]bool{"invalid": true},
+				},
+			},
+		},
+		resp: avcontrol.StateResponse{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceState{
+				"ITB-1101-DSP1": {},
+			},
+			Errors: []avcontrol.DeviceStateError{
+				{
+					ID:    "ITB-1101-DSP1",
+					Field: "mutes.invalid",
+					Value: true,
+					Error: ErrInvalidBlock.Error(),
+				},
+				{
+					ID:    "ITB-1101-DSP1",
+					Field: "volumes.invalid",
+					Value: 77,
+					Error: ErrInvalidBlock.Error(),
+				},
+			},
+		},
+	},
 }
 
 func TestSetState(t *testing.T) {
