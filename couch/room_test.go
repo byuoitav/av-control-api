@@ -8,23 +8,17 @@ import (
 
 	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/go-kivik/kivikmock/v3"
-	"github.com/google/go-cmp/cmp"
+	"github.com/matryer/is"
 )
 
-// TODO use testify - require
+func TestRoomConfig(t *testing.T) {
+	is := is.New(t)
 
-func TestRoom(t *testing.T) {
 	client, mock, err := kivikmock.New()
-	if err != nil {
-		t.Fatalf("unable to create kivik mock: %s", err)
-	}
+	is.NoErr(err)
 
-	ds := &DataService{
-		client:       client,
-		database:     _defaultDatabase,
-		mappingDocID: _defaultMappingDocID,
-		environment:  "default",
-	}
+	ds, err := NewWithClient(context.Background(), client)
+	is.NoErr(err)
 
 	db := mock.NewDB()
 	mock.ExpectDB().WithName(ds.database).WillReturn(db)
@@ -33,15 +27,15 @@ func TestRoom(t *testing.T) {
 		"proxy": "http://ITB-1101-CP1.byu.edu:17000",
 		"devices": {
 			"ITB-1101-D1": {
-				"driver": "Sony Bravia",
+				"driver": "sony/bravia",
 				"address": "ITB-1101-D1.byu.edu"
 			},
 			"ITB-1101-D2": {
-				"driver": "Sony ADCP",
+				"driver": "sony/adcp",
 				"address": "ITB-1101-D2.byu.edu"
 			},
 			"ITB-1101-DSP1": {
-				"driver": "QSC",
+				"driver": "qsc",
 				"address": "ITB-1101-DSP1.byu.edu",
 				"ports": [
 					{
@@ -57,29 +51,28 @@ func TestRoom(t *testing.T) {
 		}
 	}`))
 
-	room, err := ds.Room(context.Background(), "ITB-1101")
-	if err != nil {
-		t.Fatalf("unable to get mapping: %s", err)
-	}
+	room, err := ds.RoomConfig(context.Background(), "ITB-1101")
+	is.NoErr(err)
 
-	expectedURL, _ := url.Parse("http://ITB-1101-CP1.byu.edu:17000")
+	expectedURL, err := url.Parse("http://ITB-1101-CP1.byu.edu:17000")
+	is.NoErr(err)
 
-	expected := avcontrol.Room{
+	is.Equal(room, avcontrol.RoomConfig{
 		ID:    "ITB-1101",
 		Proxy: expectedURL,
-		Devices: map[avcontrol.DeviceID]avcontrol.Device{
-			"ITB-1101-D1": avcontrol.Device{
-				Driver:  "Sony Bravia",
+		Devices: map[avcontrol.DeviceID]avcontrol.DeviceConfig{
+			"ITB-1101-D1": {
+				Driver:  "sony/bravia",
 				Address: "ITB-1101-D1.byu.edu",
 			},
-			"ITB-1101-D2": avcontrol.Device{
-				Driver:  "Sony ADCP",
+			"ITB-1101-D2": {
+				Driver:  "sony/adcp",
 				Address: "ITB-1101-D2.byu.edu",
 			},
-			"ITB-1101-DSP1": avcontrol.Device{
-				Driver:  "QSC",
+			"ITB-1101-DSP1": {
+				Driver:  "qsc",
 				Address: "ITB-1101-DSP1.byu.edu",
-				Ports: avcontrol.Ports{
+				Ports: avcontrol.PortConfigs{
 					{
 						Name: "Mic1Gain",
 						Type: "volume",
@@ -91,54 +84,34 @@ func TestRoom(t *testing.T) {
 				},
 			},
 		},
-	}
-
-	if diff := cmp.Diff(expected, room); diff != "" {
-		t.Errorf("generated incorrect mapping (-want, +got):\n%s", diff)
-	}
+	})
 }
 
 func TestBadRoom(t *testing.T) {
-	errWanted := errors.New("unable to get/scan room: doc doesn't exist")
-	client, mock, err := kivikmock.New()
-	if err != nil {
-		t.Fatalf("unable to create kivik mock: %s", err)
-	}
+	is := is.New(t)
 
-	ds := &DataService{
-		client:       client,
-		database:     _defaultDatabase,
-		mappingDocID: _defaultMappingDocID,
-		environment:  "default",
-	}
+	client, mock, err := kivikmock.New()
+	is.NoErr(err)
+
+	ds, err := NewWithClient(context.Background(), client)
+	is.NoErr(err)
 
 	db := mock.NewDB()
 	mock.ExpectDB().WithName(ds.database).WillReturn(db)
 	db.ExpectGet().WithDocID("ITB-1101").WillReturnError(errors.New("doc doesn't exist"))
 
-	_, err = ds.Room(context.Background(), "ITB-1101")
-	if err == nil {
-		t.Fatalf("did not get error back")
-	}
-
-	if diff := cmp.Diff(errWanted.Error(), err.Error()); diff != "" {
-		t.Errorf("generated incorrect error (-want, +got):\n%s", diff)
-	}
+	_, err = ds.RoomConfig(context.Background(), "ITB-1101")
+	is.Equal(err.Error(), "unable to get/scan room: doc doesn't exist")
 }
 
 func TestRoomConvertFail(t *testing.T) {
-	errWanted := errors.New(`unable to parse proxy url: parse ":foo": missing protocol scheme`)
+	is := is.New(t)
+
 	r := room{
 		ID:    "ITB-1101",
 		Proxy: ":foo",
 	}
 
 	_, err := r.convert()
-	if err == nil {
-		t.Fatalf("no error converting room")
-	}
-
-	if diff := cmp.Diff(errWanted.Error(), err.Error()); diff != "" {
-		t.Errorf("generated incorrect error (-want, +got):\n%s", diff)
-	}
+	is.Equal(err.Error(), `unable to parse proxy url: parse ":foo": missing protocol scheme`)
 }

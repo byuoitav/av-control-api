@@ -1,22 +1,27 @@
 package couch
 
-import "testing"
+import (
+	"testing"
 
-// TODO validate things are being set
+	"github.com/matryer/is"
+)
+
 func TestOptions(t *testing.T) {
+	is := is.New(t)
+
 	opts := []Option{
 		WithBasicAuth("user", "pass"),
 		WithDatabase("db"),
-		WithMappingDocumentID("docID"),
-		WithEnvironment("env"),
 	}
 
 	options := options{
-		database:     _defaultDatabase,
-		mappingDocID: _defaultMappingDocID,
+		database: _defaultDatabase,
 	}
 
 	for _, o := range opts {
 		o.apply(&options)
 	}
+
+	is.True(options.authFunc != nil)
+	is.Equal(options.database, "db")
 }

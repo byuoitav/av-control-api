@@ -3,15 +3,12 @@ package couch
 import "github.com/go-kivik/couchdb/v3"
 
 const (
-	_defaultDatabase     = "av-control-api"
-	_defaultMappingDocID = "#driverMapping"
+	_defaultDatabase = "av-control-api"
 )
 
 type options struct {
-	authFunc     interface{}
-	database     string
-	mappingDocID string
-	environment  string
+	authFunc interface{}
+	database string
 }
 
 // Option configures how we create the DataService.
@@ -34,17 +31,5 @@ func WithBasicAuth(username, password string) Option {
 func WithDatabase(database string) Option {
 	return optionFunc(func(o *options) {
 		o.database = database
-	})
-}
-
-func WithMappingDocumentID(docID string) Option {
-	return optionFunc(func(o *options) {
-		o.mappingDocID = docID
-	})
-}
-
-func WithEnvironment(env string) Option {
-	return optionFunc(func(o *options) {
-		o.environment = env
 	})
 }
