@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/byuoitav/atlona v0.1.3
-	github.com/byuoitav/av-control-api/api v0.0.0-20200824162301-775202bed269
 	github.com/byuoitav/justaddpower v0.1.1
 	github.com/byuoitav/keydigital v0.1.1
 	github.com/byuoitav/kramer v0.1.0
@@ -37,7 +36,6 @@ require (
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	golang.org/x/sys v0.0.0-20201026173827-119d4633e4d1 // indirect
 	golang.org/x/tools v0.0.0-20201015182029-a5d9e455e9c4 // indirect
-	google.golang.org/grpc v1.30.0 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 	honnef.co/go/tools v0.0.1-2020.1.6 // indirect
