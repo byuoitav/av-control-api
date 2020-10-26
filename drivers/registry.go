@@ -35,6 +35,19 @@ func New(configPath string) (avcontrol.DriverRegistry, error) {
 	return r, nil
 }
 
+func NewWithConfig(configs map[string]map[string]interface{}) (avcontrol.DriverRegistry, error) {
+	if configs == nil {
+		configs = make(map[string]map[string]interface{})
+	}
+
+	r := &registry{
+		configs: configs,
+		drivers: make(map[string]avcontrol.Driver),
+	}
+
+	return r, nil
+}
+
 // Register registers a driver with the given name. Name must not be empty.
 func (r *registry) Register(name string, driver avcontrol.Driver) error {
 	if name == "" {
