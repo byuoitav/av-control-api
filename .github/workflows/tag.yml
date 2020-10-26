@@ -1,0 +1,29 @@
+name: Deploy
+on:
+    push:
+        branches:
+            - "master"
+        tags:
+            - "**"
+
+jobs:
+    deploy:
+        name: Deploy
+        runs-on: ubuntu-latest
+        steps:
+            - name: Set up go
+              uses: actions/setup-go@v1
+              with:
+                  go-version: 1.14.x
+
+            - name: Set up node
+              uses: actions/setup-node@v1
+
+            - name: Check out code
+              uses: actions/checkout@v2
+
+            - name: Build
+              run: |
+                  export DOCKER_USERNAME=$GITHUB_ACTOR
+                  export DOCKER_PASSWORD=${{secrets.GITHUB_TOKEN}}
+                  make deploy
