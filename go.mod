@@ -5,12 +5,12 @@ go 1.14
 require (
 	github.com/byuoitav/atlona v0.1.3
 	github.com/byuoitav/av-control-api/api v0.0.0-20200824162301-775202bed269
-	github.com/byuoitav/justaddpower v0.0.1
-	github.com/byuoitav/keydigital v0.0.1
+	github.com/byuoitav/justaddpower v0.1.1
+	github.com/byuoitav/keydigital v0.1.1
 	github.com/byuoitav/kramer v0.1.0
 	github.com/byuoitav/kramer-driver v0.1.13
-	github.com/byuoitav/london v0.1.0
-	github.com/byuoitav/qsc v0.1.0
+	github.com/byuoitav/london v0.1.1
+	github.com/byuoitav/qsc v0.1.1
 	github.com/byuoitav/sony v0.1.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kivik/couchdb/v3 v3.2.1
