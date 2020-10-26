@@ -6,15 +6,13 @@ require (
 	github.com/byuoitav/adcp-driver v0.1.1
 	github.com/byuoitav/atlona-driver v1.5.8
 	github.com/byuoitav/av-control-api/api v0.0.0-20200824162301-775202bed269
-	github.com/byuoitav/common v0.0.0-20200521193927-1fdf4e0a4271 // indirect
 	github.com/byuoitav/justaddpower-driver v0.1.3
 	github.com/byuoitav/keydigital-driver v0.0.10
-	github.com/byuoitav/kramer v0.0.0-00010101000000-000000000000
+	github.com/byuoitav/kramer v0.1.0
 	github.com/byuoitav/kramer-driver v0.1.13
 	github.com/byuoitav/london-driver v0.1.3
 	github.com/byuoitav/qsc-driver v0.1.7
-	github.com/byuoitav/sonyrest-driver v0.1.8
-	github.com/byuoitav/wspool v0.1.0
+	github.com/byuoitav/sony v0.1.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kivik/couchdb/v3 v3.2.1
 	github.com/go-kivik/kivik/v3 v3.2.0
@@ -22,6 +20,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.0 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.0
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/matryer/is v1.3.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
@@ -45,5 +44,3 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 	honnef.co/go/tools v0.0.1-2020.1.6 // indirect
 )
-
-replace github.com/byuoitav/kramer => ../kramer
