@@ -6,10 +6,12 @@ import (
 
 	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/sony/bravia"
+	"go.uber.org/zap"
 )
 
 type SonyDriver struct {
 	PSK string
+	Log *zap.Logger
 }
 
 func (s *SonyDriver) ParseConfig(config map[string]interface{}) error {
@@ -28,5 +30,6 @@ func (s *SonyDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.D
 	return &bravia.TV{
 		Address: addr,
 		PSK:     s.PSK,
+		Log:     s.Log,
 	}, nil
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/byuoitav/atlona-driver"
+	atjuno451hdbt "github.com/byuoitav/atlona/AT-JUNO-451-HDBT"
 	avcontrol "github.com/byuoitav/av-control-api"
 	"go.uber.org/zap"
 )
@@ -36,7 +36,7 @@ func (a *Atlona4x1Driver) ParseConfig(config map[string]interface{}) error {
 }
 
 func (a *Atlona4x1Driver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
-	return &atlona.AtlonaVideoSwitcher4x1{
+	return &atjuno451hdbt.AtlonaVideoSwitcher4x1{
 		Username: a.Username,
 		Password: a.Password,
 		Address:  addr,

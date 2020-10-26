@@ -4,7 +4,7 @@ import (
 	"context"
 
 	avcontrol "github.com/byuoitav/av-control-api"
-	"github.com/byuoitav/london-driver"
+	"github.com/byuoitav/london"
 	"go.uber.org/zap"
 )
 
