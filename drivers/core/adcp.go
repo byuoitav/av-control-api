@@ -4,7 +4,7 @@ import (
 	"context"
 
 	avcontrol "github.com/byuoitav/av-control-api"
-	"github.com/byuoitav/sony/adcp/commonrest"
+	"github.com/byuoitav/sony/adcp"
 	"go.uber.org/zap"
 )
 

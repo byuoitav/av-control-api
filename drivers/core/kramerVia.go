@@ -40,6 +40,6 @@ func (k *KramerViaDriver) CreateDevice(ctx context.Context, addr string) (avcont
 		Address:  addr,
 		Username: k.Username,
 		Password: k.Password,
-		Logger:   k.Log.Sugar(),
+		Log:      k.Log,
 	}, nil
 }

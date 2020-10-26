@@ -42,6 +42,8 @@ github.com/byuoitav/qsc-driver v0.1.7 h1:dg5NP8N7BV6I8LqZF36dHQ7P7k/o/EL2aL+nNjZ
 github.com/byuoitav/qsc-driver v0.1.7/go.mod h1:PvgaTbrt2HhiOH/5grqYi2dDEnCZEaFIPrHU9lV/Rcg=
 github.com/byuoitav/sony v0.1.0 h1:QeCchWhRNUJ+47lnttjKBpZDmPWrEYJbKlrX3EYuGSI=
 github.com/byuoitav/sony v0.1.0/go.mod h1:UPsVsdjG0QlwyZW2RQLtyZbhlVpYum4bXqAUPnJV+gI=
+github.com/byuoitav/sony v0.1.1 h1:2UH675HLMtDVIXba/yjLXfnm36yS3hHE2LZN43H0fpI=
+github.com/byuoitav/sony v0.1.1/go.mod h1:UPsVsdjG0QlwyZW2RQLtyZbhlVpYum4bXqAUPnJV+gI=
 github.com/byuoitav/wspool v0.1.0 h1:JuONUF8lKTNP82liKV2vvIpuSmJtl8VBVphswKfrRwY=
 github.com/byuoitav/wspool v0.1.0/go.mod h1:X5fAYVDvdxfAVBULIlTAqlsTXz/AKG7InOtrM7q5xso=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
