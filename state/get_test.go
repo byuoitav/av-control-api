@@ -917,7 +917,7 @@ func TestGetState(t *testing.T) {
 			}
 
 			// need a way to not pass a file
-			registry, err := drivers.New("../cmd/av-control-api/driver-config.yaml")
+			registry, err := drivers.NewWithConfig(nil)
 			is.NoErr(err)
 
 			err = registry.Register("driverstest/driver", tt.driver)
