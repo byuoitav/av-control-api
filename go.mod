@@ -28,6 +28,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/ugorji/go v1.1.13 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
+	go.etcd.io/bbolt v1.3.3
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect

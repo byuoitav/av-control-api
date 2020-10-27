@@ -9,6 +9,7 @@ import (
 
 	"net/http"
 
+	"github.com/byuoitav/av-control-api/cache"
 	"github.com/byuoitav/av-control-api/drivers"
 	"github.com/byuoitav/av-control-api/handlers"
 	"github.com/byuoitav/av-control-api/state"
@@ -31,6 +32,7 @@ func main() {
 		logLevel         string
 		host             string
 		driverConfigPath string
+		cachePath        string
 
 		dataServiceConfig dataServiceConfig
 	)
@@ -43,6 +45,7 @@ func main() {
 	pflag.StringVar(&dataServiceConfig.Username, "db-username", "", "database username")
 	pflag.StringVar(&dataServiceConfig.Password, "db-password", "", "database password")
 	pflag.BoolVar(&dataServiceConfig.Insecure, "db-insecure", false, "don't use SSL in database connection")
+	pflag.StringVar(&cachePath, "cache-path", "", "path to file for config caching")
 	pflag.Parse()
 
 	// build a logger
@@ -69,6 +72,15 @@ func main() {
 
 	// build the data service
 	ds := dataService(ctx, dataServiceConfig)
+
+	if cachePath != "" {
+		tmp, err := cache.New(ds, cachePath)
+		if err != nil {
+			panic(fmt.Sprintf("unable to setup cache: %s", err))
+		}
+
+		ds = tmp
+	}
 
 	// build the getsetter
 	gs := &state.GetSetter{
