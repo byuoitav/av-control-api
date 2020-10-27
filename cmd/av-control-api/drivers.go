@@ -42,7 +42,9 @@ func registerDrivers(d avcontrol.DriverRegistry, log *zap.Logger) {
 		Log: log.Named("driver/kramerVSDSP"),
 	})
 
-	d.MustRegister("kramer/protocol3000", &core.KramerProtocol3000Driver{})
+	d.MustRegister("kramer/protocol3000", &core.KramerProtocol3000Driver{
+		Log: log.Named("drivers/protocol3000"),
+	})
 
 	d.MustRegister("london", &core.LondonDriver{
 		Log: log.Named("drivers/london"),

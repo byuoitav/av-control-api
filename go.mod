@@ -7,7 +7,7 @@ require (
 	github.com/byuoitav/av-control-api/api v0.0.0-20200824162301-775202bed269
 	github.com/byuoitav/justaddpower v0.1.1
 	github.com/byuoitav/keydigital v0.1.1
-	github.com/byuoitav/kramer v0.1.0
+	github.com/byuoitav/kramer v0.1.1
 	github.com/byuoitav/kramer-driver v0.1.13
 	github.com/byuoitav/london v0.1.1
 	github.com/byuoitav/qsc v0.1.1
@@ -33,9 +33,9 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20201026091529-146b70c837a4
+	golang.org/x/net v0.0.0-20201027133719-8eef5233e2a1
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
-	golang.org/x/sys v0.0.0-20201026173827-119d4633e4d1 // indirect
+	golang.org/x/sys v0.0.0-20201027140754-0fcbb8f4928c // indirect
 	golang.org/x/tools v0.0.0-20201015182029-a5d9e455e9c4 // indirect
 	google.golang.org/grpc v1.30.0 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
