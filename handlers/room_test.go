@@ -30,8 +30,8 @@ func (g *goodGS) GetHealth(ctx context.Context, room avcontrol.RoomConfig) (avco
 	return avcontrol.RoomHealth{}, errors.New("TODO")
 }
 
-func (g *goodGS) GetInfo(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomHealth, error) {
-	return avcontrol.RoomHealth{}, errors.New("TODO")
+func (g *goodGS) GetInfo(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomInfo, error) {
+	return avcontrol.RoomInfo{}, errors.New("TODO")
 }
 
 func (g *goodGS) Set(ctx context.Context, room avcontrol.RoomConfig, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
@@ -56,8 +56,8 @@ func (g *badGS) GetHealth(ctx context.Context, room avcontrol.RoomConfig) (avcon
 	return avcontrol.RoomHealth{}, errors.New("TODO")
 }
 
-func (g *badGS) GetInfo(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomHealth, error) {
-	return avcontrol.RoomHealth{}, errors.New("TODO")
+func (g *badGS) GetInfo(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomInfo, error) {
+	return avcontrol.RoomInfo{}, errors.New("TODO")
 }
 
 func TestGetRoomConfiguration(t *testing.T) {
