@@ -59,11 +59,11 @@ func (r *registry) Register(name string, driver avcontrol.Driver) error {
 
 	// make sure this isn't a duplicate
 	if _, ok := r.drivers[name]; ok {
-		return fmt.Errorf("driver/%s: already registered", name)
+		return fmt.Errorf("registry/%s: already registered", name)
 	}
 
 	if err := driver.ParseConfig(r.configs[name]); err != nil {
-		return fmt.Errorf("driver/%s: unable to parse config: %w", name, err)
+		return fmt.Errorf("registry/%s: unable to parse config: %w", name, err)
 	}
 
 	// wrap this driver with the deviceCache
