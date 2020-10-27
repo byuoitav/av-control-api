@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"errors"
+	"sort"
 	"strings"
 	"testing"
 
@@ -82,7 +83,43 @@ func TestGet(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
+	is := is.New(t)
+
+	r, err := NewWithConfig(make(map[string]map[string]interface{}))
+	is.NoErr(err)
+	is.True(len(r.List()) == 0)
+
+	drivers := []string{
+		"driver/0",
+		"driver/1",
+		"driver/2",
+		"driver/3",
+		"driver/4",
+		"driver/5",
+	}
+
+	sort.Strings(drivers)
+
+	for i, driver := range drivers {
+		r.MustRegister(driver, &testDriver{})
+		list := r.List()
+		sort.Strings(list)
+		is.Equal(list, drivers[:i+1])
+	}
 }
 
 func TestMustRegister(t *testing.T) {
+	is := is.New(t)
+	defer func() {
+		r := recover()
+		is.True(r != nil)
+		is.True(strings.Contains(r.(error).Error(), "already registered"))
+	}()
+
+	r, err := NewWithConfig(make(map[string]map[string]interface{}))
+	is.NoErr(err)
+
+	r.MustRegister("driver/name", &testDriver{})
+	r.MustRegister("driver/name", &testDriver{})
+
 }
