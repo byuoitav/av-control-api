@@ -11,6 +11,8 @@ import (
 )
 
 func TestStatsPass(t *testing.T) {
+	t.SkipNow()
+
 	log := setLogger()
 	defer log.Sync()
 
@@ -53,6 +55,8 @@ func TestStatsPass(t *testing.T) {
 }
 
 func TestStatsFail(t *testing.T) {
+	t.SkipNow()
+
 	log := setLogger()
 	defer log.Sync()
 

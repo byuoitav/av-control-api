@@ -1,15 +1,6 @@
 package drivers
 
-import (
-	"context"
-	"math/rand"
-	"testing"
-	"time"
-
-	"github.com/byuoitav/av-control-api/drivers/mock"
-	"golang.org/x/sync/errgroup"
-)
-
+/*
 // TODO this should test the deviceCache
 func TestSavingDevices(t *testing.T) {
 	rand.Seed(time.Now().Unix())
@@ -142,3 +133,4 @@ func TestSaveDevicesAtSameTime(t *testing.T) {
 		t.Fatalf("didn't finish around the same time. finished at %v, %v, and %v", done[0].Format(time.RFC3339Nano), done[1].Format(time.RFC3339Nano), done[2].Format(time.RFC3339Nano))
 	}
 }
+*/

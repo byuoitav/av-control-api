@@ -9,15 +9,15 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/byuoitav/av-control-api/api"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/gin-gonic/gin"
 )
 
 type goodDS struct{}
 type badDS struct{}
 
-func (d *goodDS) Room(ctx context.Context, id string) (api.Room, error) {
-	return api.Room{
+func (d *goodDS) RoomConfig(ctx context.Context, id string) (avcontrol.RoomConfig, error) {
+	return avcontrol.RoomConfig{
 		ID: "ITB-1101",
 		Proxy: &url.URL{
 			Scheme: "http",
@@ -27,16 +27,8 @@ func (d *goodDS) Room(ctx context.Context, id string) (api.Room, error) {
 	}, nil
 }
 
-func (d *goodDS) DriverMapping(ctx context.Context) (api.DriverMapping, error) {
-	return api.DriverMapping{}, nil
-}
-
-func (d *badDS) Room(ctx context.Context, id string) (api.Room, error) {
-	return api.Room{}, errors.New("no room")
-}
-
-func (d *badDS) DriverMapping(ctx context.Context) (api.DriverMapping, error) {
-	return api.DriverMapping{}, nil
+func (d *badDS) RoomConfig(ctx context.Context, id string) (avcontrol.RoomConfig, error) {
+	return avcontrol.RoomConfig{}, errors.New("no room")
 }
 
 func TestRequestIDWithID(t *testing.T) {
@@ -107,9 +99,9 @@ func TestRoomWithRoomNoError(t *testing.T) {
 	handler.RequestID(c)
 	handler.Room(c)
 
-	room := c.MustGet(_cRoom).(api.Room)
+	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	if room.ID != "ITB-1101" {
-		t.Fatalf("incorrect room gotten %s", c.Keys[_cRoom].(api.Room).ID)
+		t.Fatalf("incorrect room gotten %s", c.Keys[_cRoom].(avcontrol.RoomConfig).ID)
 	}
 }
 

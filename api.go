@@ -59,6 +59,15 @@ type DeviceHealth struct {
 	Error   *string `json:"error,omitempty"`
 }
 
+type RoomInfo struct {
+	Devices map[DeviceID]DeviceInfo `json:"devices,omitempty"`
+}
+
+type DeviceInfo struct {
+	Info  interface{} `json:"info,omitempty"`
+	Error *string     `json:"error,omitempty"`
+}
+
 // DeviceID is a string in the format of Building-Room-DeviceName
 type DeviceID string
 

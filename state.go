@@ -12,4 +12,7 @@ type StateGetSetter interface {
 
 	// GetHealth returns the health status of the room
 	GetHealth(context.Context, RoomConfig) (RoomHealth, error)
+
+	// GetInfo returns the info about each device in the room
+	GetInfo(context.Context, RoomConfig) (RoomInfo, error)
 }

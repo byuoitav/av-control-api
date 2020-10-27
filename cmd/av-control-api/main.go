@@ -115,6 +115,7 @@ func main() {
 	room.GET("/:room", handlers.GetRoomConfiguration)
 	room.GET("/:room/state", handlers.GetRoomState)
 	room.GET("/:room/health", handlers.GetRoomHealth)
+	room.GET("/:room/info", handlers.GetRoomInfo)
 	room.PUT("/:room/state", handlers.SetRoomState)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))

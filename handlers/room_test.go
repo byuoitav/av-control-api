@@ -9,16 +9,16 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/byuoitav/av-control-api/api"
+	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/gin-gonic/gin"
 )
 
 type goodGS struct{}
 type badGS struct{}
 
-func (g *goodGS) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
-	return api.StateResponse{
-		Errors: []api.DeviceStateError{
+func (g *goodGS) Get(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.StateResponse, error) {
+	return avcontrol.StateResponse{
+		Errors: []avcontrol.DeviceStateError{
 			{
 				ID: "just a filler",
 			},
@@ -26,9 +26,13 @@ func (g *goodGS) Get(ctx context.Context, room api.Room) (api.StateResponse, err
 	}, nil
 }
 
-func (g *goodGS) Set(ctx context.Context, room api.Room, req api.StateRequest) (api.StateResponse, error) {
-	return api.StateResponse{
-		Errors: []api.DeviceStateError{
+func (g *goodGS) GetHealth(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomHealth, error) {
+	return avcontrol.RoomHealth{}, errors.New("TODO")
+}
+
+func (g *goodGS) Set(ctx context.Context, room avcontrol.RoomConfig, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
+	return avcontrol.StateResponse{
+		Errors: []avcontrol.DeviceStateError{
 			{
 				ID: "just a filler",
 			},
@@ -36,20 +40,16 @@ func (g *goodGS) Set(ctx context.Context, room api.Room, req api.StateRequest) (
 	}, nil
 }
 
-func (g *goodGS) DriverStates(context.Context) (map[string]string, error) {
-	return map[string]string{"key": "val"}, nil
+func (g *badGS) Get(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.StateResponse, error) {
+	return avcontrol.StateResponse{}, errors.New("no room to get")
 }
 
-func (g *badGS) Get(ctx context.Context, room api.Room) (api.StateResponse, error) {
-	return api.StateResponse{}, errors.New("no room to get")
+func (g *badGS) Set(ctx context.Context, room avcontrol.RoomConfig, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
+	return avcontrol.StateResponse{}, errors.New("no room to set")
 }
 
-func (g *badGS) Set(ctx context.Context, room api.Room, req api.StateRequest) (api.StateResponse, error) {
-	return api.StateResponse{}, errors.New("no room to set")
-}
-
-func (g *badGS) DriverStates(context.Context) (map[string]string, error) {
-	return nil, errors.New("no states to get")
+func (g *badGS) GetHealth(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomHealth, error) {
+	return avcontrol.RoomHealth{}, errors.New("TODO")
 }
 
 func TestGetRoomConfiguration(t *testing.T) {
@@ -83,7 +83,7 @@ func TestGetRoomConfiguration(t *testing.T) {
 		t.Fatalf("error reading resp body: %s", err)
 	}
 
-	var room api.Room
+	var room avcontrol.RoomConfig
 
 	json.Unmarshal(body, &room)
 	if room.ID != "ITB-1101" {
@@ -123,7 +123,7 @@ func TestRoomStatePass(t *testing.T) {
 		t.Fatalf("error reading resp body: %s", err)
 	}
 
-	var res api.StateResponse
+	var res avcontrol.StateResponse
 
 	json.Unmarshal(body, &res)
 	if res.Errors[0].ID != "just a filler" {
@@ -200,7 +200,7 @@ func TestSetRoomStatePass(t *testing.T) {
 		t.Fatalf("error reading resp body: %s", err)
 	}
 
-	var res api.StateResponse
+	var res avcontrol.StateResponse
 
 	json.Unmarshal(body, &res)
 	if res.Errors[0].ID != "just a filler" {
