@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	avcontrol "github.com/byuoitav/av-control-api"
+	"github.com/matryer/is"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,9 +27,9 @@ func (m *mockDataService) RoomConfig(ctx context.Context, id string) (avcontrol.
 func TestCache(t *testing.T) {
 
 	testConfig := avcontrol.RoomConfig{
-		ID: "yourmom",
+		ID: "test",
 		Devices: map[avcontrol.DeviceID]avcontrol.DeviceConfig{
-			"your mom": avcontrol.DeviceConfig{
+			"device": avcontrol.DeviceConfig{
 				Address: "hello.com",
 				Driver:  "adam",
 			},
@@ -37,7 +38,7 @@ func TestCache(t *testing.T) {
 
 	mock := &mockDataService{
 		configs: map[string]avcontrol.RoomConfig{
-			"yourmom": testConfig,
+			"test": testConfig,
 		},
 	}
 
@@ -46,22 +47,24 @@ func TestCache(t *testing.T) {
 	require.NoError(t, err)
 	defer os.Remove(file)
 
+	is := is.New(t)
+
 	t.Run("ConfigPassThrough", func(t *testing.T) {
-		config, err := ds.RoomConfig(context.TODO(), "yourmom")
-		require.NoError(t, err)
-		require.Equal(t, config, testConfig)
+		config, err := ds.RoomConfig(context.TODO(), "test")
+		is.NoErr(err)
+		is.Equal(config, testConfig)
 	})
 
 	t.Run("ConfigCached", func(t *testing.T) {
-		delete(mock.configs, "yourmom")
+		delete(mock.configs, "test")
 
-		config, err := ds.RoomConfig(context.TODO(), "yourmom")
-		require.NoError(t, err)
-		require.Equal(t, config, testConfig)
+		config, err := ds.RoomConfig(context.TODO(), "test")
+		is.NoErr(err)
+		is.Equal(config, testConfig)
 	})
 
 	t.Run("ConfigMissing", func(t *testing.T) {
-		_, err := ds.RoomConfig(context.TODO(), "mymom")
-		require.Error(t, err)
+		_, err := ds.RoomConfig(context.TODO(), "config")
+		is.True(err != nil)
 	})
 }
