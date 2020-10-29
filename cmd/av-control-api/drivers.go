@@ -8,8 +8,8 @@ import (
 
 // TODO wrap new functions
 func registerDrivers(d avcontrol.DriverRegistry, log *zap.Logger) {
-	d.MustRegister("sony/commonrest", &core.SonyADCPDriver{
-		Log: log.Named("drivers/sony/commonrest"),
+	d.MustRegister("sony/adcp", &core.SonyADCPDriver{
+		Log: log.Named("drivers/sony/adcp"),
 	})
 
 	d.MustRegister("atlona6x2", &core.Atlona6x2Driver{})

@@ -6,6 +6,8 @@ type TV struct {
 	WithBlank
 	WithVolume
 	WithMute
+	WithHealth
+	WithInfo
 }
 
 type TVSeparateInput struct {
@@ -15,21 +17,29 @@ type TVSeparateInput struct {
 	WithBlank
 	WithVolume
 	WithMute
+	WithHealth
+	WithInfo
 }
 
 type Projector struct {
 	WithPower
 	WithAudioVideoInput
 	WithBlank
+	WithHealth
+	WithInfo
 }
 
 type BasicVideoSwitcher struct {
 	WithAudioVideoInput
+	WithHealth
+	WithInfo
 }
 
 type VideoSwitcher struct {
 	WithAudioInput
 	WithVideoInput
+	WithHealth
+	WithInfo
 }
 
 type VideoSwitcherDSP struct {
@@ -37,13 +47,19 @@ type VideoSwitcherDSP struct {
 	WithVideoInput
 	WithVolume
 	WithMute
+	WithHealth
+	WithInfo
 }
 
 type DSP struct {
 	WithVolume
 	WithMute
+	WithHealth
+	WithInfo
 }
 
 type AVOverIPReceiver struct {
 	WithAudioVideoInput
+	WithHealth
+	WithInfo
 }

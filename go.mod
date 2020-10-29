@@ -3,14 +3,14 @@ module github.com/byuoitav/av-control-api
 go 1.14
 
 require (
-	github.com/byuoitav/atlona v0.1.3
-	github.com/byuoitav/justaddpower v0.1.1
-	github.com/byuoitav/keydigital v0.1.1
-	github.com/byuoitav/kramer v0.1.1
+	github.com/byuoitav/atlona v0.1.4
+	github.com/byuoitav/justaddpower v0.1.2
+	github.com/byuoitav/keydigital v0.1.2
+	github.com/byuoitav/kramer v0.1.2
 	github.com/byuoitav/kramer-driver v0.1.13
 	github.com/byuoitav/london v0.1.1
-	github.com/byuoitav/qsc v0.1.1
-	github.com/byuoitav/sony v0.1.1
+	github.com/byuoitav/qsc v0.1.2
+	github.com/byuoitav/sony v0.1.2
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kivik/couchdb/v3 v3.2.1
 	github.com/go-kivik/kivik/v3 v3.2.0
@@ -33,9 +33,10 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20201027133719-8eef5233e2a1
+	golang.org/x/net v0.0.0-20201029055024-942e2f445f3c
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
-	golang.org/x/sys v0.0.0-20201027140754-0fcbb8f4928c // indirect
+	golang.org/x/sys v0.0.0-20201029080932-201ba4db2418 // indirect
+	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/tools v0.0.0-20201015182029-a5d9e455e9c4 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
