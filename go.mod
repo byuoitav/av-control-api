@@ -33,10 +33,16 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+<<<<<<< Updated upstream
 	golang.org/x/net v0.0.0-20201029055024-942e2f445f3c
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	golang.org/x/sys v0.0.0-20201029080932-201ba4db2418 // indirect
 	golang.org/x/text v0.3.4 // indirect
+=======
+	golang.org/x/net v0.0.0-20201026091529-146b70c837a4
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
+	golang.org/x/sys v0.0.0-20201026173827-119d4633e4d1 // indirect
+>>>>>>> Stashed changes
 	golang.org/x/tools v0.0.0-20201015182029-a5d9e455e9c4 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
