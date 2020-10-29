@@ -61,6 +61,11 @@ var getHealthTests = []getHealthTest{
 			},
 		},
 	},
+	{
+		name:   "EmptyRoom",
+		driver: &driverstest.Driver{},
+		resp:   avcontrol.RoomHealth{},
+	},
 }
 
 func TestHealth(t *testing.T) {

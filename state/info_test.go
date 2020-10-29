@@ -68,6 +68,11 @@ var getInfoTests = []getInfoTest{
 			},
 		},
 	},
+	{
+		name:   "EmptyRoom",
+		driver: &driverstest.Driver{},
+		resp:   avcontrol.RoomInfo{},
+	},
 }
 
 func TestInfo(t *testing.T) {
