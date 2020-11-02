@@ -31,6 +31,8 @@ type setDeviceStateResponse struct {
 	sync.Mutex
 }
 
+// Set goes through the devices in the RoomConfig and sets their states to match whats in the given StateRequest.
+// Takes RoomConfig and StateRequest as input and returns StateResponse.
 func (gs *GetSetter) Set(ctx context.Context, room avcontrol.RoomConfig, req avcontrol.StateRequest) (avcontrol.StateResponse, error) {
 	if len(room.Devices) == 0 || len(req.Devices) == 0 {
 		return avcontrol.StateResponse{}, nil

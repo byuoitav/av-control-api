@@ -20,6 +20,8 @@ type getDeviceInfoResponse struct {
 	info avcontrol.DeviceInfo
 }
 
+// GetInfo goes through the devices in the RoomConfig and reports on their status.
+// Takes RoomConfig as an input and returns RoomInfo.
 func (gs *GetSetter) GetInfo(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomInfo, error) {
 	if len(room.Devices) == 0 {
 		return avcontrol.RoomInfo{}, nil

@@ -21,6 +21,7 @@ const (
 	_hContentType  = "Content-Type"
 )
 
+// RequestID requests that the client provides an id to be used in log statements.
 func (h *Handlers) RequestID(c *gin.Context) {
 	var id string
 	if c.GetHeader(_hRequestID) != "" {
@@ -39,6 +40,7 @@ func (h *Handlers) RequestID(c *gin.Context) {
 	c.Next()
 }
 
+// Log logs the start and end of client requests.
 func (h *Handlers) Log(c *gin.Context) {
 	id := c.GetString(_cRequestID)
 	log := h.Logger
@@ -52,6 +54,7 @@ func (h *Handlers) Log(c *gin.Context) {
 	log.Info("Finished request", zap.Int("statusCode", c.Writer.Status()), zap.Duration("took", time.Since(start)))
 }
 
+// Room parses the http parameter "room", gets the appropriate room, and sets the parameter _cRoom.
 func (h *Handlers) Room(c *gin.Context) {
 	roomID := c.Param("room")
 	if roomID == "" {

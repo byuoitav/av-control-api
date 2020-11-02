@@ -29,6 +29,7 @@ type getDeviceStateResponse struct {
 	sync.Mutex
 }
 
+// Get goes through the devices in the RoomConfig and reports on the state of the room.
 func (gs *GetSetter) Get(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.StateResponse, error) {
 	if len(room.Devices) == 0 {
 		return avcontrol.StateResponse{}, nil

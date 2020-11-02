@@ -3,6 +3,7 @@ package avcontrol
 import "context"
 
 type (
+	// Device is the base device interface
 	Device interface{}
 
 	DeviceWithPower interface {

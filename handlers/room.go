@@ -10,11 +10,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// GetRoomConfiguration gets the RoomConfig and returns it to the user as a JSON object in the body of an http response.
 func (h *Handlers) GetRoomConfiguration(c *gin.Context) {
 	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	c.JSON(http.StatusOK, room)
 }
 
+// GetRoomState gets the state of the devices in the room and returns it to the user as a JSON object in the body of an http response.
 func (h *Handlers) GetRoomState(c *gin.Context) {
 	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	id := c.GetString(_cRequestID)
@@ -47,6 +49,7 @@ func (h *Handlers) GetRoomState(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// GetRoomHealth gets the health status of all the devices in the room and returns it to the user as a JSON object in the body of an http response.
 func (h *Handlers) GetRoomHealth(c *gin.Context) {
 	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	id := c.GetString(_cRequestID)
@@ -73,6 +76,7 @@ func (h *Handlers) GetRoomHealth(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// GetRoomInfo gets the device info of all the devices in the room and returns it to the user as a JSON object in the body of an http response.
 func (h *Handlers) GetRoomInfo(c *gin.Context) {
 	room := c.MustGet(_cRoom).(avcontrol.RoomConfig)
 	id := c.GetString(_cRequestID)
@@ -99,6 +103,8 @@ func (h *Handlers) GetRoomInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// SetRoomState parses a new room state from the user's http request and sets the room state accordingly.
+// It returns an http response to the user with the status of the action.
 func (h *Handlers) SetRoomState(c *gin.Context) {
 	var stateReq avcontrol.StateRequest
 	if err := c.Bind(&stateReq); err != nil {

@@ -20,6 +20,8 @@ type getDeviceHealthResponse struct {
 	health avcontrol.DeviceHealth
 }
 
+// GetHealth goes through the devices in the RoomConfig and reports on their health statuses.
+// Takes RoomConfig as an input and returns RoomHealth.
 func (gs *GetSetter) GetHealth(ctx context.Context, room avcontrol.RoomConfig) (avcontrol.RoomHealth, error) {
 	if len(room.Devices) == 0 {
 		return avcontrol.RoomHealth{}, nil

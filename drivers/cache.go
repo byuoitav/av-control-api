@@ -18,6 +18,8 @@ type deviceCache struct {
 	cacheMu sync.Mutex
 }
 
+// CreateDevice gets and returns the device from the cache.
+// If the device is not found in the cache, then a new one is created, added to the cache, and returned.
 func (c *deviceCache) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
 	if dev, ok := c.get(addr); ok {
 		return dev, nil

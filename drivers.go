@@ -4,6 +4,7 @@ import (
 	"context"
 )
 
+// DriverRegistry is the interface used to register drivers with the api
 type DriverRegistry interface {
 	// Register registers a driver with the given name.
 	Register(string, Driver) error

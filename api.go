@@ -50,15 +50,18 @@ type DeviceStateError struct {
 	Error string `json:"error"`
 }
 
+// RoomHealth maps device id to device health status for each device in the room.
 type RoomHealth struct {
 	Devices map[DeviceID]DeviceHealth `json:"devices,omitempty"`
 }
 
+// DeviceHealth contains information about the device's health status
 type DeviceHealth struct {
 	Healthy *bool   `json:"healthy,omitempty"`
 	Error   *string `json:"error,omitempty"`
 }
 
+// RoomInfo maps device id to device info for each device in the room.
 type RoomInfo struct {
 	Devices map[DeviceID]DeviceInfo `json:"devices,omitempty"`
 }

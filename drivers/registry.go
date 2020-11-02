@@ -17,6 +17,8 @@ type registry struct {
 	driversMu sync.RWMutex
 }
 
+// New creates and returns a new DriverRegistry. configPath must be
+// a valid path to a config file.
 func New(configPath string) (avcontrol.DriverRegistry, error) {
 	r := &registry{
 		configs: make(map[string]map[string]interface{}),
@@ -35,6 +37,7 @@ func New(configPath string) (avcontrol.DriverRegistry, error) {
 	return r, nil
 }
 
+// NewWithConfig is like new but expects the already parsed configs as an argument.
 func NewWithConfig(configs map[string]map[string]interface{}) (avcontrol.DriverRegistry, error) {
 	if configs == nil {
 		configs = make(map[string]map[string]interface{})
