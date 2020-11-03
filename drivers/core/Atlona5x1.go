@@ -23,6 +23,7 @@ func (a *Atlona5x1Driver) ParseConfig(config map[string]interface{}) error {
 
 		a.Username = username
 	} else {
+		// driver still works so don't need username/password?
 		// return errors.New("no username given")
 	}
 
