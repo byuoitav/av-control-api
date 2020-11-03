@@ -18,7 +18,7 @@ import (
 // 	is.NoErr(err)
 // }
 
-func TestNew(t *testing.T) {
+func TestNewFail(t *testing.T) {
 	is := is.New(t)
 
 	_, err := New(context.TODO(), "")

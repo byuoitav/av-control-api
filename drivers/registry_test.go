@@ -9,6 +9,13 @@ import (
 	"github.com/matryer/is"
 )
 
+func TestNewFail(t *testing.T) {
+	is := is.New(t)
+
+	_, err := New("")
+	is.Equal("unable to read file: open : no such file or directory", err.Error())
+}
+
 func TestRegisterSuccess(t *testing.T) {
 	is := is.New(t)
 
