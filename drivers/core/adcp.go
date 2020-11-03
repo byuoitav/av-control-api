@@ -13,7 +13,6 @@ type SonyADCPDriver struct {
 }
 
 func (s *SonyADCPDriver) ParseConfig(config map[string]interface{}) error {
-	s.Log.Info("logging something")
 	return nil
 }
 

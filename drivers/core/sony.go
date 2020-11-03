@@ -21,6 +21,8 @@ func (s *SonyDriver) ParseConfig(config map[string]interface{}) error {
 		}
 
 		s.PSK = psk
+	} else {
+		return errors.New("no psk given")
 	}
 
 	return nil

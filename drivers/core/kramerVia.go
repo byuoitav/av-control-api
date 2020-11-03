@@ -18,10 +18,13 @@ type KramerViaDriver struct {
 func (k *KramerViaDriver) ParseConfig(config map[string]interface{}) error {
 	if username, ok := config["username"].(string); ok {
 		if username == "" {
+			k.Log.Info("we should get here!!!!\n\n\n\n")
 			return errors.New("given empty username")
 		}
 
 		k.Username = username
+	} else {
+		return errors.New("no username given")
 	}
 
 	if password, ok := config["password"].(string); ok {
@@ -30,6 +33,8 @@ func (k *KramerViaDriver) ParseConfig(config map[string]interface{}) error {
 		}
 
 		k.Password = password
+	} else {
+		return errors.New("no password given")
 	}
 
 	return nil
