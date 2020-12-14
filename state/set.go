@@ -59,7 +59,7 @@ func (gs *GetSetter) Set(ctx context.Context, room avcontrol.RoomConfig, req avc
 	}
 
 	expectedResps := 0
-	resps := make(chan setDeviceStateResponse)
+	resps := make(chan *setDeviceStateResponse)
 	defer close(resps)
 
 	stateResp := avcontrol.StateResponse{
@@ -97,8 +97,8 @@ func (gs *GetSetter) Set(ctx context.Context, room avcontrol.RoomConfig, req avc
 	return stateResp, nil
 }
 
-func (req *setDeviceStateRequest) do(ctx context.Context) setDeviceStateResponse {
-	resp := setDeviceStateResponse{
+func (req *setDeviceStateRequest) do(ctx context.Context) *setDeviceStateResponse {
+	resp := &setDeviceStateResponse{
 		id: req.id,
 	}
 

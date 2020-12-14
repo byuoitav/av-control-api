@@ -48,7 +48,7 @@ func (gs *GetSetter) Get(ctx context.Context, room avcontrol.RoomConfig) (avcont
 		log = gs.Logger.With(zap.String("requestID", id))
 	}
 
-	resps := make(chan getDeviceStateResponse)
+	resps := make(chan *getDeviceStateResponse)
 	defer close(resps)
 
 	stateResp := avcontrol.StateResponse{
@@ -79,8 +79,8 @@ func (gs *GetSetter) Get(ctx context.Context, room avcontrol.RoomConfig) (avcont
 	return stateResp, nil
 }
 
-func (req *getDeviceStateRequest) do(ctx context.Context) getDeviceStateResponse {
-	resp := getDeviceStateResponse{
+func (req *getDeviceStateRequest) do(ctx context.Context) *getDeviceStateResponse {
+	resp := &getDeviceStateResponse{
 		id: req.id,
 	}
 

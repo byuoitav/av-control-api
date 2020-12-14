@@ -22,9 +22,6 @@ func (a *Atlona4x1Driver) ParseConfig(config map[string]interface{}) error {
 		}
 
 		a.Username = username
-	} else {
-		// driver still works so don't need username/password?
-		// return errors.New("no username given")
 	}
 
 	if password, ok := config["password"].(string); ok {
@@ -33,8 +30,6 @@ func (a *Atlona4x1Driver) ParseConfig(config map[string]interface{}) error {
 		}
 
 		a.Password = password
-	} else {
-		// return errors.New("no password given")
 	}
 
 	return nil
