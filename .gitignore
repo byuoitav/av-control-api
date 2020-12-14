@@ -16,3 +16,5 @@
 
 # Build output
 drivers/.build/
+coverage.out
+cmd/av-control-api/driver-config.yaml
