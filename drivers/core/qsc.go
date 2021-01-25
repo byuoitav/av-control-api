@@ -17,8 +17,5 @@ func (q *QSCDriver) ParseConfig(config map[string]interface{}) error {
 }
 
 func (q *QSCDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
-	return &qsc.DSP{
-		Address: addr,
-		Log:     q.Log,
-	}, nil
+	return qsc.New(addr, qsc.WithLogger(q.Log)), nil
 }
