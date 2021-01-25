@@ -2,8 +2,10 @@ module github.com/byuoitav/av-control-api
 
 go 1.14
 
+replace github.com/byuoitav/qsc => /home/werndog/Documents/programming/qsc
+
 require (
-	github.com/byuoitav/atlona v0.1.4
+	github.com/byuoitav/atlona v0.1.6
 	github.com/byuoitav/justaddpower v0.1.2
 	github.com/byuoitav/keydigital v0.1.2
 	github.com/byuoitav/kramer v0.1.2
