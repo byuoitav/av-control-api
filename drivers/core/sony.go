@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"errors"
+	"time"
 
 	avcontrol "github.com/byuoitav/av-control-api"
 	"github.com/byuoitav/sony/bravia"
@@ -10,8 +11,8 @@ import (
 )
 
 type SonyDriver struct {
-	PSK string
-	Log *zap.Logger
+	PreSharedKey string
+	Log          *zap.Logger
 }
 
 func (s *SonyDriver) ParseConfig(config map[string]interface{}) error {
@@ -20,7 +21,7 @@ func (s *SonyDriver) ParseConfig(config map[string]interface{}) error {
 			return errors.New("given empty psk")
 		}
 
-		s.PSK = psk
+		s.PreSharedKey = psk
 	} else {
 		return errors.New("no psk given")
 	}
@@ -29,9 +30,10 @@ func (s *SonyDriver) ParseConfig(config map[string]interface{}) error {
 }
 
 func (s *SonyDriver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
-	return &bravia.TV{
-		Address: addr,
-		PSK:     s.PSK,
-		Log:     s.Log,
+	return &bravia.Display{
+		Address:      addr,
+		PreSharedKey: s.PreSharedKey,
+		Log:          s.Log,
+		RequestDelay: 250 * time.Millisecond,
 	}, nil
 }
