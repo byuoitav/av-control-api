@@ -10,7 +10,7 @@ require (
 	github.com/byuoitav/kramer-driver v0.1.13
 	github.com/byuoitav/london v0.1.1
 	github.com/byuoitav/qsc v0.1.3
-	github.com/byuoitav/sony v0.2.0
+	github.com/byuoitav/sony v0.2.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kivik/couchdb/v3 v3.2.1
 	github.com/go-kivik/kivik/v3 v3.2.0
