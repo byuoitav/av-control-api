@@ -66,6 +66,21 @@ var getHealthTests = []getHealthTest{
 		driver: &driverstest.Driver{},
 		resp:   avcontrol.RoomHealth{},
 	},
+	{
+		name: "NoHealthCheck",
+		driver: &driverstest.Driver{
+			Devices: map[string]avcontrol.Device{
+				"ITB-1101-D1": struct{}{},
+			},
+		},
+		resp: avcontrol.RoomHealth{
+			Devices: map[avcontrol.DeviceID]avcontrol.DeviceHealth{
+				"ITB-1101-D1": {
+					Healthy: nil,
+				},
+			},
+		},
+	},
 }
 
 func TestHealth(t *testing.T) {
