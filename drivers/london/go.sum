@@ -4,6 +4,8 @@ github.com/byuoitav/av-control-api v0.3.7 h1:WpNaTIpr4reun2zuRBi7xQpTgGB7xFT4tiC
 github.com/byuoitav/av-control-api v0.3.7/go.mod h1:aiwGp+wrm2hB/GbiZSnugtpSqW8CgUf/CRfGTz3X6k4=
 github.com/byuoitav/connpool v0.3.0 h1:9WX+pu0UY/ZpoCqLemC8kb+PyAV/5DVS7ij77UDQg7w=
 github.com/byuoitav/connpool v0.3.0/go.mod h1:9jVn2IL91Wp6eHEymqxZ5v7zPy07FtIWp/JIfDCMGQY=
+github.com/byuoitav/london-driver v0.1.1-ttlPatch h1:1aaUtg1rHT85xGqFauDy/fwsGO2xK6FFIYlNNhWu7mY=
+github.com/byuoitav/london-driver v0.1.1-ttlPatch/go.mod h1:xan9hYpV7QShUfwm/sB415SHwayBLnwERUtTKKS88Rk=
 github.com/byuoitav/london-driver v0.1.1 h1:G3K4pIsYaqP6G0dEA4wL5D/EFpsSb1SiHW53s7f2vg0=
 github.com/byuoitav/london-driver v0.1.1/go.mod h1:xan9hYpV7QShUfwm/sB415SHwayBLnwERUtTKKS88Rk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
