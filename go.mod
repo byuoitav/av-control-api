@@ -3,7 +3,7 @@ module github.com/byuoitav/av-control-api
 go 1.14
 
 require (
-	github.com/byuoitav/atlona v0.1.6
+	github.com/byuoitav/atlona v0.1.9
 	github.com/byuoitav/justaddpower v0.1.2
 	github.com/byuoitav/keydigital v0.1.2
 	github.com/byuoitav/kramer v0.1.2

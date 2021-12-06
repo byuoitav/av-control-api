@@ -36,10 +36,5 @@ func (a *Atlona5x1Driver) ParseConfig(config map[string]interface{}) error {
 }
 
 func (a *Atlona5x1Driver) CreateDevice(ctx context.Context, addr string) (avcontrol.Device, error) {
-	return &atuhdsw52ed.AtlonaVideoSwitcher5x1{
-		Username: a.Username,
-		Password: a.Password,
-		Address:  addr,
-		Logger:   a.Log.Sugar(),
-	}, nil
+	return atuhdsw52ed.NewAtlonaVideoSwitcher5x1(addr, atuhdsw52ed.WithLogger(a.Log)), nil
 }
