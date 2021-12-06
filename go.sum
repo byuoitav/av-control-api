@@ -4,6 +4,8 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/byuoitav/atlona v0.1.6 h1:NZaXd4uOo+15kbkI+6L7MmAPqnzZr8anEIL+l+soht4=
 github.com/byuoitav/atlona v0.1.6/go.mod h1:H323w6FDvUDUAf270ux84gdnAivlzxddKK5eXU5eLGc=
+github.com/byuoitav/atlona v0.1.9 h1:pBneo7Hxo1U0RvhAyk7S0A88e/4bo2KxOLEP8dxnnhM=
+github.com/byuoitav/atlona v0.1.9/go.mod h1:uGPD/c2qFfUdExcKDoPy8e5VMq41QfLgmwcW6VqckKA=
 github.com/byuoitav/central-event-system v0.0.0-20200121172633-64fd9d467249 h1:LffuZk+Xft6AnDURHGAexbT4wrMo15qt/LpLLDq7Tq4=
 github.com/byuoitav/central-event-system v0.0.0-20200121172633-64fd9d467249/go.mod h1:+KCvx75wISCCkCrgIWRdlJxRXlA2yxQvR4HHgU/TdpU=
 github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
